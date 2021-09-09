@@ -20,6 +20,32 @@ components:
       scheme: bearer
       bearerFormat: A resource owner JWT
       description: OAuth bearer token (TODO replace this in spec with OAuth)
+  schemas:
+    Population:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          description: The time the resource was created.
+          readOnly: true
+        description:
+          type: string
+          description: A string that specifies the description of the population.
+        id:
+          type: string
+          description: A string that specifies the resource’s unique identifier.
+          readOnly: true
+        name:
+          type: string
+          description: A string that specifies the population name, which must be provided and must be unique within an environment.
+        updatedAt:
+          type: string
+          description: The time the resource was last updated.
+          readOnly: true
+        userCount:
+          type: integer
+          description: The number of users that belong to the population
+          readOnly: true
 security:
   - oauth: []
 tags:
@@ -8334,11 +8360,26 @@ paths:
           schema:
             type: string
           required: true
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          description: Adding a paging value to limit the number of resources displayed per page
+        - name: filter
+          in: query
+          schema:
+            type: string
+          description: Adding a SCIM filter for a population ID or population name to display only those resources associated with the specified population. Only the id and name parameters are supported
+          example: id eq "60971d3b-cc5a-4601-9c44-2be541f91bf1"
       responses:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json: 
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Population'
     post:
       tags:
         - Management APIs > Populations
@@ -8348,13 +8389,11 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              example:
-                name: Accounting
-                description: Accounting group
+              $ref: '#/components/schemas/Population'
       parameters:
         - name: content-type
           in: header
@@ -8372,10 +8411,11 @@ paths:
             type: string
           required: true
       responses:
-        '200':
+        '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              $ref: '#/components/schemas/Population'
   /v1/environments/{envID}/populations/{popID}:
     get:
       tags:
@@ -8405,7 +8445,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Population'
     put:
       tags:
         - Management APIs > Populations
@@ -8418,10 +8460,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                name: Finance and Accounting
-                description: Finance and accounting group
+              $ref: '#/components/schemas/Population'
       parameters:
         - name: content-type
           in: header
@@ -8473,10 +8512,8 @@ paths:
             type: string
           required: true
       responses:
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/resources:
     get:
       tags:
