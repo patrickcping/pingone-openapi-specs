@@ -1,0 +1,923 @@
+openapi: 3.0.0
+info:
+  title: PingOne Platform API - Authentication
+  description: A bare-bones collection for the PingOne API
+  version: 1.0.0
+externalDocs:
+  url: https://apidocs.pingidentity.com/pingone/platform/v1/api/
+  description: PingOne Platform API Reference
+servers:
+  - url: https://auth.pingone.eu
+    description: PingOne EU AUTH
+  - url: https://auth.pingone.com
+    description: PingOne US AUTH
+  - url: https://auth.pingone.asia
+    description: PingOne APAC AUTH
+components:
+  securitySchemes:
+    oauth:
+      type: http
+      scheme: bearer
+      bearerFormat: A resource owner JWT
+      description: OAuth bearer token (TODO replace this in spec with OAuth)
+security:
+  - oauth: []
+tags:
+  - name: Authentication APIs
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+  - name: Authentication APIs > OpenID Connect/OAuth 2
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+  - name: Authentication APIs > Flows
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+  - name: Authentication APIs > Flows > Flows
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+  - name: Authentication APIs > Flows > Forgot Password
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+  - name: Authentication APIs > Flows > Registration and Verification
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+  - name: Authentication APIs > SAML 2.0
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+  - name: Authentication APIs > External Authentication
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+paths:
+  /v1/{envID}/as/authorize:
+    get:
+      tags:
+        - Authentication APIs > OpenID Connect/OAuth 2
+      summary: 'Authorize (Transaction Approval) '
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: response_type
+          in: query
+          schema:
+            type: string
+          example: token id_token
+        - name: client_id
+          in: query
+          schema:
+            type: string
+          example: 6c796712-0f16-4062-815a-e0a92f4a2143
+        - name: response_mode
+          in: query
+          schema:
+            type: string
+          example: pi.flow
+        - name: scope
+          in: query
+          schema:
+            type: string
+          example: openid
+        - name: state
+          in: query
+          schema:
+            type: string
+          example: '{string}'
+        - name: request
+          in: query
+          schema:
+            type: string
+          example: '{requestString}'
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Authentication APIs > OpenID Connect/OAuth 2
+      summary: Authorize (implicit)
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                response_type:
+                  type: string
+                  description: Required
+                  example: token
+                client_id:
+                  type: string
+                  description: Required
+                  example: '{{appID}}'
+                redirect_uri:
+                  type: string
+                  description: Required
+                  example: https://example.com
+                scope:
+                  type: string
+                  description: Required
+                  example: openid profile p1:read:user
+                nonce:
+                  type: integer
+                  description: Required
+                  example: '123'
+                state:
+                  type: string
+                  description: Recommended
+                  example: <state value>
+                prompt:
+                  type: string
+                  description: Optional ( none | login )
+                  example: login
+                max_age:
+                  type: integer
+                  description: Optional - uses seconds
+                  example: '3600'
+                acr_values:
+                  type: string
+                  description: Optional - use Sign-on Policy names (space-delimited)
+                  example: Single_Factor
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/{envID}/as/resume:
+    get:
+      tags:
+        - Authentication APIs > OpenID Connect/OAuth 2
+      summary: Resume
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: Cookie
+          in: header
+          schema:
+            type: string
+          example: '{{sessionToken}}'
+        - name: flowId
+          in: query
+          schema:
+            type: string
+          example: '{{flowID}}'
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/{envID}/as/token:
+    post:
+      tags:
+        - Authentication APIs > OpenID Connect/OAuth 2
+      summary: 'Token Exchange (Gateway Credential) '
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                grant_type:
+                  type: string
+                  description: Required
+                  example: urn:ietf:params:oauth:grant-type:token-exchange
+                subject_token_type:
+                  type: string
+                  description: >-
+                    (For CLIENT_SECRET_POST; if included with Basic Auth, must
+                    match Header value)
+                  example: pingone_gateway_credential
+                subject_token:
+                  type: string
+                  description: (For for CLIENT_SECRET_POST)
+                  example: '{{gatewayCredential}}'
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/{envID}/as/.well-known/openid-configuration:
+    get:
+      tags:
+        - Authentication APIs > OpenID Connect/OAuth 2
+      summary: Discovery OpenID Configuration
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/{envID}/as/userinfo:
+    get:
+      tags:
+        - Authentication APIs > OpenID Connect/OAuth 2
+      summary: Userinfo
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Authentication APIs > OpenID Connect/OAuth 2
+      summary: Userinfo
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/{envID}/as/signoff:
+    get:
+      tags:
+        - Authentication APIs > OpenID Connect/OAuth 2
+      summary: Signoff
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: Cookie
+          in: header
+          schema:
+            type: string
+          example: '{{sessionToken}}'
+        - name: id_token_hint
+          in: query
+          schema:
+            type: string
+          description: Required
+          example: '{{idToken}}'
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/{envID}/as/jwks:
+    get:
+      tags:
+        - Authentication APIs > OpenID Connect/OAuth 2
+      summary: READ JWKS
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/{envID}/as/introspect:
+    post:
+      tags:
+        - Authentication APIs > OpenID Connect/OAuth 2
+      summary: Token Introspection (Refresh Token)
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                token:
+                  type: string
+                  description: Required
+                  example: '{{refreshToken}}'
+                client_id:
+                  type: string
+                  description: >-
+                    (For CLIENT_SECRET_POST; if included with Basic Auth, must
+                    match Header value)
+                  example: '{{appID}}'
+                client_secret:
+                  type: string
+                  description: (For for CLIENT_SECRET_POST)
+                  example: '{{appSecret}}'
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/{envID}/as/revoke:
+    post:
+      tags:
+        - Authentication APIs > OpenID Connect/OAuth 2
+      summary: Token Revocation
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                token:
+                  type: string
+                  description: Required
+                  example: '{{oauthToken}}'
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /{envID}/flows/{flowID}:
+    get:
+      tags:
+        - Authentication APIs > Flows > Flows
+      summary: READ Flow
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: Cookie
+          in: header
+          schema:
+            type: string
+          example: ST={{sessionToken}}
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: flowID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Authentication APIs > Flows > Registration and Verification
+      summary: Verify User
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                verificationCode: xxxxxx
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/vnd.pingidentity.user.verify+json
+        - name: Cookie
+          in: header
+          schema:
+            type: string
+          example: ST={{sessionToken}}
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: flowID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/{envID}/flows/{flowID}:
+    post:
+      tags:
+        - Authentication APIs > Flows > Flows
+      summary: Reset Flow
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/vnd.pingidentity.session.reset+json
+        - name: Cookie
+          in: header
+          schema:
+            type: string
+          example: ST={{sessionToken}}
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: flowID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /{envID}/saml20/metadata/{appID}:
+    get:
+      tags:
+        - Authentication APIs > SAML 2.0
+      summary: READ SAML Metadata
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: appID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /{envID}/saml20/idp/sso:
+    get:
+      tags:
+        - Authentication APIs > SAML 2.0
+      summary: SAML SSO Using GET
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: SAMLRequest
+          in: query
+          schema:
+            type: string
+          example: '{{SAMLRequest}}'
+        - name: RelayState
+          in: query
+          schema:
+            type: string
+          example: token
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Authentication APIs > SAML 2.0
+      summary: SAML SSO Using POST
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                SAMLRequest:
+                  type: string
+                  example: '{{SAMLRequest}}'
+                RelayState:
+                  type: string
+                  example: token
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /{envID}/saml20/idp/startsso:
+    get:
+      tags:
+        - Authentication APIs > SAML 2.0
+      summary: Identity Provider Initiated SSO
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+        - name: spEntityId
+          in: query
+          schema:
+            type: string
+          example: '{{spEntityIdValue}}'
+        - name: applicationUrl
+          in: query
+          schema:
+            type: string
+          example: '{{AppUrl}}'
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /{envID}/saml20/sp/metadata/{idpID}:
+    get:
+      tags:
+        - Authentication APIs > SAML 2.0
+      summary: READ SAML Service Provider Metadata
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: idpID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /{envID}/saml20/sp/sso:
+    get:
+      tags:
+        - Authentication APIs > SAML 2.0
+      summary: Service Provider Initiated Inbound SSO
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: idpId
+          in: query
+          schema:
+            type: string
+          example: '{{extIdpID}}'
+        - name: flowId
+          in: query
+          schema:
+            type: string
+          example: '{{flowID}}'
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /{envID}/saml20/sp/acs:
+    post:
+      tags:
+        - Authentication APIs > SAML 2.0
+      summary: SAML ACS Endpoint for Identity Provider Initiated Inbound SSO
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                RelayState:
+                  type: string
+                  example: '{applicationId={{samlAppID}}&applicationUrl={{appURL}}}'
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /{envID}/saml20/idp/slo:
+    get:
+      tags:
+        - Authentication APIs > SAML 2.0
+      summary: SAML SLO Using GET
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: SAMLRequest
+          in: query
+          schema:
+            type: string
+          example: '{{SAMLRequest}}'
+        - name: RelayState
+          in: query
+          schema:
+            type: string
+          example: testing...
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Authentication APIs > SAML 2.0
+      summary: SAML SLO Using POST
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                SAMLRequest:
+                  type: string
+                  example: '{{SAMLRequest}}'
+                RelayState:
+                  type: string
+                  example: testing...
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/{envID}/rp/authenticate:
+    get:
+      tags:
+        - Authentication APIs > External Authentication
+      summary: READ External Authentication Initialization
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: providerId
+          in: query
+          schema:
+            type: string
+          example: '{{idpID}}'
+        - name: flowId
+          in: query
+          schema:
+            type: string
+          example: '{{flowID}}'
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '302':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/{envID}/rp/callback/{providerType}:
+    get:
+      tags:
+        - Authentication APIs > External Authentication
+      summary: READ External Authentication Callback
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+          example: '{{externalAuthCode}}'
+        - name: state
+          in: query
+          schema:
+            type: string
+          example: '{{externalProviderState}}'
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: providerType
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '302':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/environments/{envID}/externalAuthentications/{extAuthID}:
+    get:
+      tags:
+        - Authentication APIs > External Authentication
+      summary: READ External Authentication Status
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: Cookie
+          in: header
+          schema:
+            type: string
+          description: Use this for localhost
+          example: ST={{sessionToken}}
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: extAuthID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
