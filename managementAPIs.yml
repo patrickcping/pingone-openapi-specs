@@ -8415,7 +8415,8 @@ paths:
           description: Successful response
           content:
             application/json:
-              $ref: '#/components/schemas/Population'
+              schema:
+                $ref: '#/components/schemas/Population'
   /v1/environments/{envID}/populations/{popID}:
     get:
       tags:
