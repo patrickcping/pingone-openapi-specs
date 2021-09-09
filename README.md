@@ -1,0 +1,1 @@
+# pingone-openapi-specs
