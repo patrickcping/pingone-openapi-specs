@@ -41,12 +41,16 @@ components:
                 type: string
               message:
                 type: string
-    Populations:
+    EntityArray:
       type: object
       properties:
         '_embedded':
           type: object
           properties:
+            environments:
+              type: array
+              items:
+                $ref: '#/components/schemas/Environment'
             populations:
               type: array
               items:
@@ -55,6 +59,102 @@ components:
           type: number
         size:
           type: number
+    BillOfMaterials:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          description: The time the resource was created.
+          readOnly: true
+        updatedAt:
+          type: string
+          description: The time the resource was last updated.
+          readOnly: true
+        products:
+          type: array
+          description: An array that specifies the products associated with this bill of materials
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                readOnly: true
+                description: A string that specifies the BOM ID
+              type:
+                type: string
+                enum: [PING_ONE_MFA, PING_ONE_RISK, PING_ONE_VERIFY, PING_ONE_BASE, PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_DATA_SYNC, PING_DATA_GOVERNANCE, PING_ONE_FOR_ENTERPRISE, PING_ID, PING_ID_SDK, PING_INTELLIGENCE, PING_CENTRAL]
+                description: A string that specifies the Ping Identity product type. Options for PingOne platform products are PING_ONE_MFA, PING_ONE_RISK, PING_ONE_VERIFY, and PING_ONE_BASE. The PING_ONE_BASE product represents the default set of services that an environment can use on the PingOne platform. Options for other Ping Identity products are PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_DATA_SYNC, PING_DATA_GOVERNANCE, PING_ONE_FOR_ENTERPRISE, PING_ID, PING_ID_SDK, PING_INTELLIGENCE, and PING_CENTRAL
+              description:
+                type: string
+                description: A string that specifies the description of the product or standalone service
+              bookmarks:
+                type: array
+                description: Optional array of custom bookmarks. Maximum of five bookmarks per product.
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Name of the custom bookmark. The name must be unique among the product bookmarks and be 50 characters or fewer.
+                    href:
+                      type: string
+                      description: A valid URL for the bookmark.
+    Environment:
+      type: object
+      properties:
+        billOfMaterials:
+          $ref: '#/components/schemas/BillOfMaterials'
+        createdAt:
+          type: string
+          description: The time the resource was created.
+          readOnly: true
+        description:
+          type: string
+          description: A string that specifies the description of the population.
+        id:
+          type: string
+          description: A string that specifies the resource’s unique identifier.
+          readOnly: true
+        license:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies the active license associated with this environment. This property is required only if your organization has more than one active license.
+        name:
+          type: string
+          description: A string that specifies the environment name, which must be provided and must be unique within an organization.
+        organization:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies the organization resource’s unique identifier associated with the environment.
+        region:
+          type: string
+          enum: [NA, EU, AP]
+          description: A string that specifies the region in which this environment will be used. The value is set when the environment is created and cannot be updated. Options are NA, EU, and AP.
+        type:
+          type: string
+          enum: [PRODUCTION, SANDBOX]
+          description: A string that specifies the type of environment to use. Options are PRODUCTION and SANDBOX.
+        updatedAt:
+          type: string
+          description: The time the resource was last updated.
+          readOnly: true
+      example:
+        name: New-Env
+        description: New environment description
+        type: SANDBOX
+        region: EU
+        billOfMaterials:
+          products:
+            type: PING_ONE_BASE
+            description: New environment product description
+            console:
+              href: https://example.com
+        license:
+          id: 34f0efac-21d9-4a17-8a35-196bb3362983
     Population:
       type: object
       properties:
@@ -851,10 +951,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/agreements/{agreementID}/languages:
     post:
       tags:
@@ -1045,10 +1143,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/agreements/{agreementID}/languages/{languageID}/revisions:
     post:
       tags:
@@ -1191,10 +1287,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/alertChannels:
     get:
       tags:
@@ -1332,10 +1426,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/applications:
     get:
       tags:
@@ -1527,10 +1619,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/applications/{appID}/secret:
     get:
       tags:
@@ -1791,10 +1881,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/applications/{appID}/signOnPolicyAssignments:
     get:
       tags:
@@ -1996,10 +2084,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/applications/{appID}/roleAssignments:
     get:
       tags:
@@ -2144,10 +2230,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/applications/{appID}/attributes:
     get:
       tags:
@@ -2339,10 +2423,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/applications/{appID}/pushCredentials:
     get:
       tags:
@@ -2542,10 +2624,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/activities:
     get:
       tags:
@@ -2700,6 +2780,7 @@ paths:
       tags:
         - Management APIs > Bill of Materials (BOM)
       summary: READ One Bill of Materials
+      operationId: readOneBillOfMaterials
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -2720,11 +2801,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillOfMaterials'
     put:
       tags:
         - Management APIs > Bill of Materials (BOM)
       summary: UPDATE Bill of Materials
+      operationId: updateBillOfMaterials
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -2733,7 +2817,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/BillOfMaterials'
               example:
                 products:
                   - type: PING_DIRECTORY
@@ -2765,7 +2849,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillOfMaterials'
   /v1/environments/{envID}/brandingSettings:
     get:
       tags:
@@ -3065,10 +3151,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/themes/{themeID}/default:
     get:
       tags:
@@ -3376,10 +3460,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/keys/{keyID}/applications:
     get:
       tags:
@@ -3536,10 +3618,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/certificates/{certID}/applications:
     get:
       tags:
@@ -3985,10 +4065,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/deviceAuthenticationPolicy:
     get:
       tags:
@@ -4122,10 +4200,23 @@ paths:
       tags:
         - Management APIs > Environments
       summary: READ All Environments
+      operationId: readAllEnvironments
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          description: Adding a paging value to limit the number of resources displayed per page
+        - name: filter
+          in: query
+          schema:
+            type: string
+          description: Adding a SCIM filter for an environment to display only those resources associated with the specified environment. 'sw', 'eq' and 'and' are supported
+          example: name sw "S" and license.id eq "34f0efac-21d9-4a17-8a35-196bb3362983"
       responses:
         '401':
           description: Unauthorised
@@ -4136,11 +4227,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Management APIs > Environments
       summary: CREATE Environment (Active License)
+      operationId: createEnvironmentActiveLicense
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -4149,14 +4243,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                name: New-Env_{{$timestamp}}
-                description: Test Environment
-                region: NA
-                type: SANDBOX
-                license:
-                  id: '{{licenseID}}'
+              $ref: '#/components/schemas/Environment'
       parameters:
         - name: Content-Type
           in: header
@@ -4173,12 +4260,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
   /v1/environments/{envID}:
     get:
       tags:
         - Management APIs > Environments
       summary: READ One Environment
+      operationId: readOneEnvironment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -4199,11 +4289,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
     put:
       tags:
         - Management APIs > Environments
       summary: UPDATE Environment
+      operationId: updateEnvironment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -4212,18 +4305,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                name: Updated-Environment-Name
-                region: NA
-                type: SANDBOX
-                description: Updated Description
-                billOfMaterials:
-                  products:
-                    - type: PING_ONE_BASE
-                      description: New environment product description
-                      console:
-                        href: https://example.com
+              $ref: '#/components/schemas/Environment'
       parameters:
         - name: Content-Type
           in: header
@@ -4250,6 +4332,7 @@ paths:
       tags:
         - Management APIs > Environments
       summary: DELETE Environment
+      operationId: deleteEnvironment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -4267,15 +4350,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/type:
     put:
       tags:
         - Management APIs > Environments
       summary: UPDATE Environment Type
+      operationId: updateEnvironmentType
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -4285,6 +4367,11 @@ paths:
           application/json:
             schema:
               type: object
+              properties:
+                type:
+                  type: string
+                  enum: [PRODUCTION, SANDBOX]
+                  description: A string that specifies the type of environment to use. Options are PRODUCTION and SANDBOX.
               example:
                 type: PRODUCTION
       parameters:
@@ -4497,10 +4584,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/gateways/{gatewayID}/credentials:
     post:
       tags:
@@ -4569,10 +4654,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/gateways/{gatewayID}/instances:
     get:
       tags:
@@ -4835,10 +4918,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/groups/{groupID}:
     get:
       tags:
@@ -4943,10 +5024,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/groups:
     get:
       tags:
@@ -5311,10 +5390,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/propagation/stores:
     get:
       tags:
@@ -5533,10 +5610,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/propagation/stores/connection/status:
     post:
       tags:
@@ -5940,10 +6015,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/propagation/plans/{planID}/rules:
     get:
       tags:
@@ -6250,10 +6323,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/identityProviders:
     get:
       tags:
@@ -6432,10 +6503,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/identityProviders/{providerID}/attributes:
     get:
       tags:
@@ -6638,10 +6707,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/images:
     post:
       tags:
@@ -6735,10 +6802,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/integrations:
     get:
       tags:
@@ -7024,10 +7089,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/languages/:
     post:
       tags:
@@ -7257,10 +7320,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/organizations/{orgID}/licenses:
     get:
       tags:
@@ -7476,10 +7537,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/templates:
     get:
       tags:
@@ -7687,10 +7746,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/templates/{templateName}/contents/{contentID}:
     get:
       tags:
@@ -7813,10 +7870,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/notificationsSettings:
     get:
       tags:
@@ -7894,10 +7949,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/notificationsSettings/emailDeliverySettings:
     get:
       tags:
@@ -7991,10 +8044,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/notificationsSettings/phoneDeliverySettings:
     get:
       tags:
@@ -8230,10 +8281,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/emailDomains:
     get:
       tags:
@@ -8497,10 +8546,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/emailDomains/{emailDomainID}/trustedEmails:
     get:
       tags:
@@ -8780,7 +8827,7 @@ paths:
           content:
             application/json: 
               schema:
-                $ref: '#/components/schemas/Populations'
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Management APIs > Populations
@@ -9090,10 +9137,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/resources/{resourceID}/scopes:
     get:
       tags:
@@ -9299,10 +9344,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/resources/{resourceID}/attributes:
     get:
       tags:
@@ -9492,10 +9535,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/riskPolicySets:
     post:
       tags:
@@ -9758,10 +9799,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/riskEvaluations:
     post:
       tags:
@@ -10365,10 +10404,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/signOnPolicies:
     get:
       tags:
@@ -10535,10 +10572,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/signOnPolicies/{policyID}/actions:
     get:
       tags:
@@ -10758,10 +10793,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/9ad15e9e-3ac6-43f7-a053-d46b87d6c4a7/signOnPolicies/{policyID}/actions:
     post:
       tags:
@@ -10995,10 +11028,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/totalIdentities:
     get:
       tags:
@@ -11348,10 +11379,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/users/{userID}/identityProvider:
     get:
       tags:
@@ -11619,10 +11648,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
     get:
       tags:
         - Management APIs > Users > Group Membership
@@ -11772,10 +11799,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/users/{userID}/devices/{deviceID}:
     post:
       tags:
@@ -11890,10 +11915,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/users/{userID}/devices/{deviceID}/nickname:
     put:
       tags:
@@ -12234,10 +12257,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/users/{userID}/pairingKeys/{pairingKeyID}:
     get:
       tags:
@@ -12310,10 +12331,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/users/{userID}/pairingKeys:
     post:
       tags:
@@ -12698,10 +12717,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/users/{userID}/verifyTransactions:
     get:
       tags:
@@ -12878,10 +12895,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{envID}/users/{userID}/agreementConsents:
     get:
       tags:
@@ -13087,7 +13102,5 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '200':
+        '204':
           description: Successful response
-          content:
-            application/json: {}
