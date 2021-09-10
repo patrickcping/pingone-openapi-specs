@@ -47,6 +47,10 @@ components:
         '_embedded':
           type: object
           properties:
+            attributes:
+              type: array
+              items:
+                $ref:  '#/components/schemas/ApplicationAttributeMapping'
             applications:
               type: array
               items:
@@ -57,6 +61,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Environment'
+            grants:
+              type: array
+              items:
+                $ref: '#/components/schemas/ApplicationResourceGrant'
             groups:
               type: array
               items:
@@ -304,6 +312,67 @@ components:
               type: string
               enum: [NONE, CLIENT_SECRET_BASIC, CLIENT_SECRET_POST]
               description: A string that specifies the client authentication methods supported by the token endpoint. This is a required property. Options are NONE, CLIENT_SECRET_BASIC, and CLIENT_SECRET_POST.  
+    ApplicationAttributeMapping:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          readOnly: true
+          description: The time the resource was created.
+        mappingType:
+          type: string
+          enum: [CORE, SCOPE, CUSTOM]
+          description: A string that specifies the mapping type of the attribute. Options are CORE, SCOPE, and CUSTOM. The CORE and SCOPE mapping types are for reserved attributes managed by the API and cannot be removed. Attribute values for these mapping types can be updated. The CUSTOM mapping type is for user-defined attributes. Attributes of this type can be updated and deleted.
+        name:
+          type: string
+          description: A string that specifies the name of attribute and must be unique within an application. For SAML applications, the samlAssertion.subject name is a reserved case-insensitive name which indicates the mapping to be used for the subject in an assertion. For OpenID Connect applications, the following names are reserved and cannot be used acr, amr, at_hash, aud, auth_time, azp, client_id, exp, iat, iss, jti, nbf, nonce, org, scope, sid, sub  This is a required property.
+        required:
+          type: boolean
+          description: A boolean to specify whether a mapping value is required for this attribute. If true, a value must be set and a non-empty value must be available in the SAML assertion or ID token.
+        updatedAt:
+          type: string
+          readOnly: true
+          description: The time the resource was updated.
+        value:
+          type: string
+          description: A string that specifies the string constants or expression for mapping the attribute path against a specific source. The expression format is ${<source>.<attribute_path>}. The only supported source is user (for example, ${user.id}). This is a required property.
+    ApplicationResourceGrant:
+      type: object
+      properties:
+        application:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              readOnly: true
+              description: A string that specifies the application resource ID.
+        createdAt:
+          type: string
+          readOnly: true
+          description: The time the resource was created.
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the application resource grant ID.
+        resource:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies the ID of the protected resource associated with this grant. This is a required property.
+        scopes:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: id	A array that specifies the IDs of the scopes associated with this grant. This is a required property.
+        updatedAt:
+          type: string
+          readOnly: true
+          description: The time the resource was last updated.
     ApplicationSecret:
       type: object
       properties:
@@ -2308,6 +2377,7 @@ paths:
       tags:
         - Management APIs > Applications > Application Resource Grants
       summary: CREATE Grant
+      operationId: createGrant
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -2316,7 +2386,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/ApplicationResourceGrant'
               example:
                 resource:
                   id: '{{resourceID}}'
@@ -2348,11 +2418,14 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResourceGrant'
     get:
       tags:
         - Management APIs > Applications > Application Resource Grants
       summary: READ All Grants for an Application
+      operationId: readAllGrantsForAnApplication
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -2378,7 +2451,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/environments/{envID}/applications/{appID}/grants/{grantID}:
     get:
       tags:
@@ -2853,6 +2928,7 @@ paths:
       tags:
         - Management APIs > Applications > Application Attribute Mapping
       summary: READ All Application Attribute Mappings
+      operationId: readAllApplicationAttributeMappings
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -2878,11 +2954,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Management APIs > Applications > Application Attribute Mapping
       summary: CREATE Application Attribute Mapping
+      operationId: createApplicationAttributeMapping
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -2891,7 +2970,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/ApplicationAttributeMapping'
               example:
                 name: email
                 value: ${user.email}
@@ -2922,12 +3001,15 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAttributeMapping'
   /v1/environments/{envID}/applications/{appID}/attributes/{samlAttrID}:
     get:
       tags:
         - Management APIs > Applications > Application Attribute Mapping
       summary: READ One Application Attribute Mapping
+      operationId: readOneApplicationAttributeMapping
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -2958,11 +3040,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAttributeMapping'
     put:
       tags:
         - Management APIs > Applications > Application Attribute Mapping
       summary: UPDATE Application Attribute Mapping
+      operationId: updateApplicationAttributeMapping
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -2971,7 +3056,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/ApplicationAttributeMapping'
               example:
                 name: email
                 value: ${user.email}
@@ -3012,6 +3097,7 @@ paths:
       tags:
         - Management APIs > Applications > Application Attribute Mapping
       summary: DELETE Application Attribute Mapping
+      operationId: deleteApplicationAttributeMapping
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
