@@ -21,7 +21,7 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
-    Error:
+    P1Error:
       type: object
       properties: 
         id:
@@ -51,10 +51,26 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Environment'
+            groupMemberships:
+              type: array
+              items:
+                $ref: '#/components/schemas/GroupMembership'
             populations:
               type: array
               items:
                 $ref: '#/components/schemas/Population'
+            roleAssignments:
+              type: array
+              items:
+                $ref: '#/components/schemas/RoleAssignment'
+            roles:
+              type: array
+              items:
+                $ref: '#/components/schemas/Role'
+            users:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
         count:
           type: number
         size:
@@ -155,6 +171,12 @@ components:
               href: https://example.com
         license:
           id: 34f0efac-21d9-4a17-8a35-196bb3362983
+    GroupMembership:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the group to assign
     Population:
       type: object
       properties:
@@ -180,6 +202,271 @@ components:
           type: integer
           description: The number of users that belong to the population
           readOnly: true
+    Role:
+      type: object
+      properties:
+        applicableTo:
+          type: array
+          readOnly: true
+          description: A string that specifies the scope to which the role applies.
+          items:
+            type: string  
+        description:
+          type: string
+          readOnly: true
+          description: A string that specifies the description of the role.
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the ID of the role.
+        permissions:
+          type: array
+          readOnly: true
+          description: A string that specifies the set of permissions assigned to the role.
+          items:
+            type: object
+            properties:
+              classifier:
+                type: string
+                readOnly: true
+                description: A string that specifies the resource for which the permission is applicable.
+              description:
+                type: string
+                readOnly: true
+                description: A string that specifies the description of what the permission enables for the role.
+    RoleAssignment:
+      type: object
+      properties:
+        environment:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              readOnly: true
+              description: A string that specifies the environment associated with the user.
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the user role assignment ID.
+        readOnly:
+          type: boolean
+          readOnly: true
+          description: A boolean that specifies whether this role assignment can be deleted by the current actor.
+        role:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies the role ID.
+        scope:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies the role assignment scope ID.
+            type:
+              type: string
+              enum: [ORGANIZATION, ENVIRONMENT, POPULATION]
+              description: A string that specifies the type of resource defining the scope of the Role assignment. Options are ORGANIZATION, ENVIRONMENT, and POPULATION.
+    User:
+      type: object
+      properties:
+        account:
+          type: object
+          properties:
+            canAuthenticate:
+              type: boolean
+              description: A boolean that specifies the whether the user can authenticate. If the value is set to false, the account is locked or the user is disabled, and unless specified otherwise in administrative configuration, the user will be unable to authenticate.
+            lockedAt:
+              type: string
+              description: The time the specified user account was locked. This property might be absent if the account is unlocked or if the account was locked out automatically by failed password attempts.
+            secondsUntilUnlock:
+              type: integer
+              description: An integer that specifies the number of seconds until the user's account is unlocked. This property is absent if the account is unlocked, or if it will not automatically unlock (and must be unlocked by an administrator).
+            status:
+              type: string
+              description: A string that specifies the account locked state. Options are LOCKED and OK.
+            unlockAt:
+              type: string
+              description: The time the specified user account will be unlocked. This property is absent if the account is unlocked, or if it will not automatically unlock (and must be unlocked by an administrator).
+        address:
+          type: object
+          properties:
+            countryCode:
+              type: string
+              description: A string that specifies the country name component. When specified, the value must be in ISO 3166-1 “alpha-2” code format [ISO3166]. For example, the country codes for the United States and Sweden are “US” and "SE", respectively. Valid characters consist of two upper-case letters (regex [A-Z]{2}).
+            locality:
+              type: string
+              description: A string that specifies the city or locality component of the address. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex ^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$). It can have a length of no more than 256 characters (min/max=1/256).
+            postalCode:
+              type: string
+              description: A string that specifies the zip code or postal code component of the address. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex ^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$). It can have a length of no more than 40 characters (min/max=1/40).
+            region:
+              type: string
+              description: A string that specifies the state or region component of the address. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex ^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$). It can have a length of no more than 256 characters (min/max=1/256).
+            streetAddress:
+              type: string
+              description: A string that specifies the full street address component, which may include house number, street name, P.O. box, and multi-line extended street address information. This attribute may contain newlines (regex ^[\p{L}\p{M}\p{N}\p{Zs}\p{P}\n\r]*$). It can have a length of no more than 256 characters (min/max=1/256).
+        createdAt:
+              type: string
+              description: The time the resource was created.
+        email:
+              type: string
+              description: A string that specifies the user’s email address, which must be provided and valid. For more information about email address formatting, see section 3.4 of RFC 2822, Internet Message Format.
+        enabled:
+              type: boolean
+              readOnly: true
+              description: A read-only boolean attribute that specifies whether the user is enabled. This attribute is set to ‘true’ by default when the user is created.
+        environment:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies the environment resource’s unique identifier associated with the user.
+        externalId:
+          type: string
+          description: A string that specifies an identifier for the user resource as defined by the provisioning client. This is optional. This may be explicitly set to null when updating a user to unset it. The externalId attribute simplifies the correlation of the user in PingOne with the user’s account in another system of record. The platform does not use this attribute directly in any way, but it is used by Ping Identity’s Data Sync product. It can have a length of no more than 1024 characters (min/max=1/1024).
+        id:
+          type: string
+          description: A string that specifies the user resource’s unique identifier.
+        identityProvider:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A mutable string that identifies the external identity provider used to authenticate the user. If not provided, PingOne is the identity provider. This attribute is required if the identity provider is authoritative for just-in-time user provisioning.
+            type:
+              type: string
+              readOnly: true
+              description: A read-only string that identifies the type of identity provider used to authenticate the user. Possible values are FACEBOOK, GOOGLE, LINKEDIN, APPLE, TWITTER, AMAZON, YAHOO, MICROSOFT, PAYPAL, GITHUB, OPENID_CONNECT, SAML, and PING_ONE. The default value of PING_ONE is set when a value for identityProvider.id is not provided. The PING_ONE value is the default for all pre-existing users. There is currently no search filter support for this attribute.
+        lastSignOn:
+          type: object
+          properties:
+            at:
+              type: string
+              description: The time of the last successful login of the user through the PingOne flow API.
+            remoteIp:
+              type: string
+              description: The IP address of the last successful login of the user through the PingOne flow API.
+        lifecycle:
+          type: object
+          properties:
+            status:
+              type: string
+              description: A string that specifies information about the account lifecycle. Options for status are ACCOUNT_OK and VERIFICATION_REQUIRED. This property value is only allowed to be set when importing a user to set the initial account status. If the initial status is set to VERIFICATION_REQUIRED and an email address is provided, a verification email is sent.
+        locale:
+          type: string
+          description: A string that specifies the user’s default location, which is optional. This may be explicitly set to null when updating a user to unset it. This is used for purposes of localizing such items as currency, date time format, or numerical representations. If provided, it must be a valid language tag as defined in RFC 5646. The following are example tags fr, en-US, es-419, az-Arab, man-Nkoo-GN. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex ^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$). It can have a length of no more than 256 characters (min/max=1/256).
+        memberOfGroupIDs:
+          type: string
+          readOnly: true
+          description: A read-only array of IDs for the groups the user is a member of. This property is returned for GET /environments/{envID}/users/{userID} when include=memberOfGroupIDs is appended to the request. This property is not returned with a list of users.
+        memberOfGroupNames:
+          type: string
+          readOnly: true
+          description: A read-only array of names for the groups the user is a member of. This property is returned for GET /environments/{envID}/users/{userID} when include=memberOfGroupNames is appended to the request. This property is not returned with a list of users.
+        mfaEnabled:
+          type: boolean
+          description: A boolean attribute that specifies whether multi-factor authentication is enabled. This attribute is set to false by default when the user is created. You can set mfaEnabled to true with POST CREATE User, POST CREATE User (Import), or PUT UPDATE User MFA Enabled. You cannot update mfaEnabled with PUT UPDATE User or PATCH UPDATE User.
+        mobilePhone:
+          type: string
+          description: A string that specifies the user’s native phone number, which is optional. This might also match the primaryPhone attribute. This may be explicitly set to null when updating a user to unset it. Valid phone numbers must have at least one number and a maximum character length of 32.
+        name:
+          type: object
+          properties:
+            family:
+              type: string
+              description: A string that specifies the family name of the user, or Last in most Western languages (for example, ‘Jensen’ given the full name ‘Ms. Barbara J Jensen, III’). This may be explicitly set to null when updating a name to unset it. Valid characters consist of any Unicode letter, mark (for example, accent, umlaut), space, dot, apostrophe, or hyphen (regex ^[\p{L}\p{M}\p{N}' .-]*$). It can have a length of no more than 256 characters (min/max=1/256).
+            formatted:
+              type: string
+              description: A string that specifies the fully formatted name of the user (for example ‘Ms. Barbara J Jensen, III’). This can be explicitly set to null when updating a name to unset it. Valid characters consist of any Unicode letter, mark (for example, accent, umlaut), space, dot, apostrophe, or hyphen (regex ^[\p{L}\p{M}\p{N}' .-]*$). It can have a length of no more than 256 characters (min/max=1/256).
+            given:
+              type: string
+              description: A string that specifies the given name of the user, or First in most Western languages (for example, ‘Barbara’ given the full name ‘Ms. Barbara J Jensen, III’). This may be explicitly set to null when updating a name to unset it. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex ^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$). It can have a length of no more than 256 characters (min/max=1/256).
+            honorificPrefix:
+              type: string
+              description: A string that specifies the honorific prefix(es) of the user, or title in most Western languages (for example, ‘Ms.’ given the full name ‘Ms. Barbara Jane Jensen, III’). This can be explicitly set to null when updating a name to unset it.
+            honorificSuffix:
+              type: string
+              description: A string that specifies the honorific suffix(es) of the user, or suffix in most Western languages (for example, ‘III’ given the full name ‘Ms. Barbara Jane Jensen, III’). This can be explicitly set to null when updating a name to unset it.
+            middle:
+              type: string
+              description: A string that specifies the the middle name(s) of the user (for exmple, ‘Jane’ given the full name ‘Ms. Barbara Jane Jensen, III’). This can be explicitly set to null when updating a name to unset it. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex ^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$). It can have a length of no more than 256 characters (min/max=1/256).
+        nickname:
+          type: string
+          description: A string that specifies the user’s nickname, which is optional. This can be explicitly set to null when updating a user to unset it. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex ^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$). It can have a length of no more than 256 characters (min/max=1/256).
+        password:
+          type: object
+          description: An object that specifies the user's password. This property is never returned in the response.
+          properties:
+            forceChange:
+              type: boolean
+              description: (Optional) A boolean that specifies whether the user is forced to change the password on the next log in. If not provided, the property is set to false.
+            value:
+              type: string
+              description: A string that specifies the user's password value. The string is either in cleartext or pre-encoded format.
+            external:
+              type: object
+              description: (Optional) An object that maps the information relevant to the user’s password, and its association to external directories.
+              properties:
+                gateway:
+                  type: object
+                  description: (Optional) An object containing the gateway properties. When this is value is specified, the user’s password is managed in an external directory. You can set the user password using Create User (Import) or Update Password (Set).
+                  properties:
+                    id:
+                      type: string
+                      description: The UUID of the linked gateway that references the remote directory.
+                    type:
+                      type: string
+                      description: An enum indicating one of the supported gateway types. For the supported types, see type in the Gateway base data model.
+                    userType:
+                      type: object
+                      description: A reference to a userType in the list of userTypes values for an LDAP gateway.
+                      properties:
+                        id:
+                          type: string
+                          description: The UUID of a user type in the list of userTypes for the LDAP gateway.
+                    correlationAttributes:
+                      type: object
+                      description: An object that maps the external LDAP directory attributes to PingOne attributes. We use the correlationAttributes values to read the attributes from the external LDAP directory and map them to the corresponding PingOne attributes.
+        photo:
+          type: object
+          properties:
+            href:
+              type: string
+              description: A string that specifies the URI that is a uniform resource locator (as defined in Section 1.1.3 of RFC 3986) that points to a resource location representing the user’s image. This can be removed from a user by setting the photo attribute to null. If provided, the resource must be a file (for example, a GIF, JPEG, or PNG image file) rather than a web page containing an image. It must be a valid URL that starts with the HTTP or HTTPS scheme.
+        population:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies the identifier of the population resource associated with the user. This property cannot be updated using PUT {{apiPath}}/environments/{{envID}}/users/{{userID}}. However, it can be updated using PUT /environments/{{envID}}/users/{{userID}}/population.
+        preferredLanguage:
+          type: string
+          description: A string that specifies the user’s preferred written or spoken languages, which are optional. This may be explicitly set to null when updating a user to unset it. If provided, the format of the value must be a valid language range and the same as the HTTP Accept-Language header field (not including Accept-Language:) and is specified in Section 5.3.5 of RFC 7231. For example en-US, en-gb;q=0.8, en;q=0.7.
+        primaryPhone:
+          type: string
+          description: A string that specifies the user’s primary phone number, which is optional. This might also match the mobilePhone attribute. This may be explicitly set to null when updating a user to unset it. Valid phone numbers must have at least one number and a maximum character length of 32.
+        timezone:
+          type: string
+          description: A string that specifies the user’s time zone, which is optional. This can be explicitly set to null when updating a user to unset it. If provided, it must conform with the IANA Time Zone database format [RFC6557], also known as the “Olson” time zone database format [Olson-TZ] for example, “America/Los_Angeles” (regex ^\w+\/\w+$).
+        title:
+          type: string
+          description: A string that specifies the user’s title, which is optional, such as "Vice President". This can be explicitly set to null when updating a user to unset it. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex ^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$). It can have a length of no more than 256 characters (min/max=1/256).
+        type:
+          type: string
+          description: A string that specifies the user’s type, which is optional. This can be explicitly set to null when updating a user to unset it. This attribute is organization-specific and has no special meaning within the PingOne platform. It could have values of "Contractor", "Employee", "Intern", "Temp", "External", and “Unknown”. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex ^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$). It can have a length of no more than 256 characters (min/max=1/256).
+        updatedAt:
+          type: string
+          description: The time the resource was last updated.
+        username:
+          type: string
+          description: A string that specifies the user name, which must be provided and must be unique within an environment. The username must either be a well-formed email address or a string. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex ^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$). It can have a length of no more than 128 characters (min/max=1/128).
+        verifyStatus:
+          type: string
+          enum: [NOT_INITIATED, ENABLED, DISABLED]
+          description: Indicates whether ID verification can be done for the user. This value can be NOT_INITIATED (the initial value), ENABLED, or DISABLED. If the user verification status is DISABLED, a new verification status cannot be created for that user until the status is changed to ENABLED.
 security:
   - bearer: []
 tags:
@@ -688,7 +975,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -734,7 +1021,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -780,7 +1067,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -821,7 +1108,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '201':
           description: Successful response
           content:
@@ -846,7 +1133,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -877,7 +1164,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -920,7 +1207,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -950,7 +1237,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/agreements/{agreementID}/languages:
@@ -993,7 +1280,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '201':
           description: Successful response
           content:
@@ -1023,7 +1310,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1059,7 +1346,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1107,7 +1394,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1142,7 +1429,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/agreements/{agreementID}/languages/{languageID}/revisions:
@@ -1190,7 +1477,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '201':
           description: Successful response
           content:
@@ -1225,7 +1512,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1266,7 +1553,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1286,7 +1573,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/alertChannels:
@@ -1310,7 +1597,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1349,7 +1636,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1394,7 +1681,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1425,7 +1712,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/applications:
@@ -1449,7 +1736,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1500,7 +1787,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1531,7 +1818,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1582,7 +1869,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1618,7 +1905,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/applications/{appID}/secret:
@@ -1647,7 +1934,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1682,7 +1969,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1728,7 +2015,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1758,7 +2045,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1794,7 +2081,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1845,7 +2132,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1880,7 +2167,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/applications/{appID}/signOnPolicyAssignments:
@@ -1911,7 +2198,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1957,7 +2244,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -1995,7 +2282,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2046,7 +2333,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2083,7 +2370,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/applications/{appID}/roleAssignments:
@@ -2112,7 +2399,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2158,7 +2445,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2194,7 +2481,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2229,7 +2516,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/applications/{appID}/attributes:
@@ -2258,7 +2545,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2302,7 +2589,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2338,7 +2625,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2387,7 +2674,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2422,7 +2709,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/applications/{appID}/pushCredentials:
@@ -2451,7 +2738,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2494,7 +2781,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2530,7 +2817,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2583,7 +2870,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2623,7 +2910,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/activities:
@@ -2654,7 +2941,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2693,7 +2980,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2724,7 +3011,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2770,7 +3057,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2797,7 +3084,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2845,7 +3132,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2878,7 +3165,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2923,7 +3210,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -2954,7 +3241,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3014,7 +3301,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3050,7 +3337,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3115,7 +3402,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3150,7 +3437,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/themes/{themeID}/default:
@@ -3184,7 +3471,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3231,7 +3518,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3257,7 +3544,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3283,7 +3570,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3309,7 +3596,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3351,7 +3638,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3387,7 +3674,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3429,7 +3716,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3459,7 +3746,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/keys/{keyID}/applications:
@@ -3488,7 +3775,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3514,7 +3801,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3556,7 +3843,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3587,7 +3874,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3617,7 +3904,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/certificates/{certID}/applications:
@@ -3646,7 +3933,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3688,7 +3975,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3729,7 +4016,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3770,7 +4057,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3813,7 +4100,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3849,7 +4136,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3884,7 +4171,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3910,7 +4197,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3947,7 +4234,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -3978,7 +4265,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4034,7 +4321,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4064,7 +4351,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/deviceAuthenticationPolicy:
@@ -4088,7 +4375,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4190,7 +4477,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4223,7 +4510,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4256,7 +4543,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4285,7 +4572,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4323,7 +4610,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4349,7 +4636,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/type:
@@ -4391,7 +4678,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4417,7 +4704,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4467,7 +4754,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4498,7 +4785,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4553,7 +4840,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4583,7 +4870,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/gateways/{gatewayID}/credentials:
@@ -4617,7 +4904,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4653,7 +4940,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/gateways/{gatewayID}/instances:
@@ -4682,7 +4969,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4718,7 +5005,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4749,7 +5036,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4795,7 +5082,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4831,7 +5118,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4882,7 +5169,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4917,7 +5204,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/groups/{groupID}:
@@ -4951,7 +5238,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -4993,7 +5280,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5023,7 +5310,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/groups:
@@ -5057,7 +5344,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5094,7 +5381,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5127,7 +5414,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5160,7 +5447,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5198,7 +5485,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5231,7 +5518,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5270,7 +5557,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5308,7 +5595,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5352,7 +5639,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5389,7 +5676,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/propagation/stores:
@@ -5420,7 +5707,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5477,7 +5764,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5515,7 +5802,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5572,7 +5859,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5609,7 +5896,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/propagation/stores/connection/status:
@@ -5659,7 +5946,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5710,7 +5997,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5756,7 +6043,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5802,7 +6089,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5853,7 +6140,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5890,7 +6177,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5939,7 +6226,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -5977,7 +6264,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6014,7 +6301,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/propagation/plans/{planID}/rules:
@@ -6055,7 +6342,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6111,7 +6398,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6149,7 +6436,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6196,7 +6483,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6239,7 +6526,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6284,7 +6571,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6322,7 +6609,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/identityProviders:
@@ -6346,7 +6633,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6383,7 +6670,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6414,7 +6701,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6472,7 +6759,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6502,7 +6789,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/identityProviders/{providerID}/attributes:
@@ -6533,7 +6820,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6579,7 +6866,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6617,7 +6904,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6668,7 +6955,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6706,7 +6993,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/images:
@@ -6740,7 +7027,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6771,7 +7058,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6801,7 +7088,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/integrations:
@@ -6825,7 +7112,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6856,7 +7143,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6887,7 +7174,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6923,7 +7210,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6959,7 +7246,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -6985,7 +7272,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7016,7 +7303,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7058,7 +7345,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7088,7 +7375,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/languages/:
@@ -7124,7 +7411,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7155,7 +7442,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7199,7 +7486,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7235,7 +7522,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7284,7 +7571,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7319,7 +7606,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/organizations/{orgID}/licenses:
@@ -7343,7 +7630,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7374,7 +7661,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7405,7 +7692,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7447,7 +7734,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7473,7 +7760,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7511,7 +7798,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7536,7 +7823,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/templates:
@@ -7560,7 +7847,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7591,7 +7878,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7622,7 +7909,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7668,7 +7955,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7710,7 +7997,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7745,7 +8032,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/templates/{templateName}/contents/{contentID}:
@@ -7784,7 +8071,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7834,7 +8121,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7869,7 +8156,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/notificationsSettings:
@@ -7893,7 +8180,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7923,7 +8210,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -7948,7 +8235,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/notificationsSettings/emailDeliverySettings:
@@ -7972,7 +8259,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8018,7 +8305,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8043,7 +8330,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/notificationsSettings/phoneDeliverySettings:
@@ -8067,7 +8354,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8105,7 +8392,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8136,7 +8423,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8219,7 +8506,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8250,7 +8537,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8280,7 +8567,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/emailDomains:
@@ -8304,7 +8591,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8341,7 +8628,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8372,7 +8659,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8403,7 +8690,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8434,7 +8721,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8470,7 +8757,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8510,7 +8797,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8545,7 +8832,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/emailDomains/{emailDomainID}/trustedEmails:
@@ -8574,7 +8861,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8617,7 +8904,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8637,7 +8924,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8663,7 +8950,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8689,7 +8976,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8720,7 +9007,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8783,7 +9070,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8821,7 +9108,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8860,7 +9147,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '201':
           description: Successful response
           content:
@@ -8894,7 +9181,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8937,7 +9224,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -8968,7 +9255,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/resources:
@@ -8992,7 +9279,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9032,7 +9319,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9063,7 +9350,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9106,7 +9393,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9136,7 +9423,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/resources/{resourceID}/scopes:
@@ -9165,7 +9452,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9211,7 +9498,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9247,7 +9534,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9308,7 +9595,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9343,7 +9630,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/resources/{resourceID}/attributes:
@@ -9372,7 +9659,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9415,7 +9702,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9451,7 +9738,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9499,7 +9786,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9534,7 +9821,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/riskPolicySets:
@@ -9620,7 +9907,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9645,7 +9932,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9676,7 +9963,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9768,7 +10055,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9798,7 +10085,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/riskEvaluations:
@@ -9909,7 +10196,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9940,7 +10227,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -9983,7 +10270,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10009,7 +10296,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10040,7 +10327,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10050,6 +10337,7 @@ paths:
       tags:
         - Management APIs > Roles
       summary: READ All Roles
+      operationId: readAllRoles
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10060,16 +10348,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/roles/{roleID}:
     get:
       tags:
         - Management APIs > Roles
       summary: READ One Role
+      operationId: readOneRole
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10086,11 +10377,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
   /v1/environments/{envID}/schemas:
     get:
       tags:
@@ -10112,7 +10405,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10143,7 +10436,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10174,7 +10467,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10226,7 +10519,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10262,7 +10555,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10313,7 +10606,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10363,7 +10656,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10403,7 +10696,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/signOnPolicies:
@@ -10427,7 +10720,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10466,7 +10759,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10497,7 +10790,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10541,7 +10834,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10571,7 +10864,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/signOnPolicies/{policyID}/actions:
@@ -10600,7 +10893,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10654,7 +10947,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10690,7 +10983,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10757,7 +11050,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10792,7 +11085,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/9ad15e9e-3ac6-43f7-a053-d46b87d6c4a7/signOnPolicies/{policyID}/actions:
@@ -10831,7 +11124,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10884,7 +11177,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10909,7 +11202,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10940,7 +11233,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -10997,7 +11290,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11027,7 +11320,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/totalIdentities:
@@ -11058,7 +11351,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11091,7 +11384,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11101,6 +11394,7 @@ paths:
       tags:
         - Management APIs > Users > Group Membership
       summary: READ All Users in a Group with Other User Attribute
+      operationId: readAllUsersInAGroupWithOtherUserAttribute
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -11122,15 +11416,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Management APIs > Users > Users
       summary: CREATE User (Import)
+      operationId: createUserImport
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -11139,7 +11436,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/User'
               example:
                 email: do-not-send@example.com
                 name:
@@ -11168,16 +11465,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '200':
+                $ref: '#/components/schemas/P1Error'
+        '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
   /v1/environments/{envID}/users/{userID}:
     get:
       tags:
         - Management APIs > Users > Group Membership
       summary: READ All Group IDs for User
+      operationId: readAllGroupIDsForUser
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -11204,7 +11504,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11239,15 +11539,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     put:
       tags:
         - Management APIs > Users > Users
       summary: UPDATE User (Put)
+      operationId: updateUserPut
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -11256,7 +11559,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/User'
               example:
                 username: joe@example.com
                 name:
@@ -11306,7 +11609,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11315,6 +11618,7 @@ paths:
       tags:
         - Management APIs > Users > Users
       summary: UPDATE User (Patch)
+      operationId: updateUserPatch
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -11323,7 +11627,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/User'
               example:
                 title: Manager
       parameters:
@@ -11348,7 +11652,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11357,6 +11661,7 @@ paths:
       tags:
         - Management APIs > Users > Users
       summary: DELETE User
+      operationId: deleteUser
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -11378,7 +11683,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/users/{userID}/identityProvider:
@@ -11407,7 +11712,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11450,7 +11755,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11486,7 +11791,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11528,7 +11833,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11566,7 +11871,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11611,7 +11916,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11647,7 +11952,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
     get:
@@ -11685,7 +11990,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11733,7 +12038,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11763,7 +12068,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11798,7 +12103,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/users/{userID}/devices/{deviceID}:
@@ -11844,7 +12149,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11879,7 +12184,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -11914,7 +12219,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/users/{userID}/devices/{deviceID}/nickname:
@@ -11960,7 +12265,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12008,7 +12313,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12039,7 +12344,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12081,7 +12386,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12112,7 +12417,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12154,7 +12459,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12185,7 +12490,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12221,7 +12526,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12256,7 +12561,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/users/{userID}/pairingKeys/{pairingKeyID}:
@@ -12295,7 +12600,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12330,7 +12635,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/users/{userID}/pairingKeys:
@@ -12372,7 +12677,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12403,7 +12708,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12445,7 +12750,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12481,7 +12786,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12524,7 +12829,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12568,7 +12873,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12578,6 +12883,7 @@ paths:
       tags:
         - Management APIs > Users > User Role Assignments
       summary: READ Role Assignments
+      operationId: readUserRoleAssignments
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -12599,15 +12905,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Management APIs > Users > User Role Assignments
       summary: CREATE User Role Assignment
+      operationId: createUserRoleAssignment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -12616,7 +12925,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/RoleAssignment'
               example:
                 role:
                   id: '{{roleID}}'
@@ -12645,16 +12954,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '200':
+                $ref: '#/components/schemas/P1Error'
+        '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAssignment'
   /v1/environments/{envID}/users/{userID}/roleAssignments/{roleAssignmentID}:
     get:
       tags:
         - Management APIs > Users > User Role Assignments
       summary: READ One Role Assignment
+      operationId: readOneRoleAssignment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -12681,15 +12993,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAssignment'
     delete:
       tags:
         - Management APIs > Users > User Role Assignments
       summary: DELETE User's Role Assignment
+      operationId: deleteUserRoleAssignment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -12716,7 +13031,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/users/{userID}/verifyTransactions:
@@ -12745,7 +13060,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12780,7 +13095,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12816,7 +13131,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12859,7 +13174,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12894,7 +13209,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
   /v1/environments/{envID}/users/{userID}/agreementConsents:
@@ -12923,7 +13238,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12959,7 +13274,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -12999,7 +13314,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -13030,7 +13345,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -13066,7 +13381,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '200':
           description: Successful response
           content:
@@ -13101,6 +13416,6 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
