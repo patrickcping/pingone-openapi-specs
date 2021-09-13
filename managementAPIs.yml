@@ -50,7 +50,9 @@ components:
             attributes:
               type: array
               items:
-                $ref:  '#/components/schemas/ApplicationAttributeMapping'
+                oneOf:
+                  - $ref:  '#/components/schemas/ApplicationAttributeMapping'
+                  - $ref:  '#/components/schemas/SchemaAttribute'
             applications:
               type: array
               items:
@@ -89,6 +91,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Role'
+            schemas:
+              type: array
+              items:
+                $ref: '#/components/schemas/Schema'
             users:
               type: array
               items:
@@ -645,6 +651,77 @@ components:
               type: string
               enum: [ORGANIZATION, ENVIRONMENT, POPULATION]
               description: A string that specifies the type of resource defining the scope of the Role assignment. Options are ORGANIZATION, ENVIRONMENT, and POPULATION.
+    Schema:
+      type: object
+      properties:
+        attributes:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/SchemaAttribute'
+        description:
+          type: string
+          readOnly: true
+          description: A string that specifies the description of the schema.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        name:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource name.
+    SchemaAttribute:
+      type: object
+      properties:
+        description:
+          type: string
+          description: A string that specifies an optional property that specifies the description of the attribute. If provided, it must not be an empty string. Valid characters consists of any Unicode letter, mark (for example, accent or umlaut), numeric character, punctuation character, or space.
+        displayName:
+          type: string
+          description: A string that specifies an optional property that specifies the display name of the attribute such as 'T-shirt size’. If provided, it must not be an empty string. Valid characters consist of any Unicode letter, mark (for example, accent or umlaut), numeric character, forward slash, dot, apostrophe, underscore, space, or hyphen.
+        enabled:
+          type: boolean
+          description: A boolean that specifies whether or not the attribute is enabled. This is a required property for POST and PUT operations; it cannot be omitted or explicitly set to null. Disabled attributes are ignored on create/update and not returned on read.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        ldapAttribute:
+          type: string
+          readOnly: true
+          description: A string that specifies the LDAP attribute.
+        name:
+          type: string
+          description: A string that specifies the name of the attribute. The attribute name must be provided during creation, must not be empty and must not exceed 256 characters. It must also be unique within the schema for an environment. It must start with a letter and may be followed by letters, numbers or hyphens.
+        required:
+          type: boolean
+          description: A boolean that specifies whether or not the attribute is required. Required attributes must be provided a value during create/update. Defaults to false if not provided.
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+              readOnly: true
+              description: A string that specifies the identifier of the resource referenced by this relationship.
+        schemaType:
+          type: string
+          enum: [ CORE, STANDARD, CUSTOM ]
+          description: A string that specifies the schema type of the attribute. It may be one of CORE, STANDARD or CUSTOM. Core and standard attributes are present out-of-the-box. Core attributes may not be updated or deleted. Standard attributes may not be deleted, but their mutable properties may be updated. Custom attributes may be deleted, and their mutable properties may be updated. New attributes are created with a schema type of CUSTOM.
+        type:
+          type: string
+          enum: [ STRING, JSON, BOOLEAN, COMPLEX ]
+          description: A string that specifies the the type of the attribute. It may be one of STRING, JSON, BOOLEAN, or COMPLEX. If the type is not provided during creation, then it defaults to STRING. Complex and boolean attributes may not be created, but standard attributes of those types may be updated. JSON attributes are limited by size (total size must not exceed 16KB).
+        unique:
+          type: boolean
+          description: A boolean that specifies whether or not the attribute must have a unique value within the environment. This is a required property for POST and PUT operations; it cannot be omitted or explicitly set to null.
+        multiValued:
+          type: boolean
+          description: A boolean that specifies whether the attribute has multiple values or a single one. This value can only change from false to true, as changing from true to false is not allowed. Maximum number of values stored is 1,000.
     User:
       type: object
       properties:
@@ -10825,6 +10902,7 @@ paths:
       tags:
         - Management APIs > Schemas
       summary: READ All Schemas
+      operationId: readAllSchemas
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10845,12 +10923,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/environments/{envID}/schemas/{schemaID}:
     get:
       tags:
         - Management APIs > Schemas
       summary: READ One Schema
+      operationId: readOneSchema
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10876,12 +10957,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
   /v1/environments/{envID}/schemas/{schemaID}/attributes:
     get:
       tags:
         - Management APIs > Schemas
       summary: READ All (Schema) Attributes
+      operationId: readAllSchemaAttributes
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10907,11 +10991,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Management APIs > Schemas
       summary: CREATE Attribute
+      operationId: createAttribute
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10920,7 +11007,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/SchemaAttribute'
               example:
                 description: >-
                   An optional property that specifies the description of the new
@@ -10959,12 +11046,15 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaAttribute'
   /v1/environments/{envID}/schemas/{schemaID}/attributes/{attributeID}:
     get:
       tags:
         - Management APIs > Schemas
       summary: READ One Attribute
+      operationId: readOneAttribute
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10995,11 +11085,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaAttribute'
     patch:
       tags:
         - Management APIs > Schemas
       summary: UPDATE Attribute (Patch)
+      operationId: updateAttributePatch
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -11008,7 +11101,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/SchemaAttribute'
               example:
                 name: NewName
                 schemaType: CORE
@@ -11051,6 +11144,7 @@ paths:
       tags:
         - Management APIs > Schemas
       summary: UPDATE Attribute (Put)
+      operationId: updateAttributePut
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -11059,7 +11153,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/SchemaAttribute'
               example:
                 name: customAttribute
                 unique: true
@@ -11101,6 +11195,7 @@ paths:
       tags:
         - Management APIs > Schemas
       summary: DELETE Attribute
+      operationId: deleteAttribute
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -11828,9 +11923,9 @@ paths:
   /v1/environments/{envID}/users:
     get:
       tags:
-        - Management APIs > Users > Group Membership
-      summary: READ All Users in a Group with Other User Attribute
-      operationId: readAllUsersInAGroupWithOtherUserAttribute
+        - Management APIs > Users > Users
+      summary: READ All Users
+      operationId: readAllUsers
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -11862,8 +11957,8 @@ paths:
     post:
       tags:
         - Management APIs > Users > Users
-      summary: CREATE User (Import)
-      operationId: createUserImport
+      summary: CREATE User
+      operationId: createUser
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
