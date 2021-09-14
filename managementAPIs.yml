@@ -557,6 +557,376 @@ components:
           type: integer
           description: The number of users that belong to the population
           readOnly: true
+    RiskEvaluation:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          readOnly: true
+          description: The time the resource was created (format ISO-8061).
+        details:
+          $ref: '#/components/schemas/RiskEvaluationDetails'
+          readOnly: true
+          description: A details object that provides additional information about the risk evaluation.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        event:
+          $ref: '#/components/schemas/RiskEvaluationEvent'
+          readOnly: true
+          description: An object that specifies the attributes to identify the event. This is a required property. For more information about event attributes, see the Event Data Model table.
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        riskPolicySet:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies the risk policy set resource's unique identifier. If the risk policy set ID and name are both specified, the policy set specified by the riskPolicySet.id is used. If the risk policy set ID and name are not specified, the environment's default risk policy set is used.
+            name:
+              type: string
+              description: A string that specifies the risk policy set name associated with this risk evaluation resource. If the risk policy set ID and name are both specified, the policy set specified by the riskPolicySet.id is used. If the risk policy set name and ID are not specified, the environment's default risk policy set is used.
+        result:
+          $ref: '#/components/schemas/RiskEvaluationResult'
+          readOnly: true
+          description: A result object that specifies the result that corresponds to the risk policy that evaluates as true. If there are several risk policies that evaluate as true, the result that corresponds to the highest priority risk policy is returned. If no risk policy evaluates as true, the result is the defaultResult of the policy set.
+        updatedAt:
+          type: string
+          readOnly: true
+          description: The time the resource was last updated (format ISO-8061).
+    RiskEvaluationDetails:
+      type: object
+      readOnly: true
+      properties:
+        ipAddressReputation:
+          type: object
+          properties: 
+            level:
+              type: string
+              enum: [LOW, MEDIUM, HIGH]
+              description: A string that specifies the risk level of the evaluated IP address. Options are LOW, MEDIUM, and HIGH. If the score is less than 55, the level is LOW; if the score is greater than 77, the level is HIGH; if the score is between 55 and 77, the level is MEDIUM. Note that these guidelines could change based on data analytics and product consideration. If the ipAddressReputation.score is unknown, NULL is returned.
+            score:
+              type: integer
+              description: An integer that represents the calculated score of the IP address involved in the transaction. Scores range between 0 and 100. A score of 0 indicates a non-risky IP address; a score of 100 indicates a high-risk IP address. If the IP address reputation score is not available for the specific IP address, NULL is returned.
+        ipVelocityByUser:
+          type: object
+          properties: 
+            level:
+              type: string
+              enum: [LOW, MEDIUM, HIGH]
+              description: An enum indicating whether the number of distinct IPs for the user in the past hour is flagged as LOW, MEDIUM, or HIGH.
+            reason:
+              type: string
+              description: A string indicating the reason the user was flagged. For example "More than 13 IPs were accessed by John during the last 1 hour."
+            threshold:
+              type: object
+              description: The information about the threshold used.
+              properties:
+                high:
+                  type: integer
+                  description: An integer indicating the value calculated for the high threshold. If the user accessed more than the high number of IPs during the past hour, they're flagged as a HIGH ipVelocityByUser.level.
+                medium:
+                  type: integer
+                  description: An integer indicating the value calculated for the medium threshold. If the user accessed more than the medium number of IPs during the past hour, they're flagged as a MEDIUM ipVelocityByUser.level.
+                source:
+                  type: string
+                  enum: [MIN_NOT_REACHED, CALCULATED, ENVIRONMENT_FALLBACK, DEFAULT_FALLBACK]
+                  description:  >-
+                    An enum indicating the source used to calculate the threshold. This can be
+                    MIN_NOT_REACHED. If the measure is less than every.minSample, the threshold isn't calculated. Instead, a value of LOW is automatically assigned. If less than five IPs were used by the user during the past hour, MIN_NOT_REACHED is set.
+                    CALCULATED. Indicates the threshold is guaranteed to be calculated.
+                    ENVIRONMENT_FALLBACK. Indicates a global threshold calculated for the entire environment is used. The global threshold is used when the ipVelocityByUser.threshold couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the threshold calculation.
+                    DEFAULT_FALLBACK. Indicates the default threshold defined for the predictor (in threshold.medium or threshold.high) is used. The default threshold is used when ENVIRONMENT_FALLBACK (the global threshold) couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the environment threshold calculation.
+                calculatedAt:
+                  type: string
+                  description: A date-time indicating the timestamp for the calculated threshold.
+                expiresAt:
+                  type: string
+                  description: A date-time indicating when the threshold will be recalculated. The recalculation will happen before this time.
+            velocity:
+              type: object
+              description: Integer values for the measures used to calculate velocity.
+              properties:
+                distinctCount:
+                  type: integer
+                  description: This is the distinct count for the previous seconds indicated by the during value.
+                during:
+                  type: integer
+                  description: The interval (in seconds) during which the velocity is calculated.
+        userVelocityByIp:
+          type: object
+          properties: 
+            level:
+              type: string
+              enum: [LOW, MEDIUM, HIGH]
+              description: An enum indicating whether the calculated number of users per IP is LOW, MEDIUM, or HIGH.
+            reason:
+              type: string
+              description: A string indicating the reason the user was flagged. For example "More than 250 users accessed IP address 1.1.1.1 during the last 1 hour."
+            threshold:
+              type: object
+              description: The information about the calculated threshold used.
+              properties:
+                high:
+                  type: integer
+                  description: An integer indicating the value calculated for the high threshold. If the IP was accessed by more than the high number of users during the past hour, the IP is flagged as a HIGH userVelocityByIp.level.
+                medium:
+                  type: integer
+                  description: An integer indicating the value calculated for the medium threshold. If the IP was accessed by more than the medium number of users during the past hour, the IP is flagged as a MEDIUM userVelocityByIp.level
+                source:
+                  type: string
+                  enum: [MIN_NOT_REACHED, CALCULATED, ENVIRONMENT_FALLBACK, DEFAULT_FALLBACK]
+                  description:  >-
+                    An enum indicating the source used to calculate the threshold. This can be:
+                    MIN_NOT_REACHED. If the measure is less than every.minSample, the threshold isn't calculated. Instead, a value of LOW is automatically assigned.
+                    CALCULATED. Indicates the threshold was calculated.
+                    ENVIRONMENT_FALLBACK. Indicates a global threshold calculated for the entire environment is used. The global threshold is used when the userVelocityByIp.threshold couldn't be calculated for the user, generally due to a lack of past transactions for the risk predictor to use for the threshold calculation.
+                    DEFAULT_FALLBACK. Indicates the default threshold defined for the predictor (in threshold.medium or threshold.high) is used. The default threshold is used when ENVIRONMENT_FALLBACK (the global threshold) couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the global threshold calculation.
+                calculatedAt:
+                    type: string
+                    description: A date-time indicating the timestamp for the calculated threshold.
+                expiresAt:
+                    type: string
+                    description: A date-time indicating when the threshold will be recalculated. The recalculation will happen before this time.
+            velocity:
+              type: object
+              description: Integer values for the measures used to calculate velocity.
+              properties:
+                distinctCount:
+                  type: integer
+                  description: Relevant only for predictors having a measure value of "DISTINCT_COUNT". This is the number of users that accessed the IP in the past during seconds.
+                during:
+                  type: integer
+                  description: The interval (in seconds) during which the velocity is calculated.
+        impossibleTravel:
+          type: boolean
+          description: >-
+            A boolean that specifies whether the distance between the location of the user in their previous successful authentication and current authentication infers that the user had to travel at a speed greater than 1000 kilometers per hour. This condition is marked as fulfilled, only if:
+            Location data is available for the current and previous IP address of the user.
+            This is not the first transaction that the user has performed.
+            The user’s previous successful transaction was performed less than 24 hours ago.
+            The user moved a distance of at least 100 kilometers. Thus, even if the user moved very fast, but moved only a distance of 90 kilometers, the condition is not fulfilled.
+            The user moved at a speed greater than 1000 kilometers per hour.
+        estimatedSpeed:
+          type: number
+          description: The calculated travel speed in units of kilometers per hour.
+        anonymousNetworkDetected:
+          type: boolean
+          description: A boolean that specifies whether the current authentication originated from an anonymous network (for example, proxy or VPN).
+        country:
+          type: string
+          description: A string that specifies the country related to current transaction from the IP address.
+        state:
+          type: string
+          description: A string that specifies the state related to current transaction from the IP address.
+        city:
+          type: string
+          description: A string that specifies the city related to current transaction from the IP address.
+        longitude:
+          type: number
+          description: A double-precision floating point that specifies the longitude related to current transaction from the IP address. Values range from -90 to 90.
+        latitude:
+          type: number
+          description: A double-precision floating point that specifies the latitude related to current transaction from the IP address. Values range from -180 to 180.
+        previousSuccessfulTransaction:
+          type: object
+          properties:
+            anonymousNetworkDetected:
+              type: boolean
+              description: A boolean that specifies whether an anonymous network was detected. Information is available twenty-four hours after the last successful transaction.
+            country:
+              type: string
+              description: A string that specifies the country of the IP address involved in the transaction. Information is available twenty-four hours after the last successful transaction.
+            state:
+              type: string
+              description: A string that specifies the state of the IP address involved in the transaction. Information is available twenty-four hours after the last successful transaction.
+            city:
+              type: string
+              description: A string that specifies the city of the IP address involved in the transaction. Information is available twenty-four hours after the last successful transaction.
+            ip:
+              type: string
+              description: A string that specifies the IP address involved in the transaction. Information is available twenty-four hours after the last successful transaction.
+            timestamp:
+              type: string
+              description: A date that specifies the timestamp of the transaction. Information is available twenty-four hours after the last successful transaction.
+        userBasedRiskBehavior:
+          type: object
+          properties:
+            level:
+              type: string
+              enum: [LOW, MEDIUM, HIGH]
+              description: A string that specifies the risk score calculated for the user behavior for all transactions associated with the accessing device, and for the current authentication attempt. Options are LOW, MEDIUM, and HIGH. This information is available only if customers have agreed to data consent and the intelligence.allowDataConsent property in the PingOne license is set to true.
+            reason:
+              type: string
+              description: A string that describes the reason (or reasons) provided for the user behavior risk score classification (for example, the operating system or browser type used by the device, and country in which the accessing device is located). Each reason is classified as Unusual, to indicate how much it deviates from normal user behavior, and its effect in calculating the overall user behavior risk score.
+        userRiskBehavior:
+          type: object
+          properties:
+            level:
+              type: string
+              enum: [LOW, MEDIUM, HIGH]
+              description: A string that specifies the risk score calculated for the user behavior within the organization associated with the accessing device, and for the current authentication attempt. Options are LOW, MEDIUM, and HIGH. This information is available only if customers have agreed to data consent and the intelligence.allowDataConsent property in the PingOne license is set to true.
+            reason:
+              type: string
+              description: A string that describes the reason (or reasons) provided for the user behavior risk score classification within the organization (for example, the operating system or browser type used by the device, and country in which the accessing device is located). Each reason is classified as Unusual or Very Unusual, to indicate how much it deviates from normal user behavior, and its effect in calculating the overall user behavior risk score.
+    RiskEvaluationEvent:
+      type: object
+      properties:
+        browser:
+          type: object
+          description: An object that specifies the browser fingerprint attributes. Browser data can be retrieved using browser fingerprint JS. For more information, see Overview of the PingOne Risk Integration Kit.
+          properties:
+            userAgent:
+              type: string
+            language:
+              type: string
+            colorDepth:
+              type: number
+            deviceMemory:
+              type: number
+            hardwareConcurrency:
+              type: number
+            screenResolution:
+              type: array
+              items:
+                type: number
+            availableScreenResolution:
+              type: array
+              items:
+                type: number
+            timezoneOffset:
+              type: number
+            timezone:
+              type: string
+            sessionStorage:
+              type: boolean
+            localStorage:
+              type: boolean
+            indexedDb:
+              type: boolean
+            addBehaviour:
+              type: object
+            openDatabase:
+              type: boolean
+            cpuClass:
+              type: string
+            platform:
+              type: string
+            plugins:
+              type: array
+              items:
+                type: object
+            webglVendorAndRenderer:
+              type: string
+            webgl:
+              type: array
+              items:
+                type: string
+            adBlock:
+              type: boolean
+            hasLiedLanguages:
+              type: boolean
+            hasLiedResolution:
+              type: boolean
+            hasLiedOs:
+              type: boolean
+            hasLiedBrowser:
+              type: boolean
+            touchSupport:
+              type: array
+              items:
+                type: string
+            fonts:
+              type: array
+              items:
+                type: string
+            audio:
+              type: string
+        completionStatus:
+          type: string
+          enum: [FAILED, IN_PROGRESS, SUCCESS]
+          description: A string that specifies the state of the transaction. Options are FAILED, IN_PROGRESS, and SUCCESS. If a value is not provided, the value defaults to IN_PROGRESS. The value of this property can be changed only if its current state is IN_PROGRESS.
+        evaluatedFactors:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [FAILED, IN_PROGRESS, SUCCESS]
+              description: A string that specifies the state of the transaction. Options are FAILED, IN_PROGRESS, and SUCCESS.
+            type:
+              type: string
+              description: A string that specifies the transaction type.
+        ip:
+          type: string
+          description: A string that specifies the origin IP address of the authentication flow. This is a required property.
+        flow:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [AUTHENTICATION]
+              description: A string that specifies the flow type for the event. The only option (and default) is AUTHENTICATION.
+        origin:
+          type: string
+          description: A string that specifies the calling service.
+        session:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies a unique session ID associated with the event.
+        targetResource:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies the ID of the target application.
+            name:
+              type: string
+              description: A string that specifies the name of the target application.
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies the ID of the user associated with the event (maximum size 1024 characters). This is a required property.
+            name:
+              type: string
+              description: A string that specifies the name of the user associated with the event (maximum size 1024 characters).
+            type:
+              type: string
+              description: A string that specifies the type of user associated with the event. Options are EXTERNAL. This is a required property.
+            groups:
+              type: array
+              description: An array of group names.
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: A string that specifies the name of the group (maximum size 1024 characters).
+        sharingType:
+          type: string
+          enum: [UNSPECIFIED, SHARED, PRIVATE]
+          description: A string that specifies the device sharing type. Options are UNSPECIFIED, SHARED, and PRIVATE.
+    RiskEvaluationResult:
+      type: object
+      properties:
+        type:
+          type: string
+          readOnly: true
+          enum: [VALUE]
+          description: A string that specifies the risk evaluation result type. Options are VALUE.
+        level:
+          type: string
+          readOnly: true
+          enum: [HIGH, MEDIUM, LOW]
+          description: A string that specifies the risk evaluation result level. Options are HIGH, MEDIUM, and LOW.
+        value:
+          type: string
+          readOnly: true
+          description: A string that specifies any custom attribute the administrator defines.
     Resource:
       type: object
       properties:
@@ -10606,6 +10976,7 @@ paths:
       tags:
         - Management APIs > Risk Management > Risk Evaluations
       summary: CREATE Risk Evaluation
+      operationId: createRiskEvaluation
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10614,7 +10985,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/RiskEvaluation'
               example:
                 event:
                   completionStatus: SUCCESS
@@ -10713,12 +11084,15 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEvaluation'
   /v1/environments/{envID}/riskEvaluations/{riskID}:
     get:
       tags:
         - Management APIs > Risk Management > Risk Evaluations
       summary: READ One Risk Evaluation
+      operationId: readOneRiskEvaluation
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10744,12 +11118,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEvaluation'
   /v1/environments/{envID}/riskEvaluations/{riskID}/event:
     put:
       tags:
         - Management APIs > Risk Management > Risk Evaluations
       summary: UPDATE Risk Evaluation
+      operationId: updateRiskEvaluation
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10758,7 +11135,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/RiskEvaluation'
               example:
                 completionStatus: SUCCESS
       parameters:
@@ -10787,7 +11164,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEvaluation'
   /v1/environments/{envID}/riskPredictors:
     get:
       tags:
@@ -12374,6 +12753,7 @@ paths:
       tags:
         - Management APIs > Users > Group Membership
       summary: ADD User to Group
+      operationId: addUserToGroup
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -12383,6 +12763,10 @@ paths:
           application/json:
             schema:
               type: object
+              properties:
+                id:
+                  type: string
+                  description: The group ID to add the user to
               example:
                 id: e947cec5-62c5-4d80-af16-497b29e8a685
       parameters:
@@ -12403,14 +12787,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/P1Error'
-        '200':
+        '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
     get:
       tags:
         - Management APIs > Users > Group Membership
       summary: READ All Group Memberships for User
+      operationId: readAllGroupMembershipsForUser
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -12451,12 +12838,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/environments/{envID}/users/{userID}/memberOfGroups/{groupID}:
     delete:
       tags:
         - Management APIs > Users > Group Membership
       summary: REMOVE User from Group
+      operationId: removeUserFromGroup
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -12490,6 +12880,7 @@ paths:
       tags:
         - Management APIs > Users > Group Membership
       summary: READ One Group Membership for User
+      operationId: readOneGroupMembershipForUser
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -12525,7 +12916,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
   /v1/environments/{envID}/users/{userID}/devices:
     post:
       tags:
