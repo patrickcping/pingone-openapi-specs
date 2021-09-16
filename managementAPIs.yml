@@ -896,6 +896,7 @@ components:
               description: A string that specifies the name of the user associated with the event (maximum size 1024 characters).
             type:
               type: string
+              enum: [EXTERNAL]
               description: A string that specifies the type of user associated with the event. Options are EXTERNAL. This is a required property.
             groups:
               type: array
@@ -1182,13 +1183,17 @@ components:
           type: string
           description: A string that specifies the user’s default location, which is optional. This may be explicitly set to null when updating a user to unset it. This is used for purposes of localizing such items as currency, date time format, or numerical representations. If provided, it must be a valid language tag as defined in RFC 5646. The following are example tags fr, en-US, es-419, az-Arab, man-Nkoo-GN. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex ^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$). It can have a length of no more than 256 characters (min/max=1/256).
         memberOfGroupIDs:
-          type: string
+          type: array
           readOnly: true
           description: A read-only array of IDs for the groups the user is a member of. This property is returned for GET /environments/{envID}/users/{userID} when include=memberOfGroupIDs is appended to the request. This property is not returned with a list of users.
+          items:
+            type: string
         memberOfGroupNames:
-          type: string
+          type: array
           readOnly: true
           description: A read-only array of names for the groups the user is a member of. This property is returned for GET /environments/{envID}/users/{userID} when include=memberOfGroupNames is appended to the request. This property is not returned with a list of users.
+          items:
+            type: string
         mfaEnabled:
           type: boolean
           description: A boolean attribute that specifies whether multi-factor authentication is enabled. This attribute is set to false by default when the user is created. You can set mfaEnabled to true with POST CREATE User, POST CREATE User (Import), or PUT UPDATE User MFA Enabled. You cannot update mfaEnabled with PUT UPDATE User or PATCH UPDATE User.
@@ -1915,11 +1920,6 @@ paths:
                 reconsentPeriodDays: 180
                 enabled: false
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -2009,11 +2009,6 @@ paths:
                 name: Agreement_1_UPDATED_{{$timestamp}}
                 reconsentPeriodDays: 360
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -2082,11 +2077,6 @@ paths:
                 displayName: Language_1
                 enabled: true
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -2191,11 +2181,6 @@ paths:
                 locale: en-CH
                 displayName: Language_{{$timestamp}}
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -2274,11 +2259,6 @@ paths:
                 requireReconsent: false
                 text: So, you agree to all my terms, right?
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -2600,11 +2580,6 @@ paths:
                 sloResponseEndpoint: https://example.com
                 spEntityId: test
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -2689,11 +2664,6 @@ paths:
                 sloResponseEndpoint: https://example.com
                 spEntityId: test
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -2714,7 +2684,11 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ApplicationSAML'
+                  - $ref: '#/components/schemas/ApplicationOIDC'
     delete:
       tags:
         - Management APIs > Applications > Applications
@@ -2725,11 +2699,6 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -2793,11 +2762,6 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -2840,11 +2804,6 @@ paths:
                 scopes:
                   - id: '{{scopeID}}'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -2957,11 +2916,6 @@ paths:
                   - id: '{{OIDCscopeID}}'
                   - id: '{{anotherOIDCscopeID}}'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -3074,11 +3028,6 @@ paths:
                 signOnPolicy:
                   id: '{{policyID}}'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -3158,11 +3107,6 @@ paths:
                 signOnPolicy:
                   id: '{{policyID}}'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -3275,11 +3219,6 @@ paths:
                   id: '{{envID}}'
                   type: ENVIRONMENT
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -3423,11 +3362,6 @@ paths:
                 value: ${user.email}
                 required: false
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -3509,11 +3443,6 @@ paths:
                 value: ${user.email}
                 required: true
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -3539,7 +3468,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAttributeMapping'
     delete:
       tags:
         - Management APIs > Applications > Application Attribute Mapping
@@ -3622,11 +3553,6 @@ paths:
                 type: FCM
                 key: key.value
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -3706,11 +3632,6 @@ paths:
                   MIGTAgEA****7HUikGZU
                   -----END PRIVATE KEY-----
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -3826,11 +3747,6 @@ paths:
                   recordedat gt "2019-01-01T22:54:12.988Z" AND recordedat lt
                   "2019-01-31T22:54:12.988Z" AND actors.user.name eq "Bill"
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -3978,11 +3894,6 @@ paths:
                   - type: PING_ONE_RISK
                     description: PingOne Risk
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -4051,11 +3962,6 @@ paths:
                   href: '{{imageURL}}'
                   id: '{{imageID}}'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: Authorization
           in: header
           schema:
@@ -4557,11 +4463,6 @@ paths:
               example:
                 default: true
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -4821,11 +4722,6 @@ paths:
                   id: '{certificateId}'
                 plainText: SGVsbG8sIFdvcmxkIQ==
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -4862,11 +4758,6 @@ paths:
                 cipherText: >-
                   0kEOngncmwvmGal0pT1y71bNsfWfvllmoDQlPfUq4UxiFE/u2w0RoS0yqPieNY1samW971zFuZ+XGtqIp69id6KSd9WXaaZliE18GAk8XvnilKF4A6TW1lmkpGuezI6G6AxPaaFVMKZyPx6R8Ai90aRBkcZ+2TtOrzZjGWh0Z132R/3syiFpEzBIqmo/ksnHKcojfj0Eq8cMwaSeymLaxT/wykeCwDC4x2QrRQLVmM4yCDNM2eC/3ArkB24pjMXHKfcr5jzR9ZtHdlh7Bs8D4JpdNMyD+uI6mrJyFll+E3TLGUhRymjMc4ZiUpPPntoXVzYq4xupZdNTbbcClA6hyg==
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -4903,11 +4794,6 @@ paths:
                 key:
                   id: '{keyId}'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -4946,11 +4832,6 @@ paths:
                 plainText: SGVsbG8sIFdvcmxkIQ==
                 signature: '{signature}'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -5080,11 +4961,6 @@ paths:
               example:
                 domainName: custom-domain.example.com
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -5318,11 +5194,6 @@ paths:
                   enabled: true
                 default: false
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -5393,12 +5264,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Environment'
-      parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
       responses:
         '401':
           description: Unauthorised
@@ -5456,11 +5321,6 @@ paths:
             schema:
               $ref: '#/components/schemas/Environment'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -5476,7 +5336,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
     delete:
       tags:
         - Management APIs > Environments
@@ -5524,11 +5386,6 @@ paths:
               example:
                 type: PRODUCTION
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -5544,7 +5401,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
   /v1/environments/{envID}/gateways:
     get:
       tags:
@@ -5600,11 +5459,6 @@ paths:
                 searchBaseDN: o=example
                 userCorrelationFilterPattern: (|(uid=$username$)(mail=$username$))
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -5681,11 +5535,6 @@ paths:
                 searchBaseDN: o=example
                 userCorrelationFilterPattern: (|(uid=$username$)(mail=$username$))
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -5745,11 +5594,6 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -5923,11 +5767,6 @@ paths:
                   id: '{{envID}}'
                   type: ENVIRONMENT
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -6005,11 +5844,6 @@ paths:
                   id: '{{envID}}'
                   type: ENVIRONMENT
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -6150,7 +5984,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
     delete:
       tags:
         - Management APIs > Groups
@@ -6271,11 +6107,6 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -6414,11 +6245,6 @@ paths:
               example:
                 name: Default Plan
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -6491,11 +6317,6 @@ paths:
               example:
                 name: Test-Propagation-Plan
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -6621,11 +6442,6 @@ paths:
                   href: >-
                     https://d1oekt4jpdthse.cloudfront.net/branding/market/cb933bfe-8282-405a-a780-0a19b97edc02.png
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -6711,11 +6527,6 @@ paths:
                   href: >-
                     https://d1oekt4jpdthse.cloudfront.net/branding/market/cb933bfe-8282-405a-a780-0a19b97edc02.png
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -6854,11 +6665,6 @@ paths:
                   BASIC_AUTH_USER: username
                   BASIC_AUTH_PASSWORD: password
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -6900,11 +6706,6 @@ paths:
                   OAUTH_ACCESS_TOKEN: token
                   OAUTH_REFRESH_TOKEN: token
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -6946,11 +6747,6 @@ paths:
                   OAUTH_ACCESS_TOKEN: yourAccessToken
                   OAUTH_REFRESH_TOKEN: yourRefreshToken
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -6997,11 +6793,6 @@ paths:
                   BASIC_AUTH_USER: username
                   BASIC_AUTH_PASSWORD: password
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -7083,11 +6874,6 @@ paths:
                   - id: 1425fb3b-476e-4cbe-9ef4-e06a52b74ab8
                 deprovision: true
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -7250,11 +7036,6 @@ paths:
                   - id: 1425fb3b-476e-4cbe-9ef4-e06a52b74ab8
                 deprovision: true
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -7335,11 +7116,6 @@ paths:
                 sourceAttribute: username
                 targetAttribute: accountId
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -7423,11 +7199,6 @@ paths:
                 sourceAttribute: accountId
                 targetAttribute: userName
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -7611,11 +7382,6 @@ paths:
                   - USER_GENDER
                   - EMAIL
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -7718,11 +7484,6 @@ paths:
                 value: ${providerAttributes.externalId}
                 update: ALWAYS
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -7802,11 +7563,6 @@ paths:
                 value: ${providerAttributes.first_name}
                 update: EMPTY_ONLY
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -8197,11 +7953,6 @@ paths:
               example:
                 enabled: true
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -8268,11 +8019,6 @@ paths:
               example:
                 locale: fr
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -8338,11 +8084,6 @@ paths:
                 localizationComplete: true
                 statusDetails: Status details here
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -8418,11 +8159,6 @@ paths:
                 localizationComplete: true
                 statusDetails: Status Details - add updated status details here
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -8586,11 +8322,6 @@ paths:
               example:
                 name: Internal Test License
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: orgID
           in: path
           schema:
@@ -8807,11 +8538,6 @@ paths:
                 body: ' Your OTP is ${otp}'
                 deliveryMethod: Push
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -8918,11 +8644,6 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -8968,11 +8689,6 @@ paths:
                 body: ${user.username}, you have a new authentication request.
                 deliveryMethod: Push
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -9067,11 +8783,6 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -9162,11 +8873,6 @@ paths:
                   name: reply_name
                   address: reply@pingidentity.com
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -9249,11 +8955,6 @@ paths:
                 authToken: exampleAuthToken
                 provider: CUSTOM_SYNIVERSE
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -9358,11 +9059,6 @@ paths:
                     available: true
                     number: '+972544440099'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -9485,11 +9181,6 @@ paths:
               example:
                 domainName: auth.shopco.com
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -9756,11 +9447,6 @@ paths:
               example:
                 emailAddress: noreply1@auth.shopco.com
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -9922,11 +9608,6 @@ paths:
                   ~!@#$%^&*()-_=+[]{}|;:,.<>/?: 1
                 default: true
       parameters:
-        - name: content-type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -10004,11 +9685,6 @@ paths:
             schema:
               $ref: '#/components/schemas/Population'
       parameters:
-        - name: content-type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -10076,11 +9752,6 @@ paths:
             schema:
               $ref: '#/components/schemas/Population'
       parameters:
-        - name: content-type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -10101,7 +9772,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Population'
     delete:
       tags:
         - Management APIs > Populations
@@ -10180,11 +9853,6 @@ paths:
                 audience: https://api.custom.com
                 accessTokenValiditySeconds: 7200
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -10254,11 +9922,6 @@ paths:
                 name: CustomResource_EU
                 audience: https://api.custom.eu
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -10279,7 +9942,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
     delete:
       tags:
         - Management APIs > Resources > Resources
@@ -10360,11 +10025,6 @@ paths:
                   - name.family
                   - name.given
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -10452,11 +10112,6 @@ paths:
                   - primaryPhone
                   - mobilePhone
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -10564,11 +10219,6 @@ paths:
                 name: firstName
                 value: ${user.name.given}
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -10643,11 +10293,6 @@ paths:
                 name: nickname
                 value: ${user.nickname}
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -10774,11 +10419,6 @@ paths:
                         minScore: 70
                         maxScore: 100
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -10917,11 +10557,6 @@ paths:
                         minScore: 80
                         maxScore: 100
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -11064,11 +10699,6 @@ paths:
                     audio: '124.04345808873768'
                   origin: PF_RISK_IK
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -11135,15 +10765,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RiskEvaluation'
+              $ref: '#/components/schemas/RiskEvaluationEvent'
               example:
                 completionStatus: SUCCESS
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -11400,11 +11025,6 @@ paths:
                 type: STRING
                 unique: false
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -11488,11 +11108,6 @@ paths:
                 unique: true
                 enabled: false
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -11518,7 +11133,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaAttribute'
     put:
       tags:
         - Management APIs > Schemas
@@ -11539,11 +11156,6 @@ paths:
                 enabled: false
                 required: true
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -11569,7 +11181,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaAttribute'
     delete:
       tags:
         - Management APIs > Schemas
@@ -11580,11 +11194,6 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -11653,11 +11262,6 @@ paths:
                 default: 'false'
                 description: A new basic sign-on policy.
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -11723,11 +11327,6 @@ paths:
                 description: a sign-on policy that has been updated
                 default: true
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -11836,11 +11435,6 @@ paths:
                   population:
                     id: '{{popID}}'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -11934,11 +11528,6 @@ paths:
                         previousSuccessfulAuthenticationTime: ${user.lastSignOn.at}
                         previousSuccessfulAuthenticationIp: ${user.lastSignOn.remoteIp}
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -12018,11 +11607,6 @@ paths:
                   id: '{{agreementID}}'
                 type: AGREEMENT
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: policyID
           in: path
           schema:
@@ -12071,11 +11655,6 @@ paths:
                 verifyTlsCertificates: false
                 enabled: true
       parameters:
-        - name: content-type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -12179,11 +11758,6 @@ paths:
                 enabled: true
                 verifyTlsCertificates: true
       parameters:
-        - name: content-type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -12315,6 +11889,11 @@ paths:
           schema:
             type: string
           example: memberOfGroups[id eq "{{groupID}}"] and name.family eq "demo"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          example: '100'
         - name: envID
           in: path
           schema:
@@ -12385,9 +11964,9 @@ paths:
   /v1/environments/{envID}/users/{userID}:
     get:
       tags:
-        - Management APIs > Users > Group Membership
-      summary: READ All Group IDs for User
-      operationId: readAllGroupIDsForUser
+        - Management APIs > Users > Users
+      summary: READ User
+      operationId: readUser
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -12397,6 +11976,7 @@ paths:
           in: query
           schema:
             type: string
+            enum: [memberOfGroupIDs, memberOfGroupNames]
           example: memberOfGroupIDs
         - name: envID
           in: path
@@ -12418,7 +11998,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
     post:
       tags:
         - Management APIs > Users > User Accounts
@@ -12498,11 +12080,6 @@ paths:
                 type: tele
                 timezone: America/Los_Angeles
       parameters:
-        - name: content-type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -12523,7 +12100,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
     patch:
       tags:
         - Management APIs > Users > Users
@@ -12541,11 +12120,6 @@ paths:
               example:
                 title: Manager
       parameters:
-        - name: content-type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -12566,7 +12140,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
     delete:
       tags:
         - Management APIs > Users > Users
@@ -12644,11 +12220,6 @@ paths:
                 identityProvider:
                   id: '{{idpID}}'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -12680,11 +12251,6 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: content-type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -12722,11 +12288,6 @@ paths:
               example:
                 verifyStatus: ENABLED
       parameters:
-        - name: content-type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -13163,11 +12724,6 @@ paths:
               example:
                 nickname: My phone
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -13211,11 +12767,6 @@ paths:
               example:
                 status: PENDING
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -13289,11 +12840,6 @@ paths:
               example:
                 enabled: false
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -13362,11 +12908,6 @@ paths:
               example:
                 mfaEnabled: true
       parameters:
-        - name: content-type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -13498,11 +13039,6 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -13580,11 +13116,6 @@ paths:
                 applications:
                   - id: '{{appID}}'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -13653,11 +13184,6 @@ paths:
               example:
                 id: '{{popID}}'
       parameters:
-        - name: content-type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -13689,11 +13215,6 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -13857,11 +13378,6 @@ paths:
                   id: '{{envID}}'
                   type: ENVIRONMENT
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
@@ -13998,11 +13514,6 @@ paths:
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: envID
           in: path
           schema:
