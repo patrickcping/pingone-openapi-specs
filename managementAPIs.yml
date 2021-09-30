@@ -416,6 +416,13 @@ components:
               description:
                 type: string
                 description: A string that specifies the description of the product or standalone service
+                readOnly: true
+              console:
+                type: object
+                properties:
+                  href:
+                    type: string
+                    description: Primary console link for certain products
               bookmarks:
                 type: array
                 description: Optional array of custom bookmarks. Maximum of five bookmarks per product.
@@ -778,6 +785,8 @@ components:
           description: An object that specifies the browser fingerprint attributes. Browser data can be retrieved using browser fingerprint JS. For more information, see Overview of the PingOne Risk Integration Kit.
           properties:
             userAgent:
+              type: string
+            cookie:
               type: string
             language:
               type: string
