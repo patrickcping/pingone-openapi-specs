@@ -83,6 +83,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Resource'
+            riskPredictors:
+              type: array
+              items:
+                $ref: '#/components/schemas/RiskPredictor'
             roleAssignments:
               type: array
               items:
@@ -937,6 +941,87 @@ components:
           type: string
           readOnly: true
           description: A string that specifies any custom attribute the administrator defines.
+    RiskPredictor:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        name:
+          type: string
+          description: A string type. A unique, friendly name for the predictor. This name is displayed in the Risk Policies UI, when the admin is asked to define the overrides and weights.
+        compactName:
+          type: string
+          description: A string type. A unique name for the predictor. This property is immutable; it cannot be modified after initial creation. The value must be alpha-numeric, with no special characters or spaces. This name is used in the API both for policy configuration, and in the Risk Evaluation response (under details).
+        type:
+          type: string
+          enum: [VELOCITY, USER_RISK_BEHAVIOR, MAP]
+          description: A string type. This specifies the desription of the risk predictor. Maximum length is 1024 characters.
+        description:
+          type: string
+          description: A string type. This specifies the desription of the risk predictor. Maximum length is 1024 characters.
+        createdAt:
+          type: string
+          readOnly: true
+          description: The time the resource was created.
+        updatedAt:
+          type: string
+          readOnly: true
+          description: The time the resource was updated.
+        default:
+          type: object
+          properties:
+            weight:
+              type: integer
+              description: An integer type. This specifies the weight assigned to the risk predictor in a new policy by default.
+            result:
+              type: object
+              description: >-
+                This specifies the result assigned to the predictor if the predictor could not be calculated during the risk evaluation. If this field is not provided, and the predictor could not be calculated during risk evaluation, the following options are:
+                If the predictor is used in an override, the override is skipped.
+                In the weighted policy, the predictor will have a weight of 0.
+              properties:
+                level:
+                  type: string
+                  enum: [HIGH,MEDIUM,LOW]
+                  description: A string that identifies the risk level. Options are HIGH, MEDIUM, and LOW.
+                type:
+                  type: string
+                  enum: [VALUE]
+        map:
+          type: object
+          description: An object that defines the mapping of risk levels for the list of all results.
+          properties:
+            high:
+              $ref: '#/components/schemas/RiskPredictorMap'
+            medium:
+              $ref: '#/components/schemas/RiskPredictorMap'
+            low:
+              $ref: '#/components/schemas/RiskPredictorMap'
+    RiskPredictorMap:
+      type: object
+      properties:
+        contains:
+          type: string
+        ipRange:
+          type: array
+          description: List of CIDRs to include
+          items:
+            type: string
+        between:
+          type: object
+          description: Minimum and maximum boundaries
+          properties:
+            minScore:
+              type: integer
+            maxScore:
+              type: integer
+        list:
+          type: array
+          description: An array that specifies the list of entities that represent the risk conditions.
+          items:
+            type: string
     Resource:
       type: object
       properties:
@@ -10802,10 +10887,72 @@ paths:
               schema:
                 $ref: '#/components/schemas/RiskEvaluation'
   /v1/environments/{envID}/riskPredictors:
+    post:
+      tags:
+        - Management APIs > Risk Management > Risk Advanced Predictors
+      summary: CREATE Risk Predictor
+      operationId: createRiskPredictor
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiskPredictor'
+              example:
+                name: My Risk Predictor
+                compactName: riskPred
+                map:
+                  high:
+                    list: [
+                      Dangerous,
+                      Insanely Dangerous,
+                      Unspeakably Dangerous
+                    ]
+                    contains: ${event.danger.type}
+                  medium:
+                    list: [
+                      Kinda Dangerous
+                    ]
+                    contains: ${event.danger.type}
+                  low:
+                    list: [
+                      Kinda Safe,
+                      Safe
+                    ]
+                    contains: ${event.danger.type}
+                type: MAP
+                default:
+                  weight: 5
+                  result:
+                    level: HIGH
+                    type: VALUE
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskPredictor'
     get:
       tags:
         - Management APIs > Risk Management > Risk Advanced Predictors
       summary: READ All Risk Predictors
+      operationId: readAllRiskPredictors
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10826,12 +10973,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/environments/{envID}/riskPredictors/{riskPredictorID}:
     get:
       tags:
         - Management APIs > Risk Management > Risk Advanced Predictors
       summary: READ One Risk Predictor
+      operationId: readOneRiskPredictor
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10857,7 +11007,104 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskPredictor'
+    put:
+      tags:
+        - Management APIs > Risk Management > Risk Advanced Predictors
+      summary: UPDATE Risk Predictor
+      operationId: updateRiskPredictor
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiskPredictor'
+              example:
+                name: My Risk Predictor
+                compactName: riskPred
+                map:
+                  high:
+                    list: [
+                      Dangerous,
+                      Insanely Dangerous,
+                      Unspeakably Dangerous
+                    ]
+                    contains: ${event.danger.type}
+                  medium:
+                    list: [
+                      Kinda Dangerous
+                    ]
+                    contains: ${event.danger.type}
+                  low:
+                    list: [
+                      Kinda Safe,
+                      Safe
+                    ]
+                    contains: ${event.danger.type}
+                type: MAP
+                default:
+                  weight: 5
+                  result:
+                    level: HIGH
+                    type: VALUE
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: riskPredictorID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskPredictor'
+    delete:
+      tags:
+        - Management APIs > Risk Management > Risk Advanced Predictors
+      summary: DELETE Risk Advanced Predictor
+      operationId: deleteRiskAdvancedPredictor
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: riskPredictorID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
   /v1/roles:
     get:
       tags:
