@@ -505,7 +505,12 @@ components:
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
         population:
-          $ref: '#/components/schemas/ObjectPopulation'
+          type: object
+          description: The population to assign the group to
+          properties:
+            id:
+              type: string
+              description: The population ID
         name:
           type: string
           description: The group name. A group name can be reused across populations, but the same user cannot belong to multiple groups with the same group name. Population groups cannot share a group name with an environment group. Search all groups for a specific group name with a SCIM filter on GET /environments/{envID}/groups. Retrieve all the group names associated with a user with GET /environments/{envID}/users/{userID}?include=memberOfGroupNames. Use this operation to determine group membership in attribute mappings for claims and assertions.
@@ -1072,6 +1077,9 @@ components:
           type: string
           readOnly: true
           description: A string that specifies the ID of the role.
+        name:
+          type: string
+          description: The name of the role
         permissions:
           type: array
           readOnly: true
