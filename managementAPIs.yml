@@ -83,6 +83,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Resource'
+            riskPolicySets:
+              type: array
+              items:
+                $ref: '#/components/schemas/RiskPolicySet'
             riskPredictors:
               type: array
               items:
@@ -946,6 +950,100 @@ components:
           type: string
           readOnly: true
           description: A string that specifies any custom attribute the administrator defines.
+    RiskPolicySet:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          readOnly: true
+          description: The time the resource was created (format ISO-8061).
+        default:
+          type: boolean
+          description: A boolean that specifies whether this risk policy set is the environment's default risk policy set, which is used whenever an explicit policySet ID is not specified in the risk policy evaluation request. If this property is not specified, the value defaults to false, and this risk policy set is not regarded as the default risk policy set for the environment. When this property is set to true (in PUT or POST requests), the default property of all other risk policy sets in the environment is set to false.
+        defaultResult:
+          $ref: '#/components/schemas/RiskPolicyResult'
+          description: A result object that specifies the default result returned if none of the conditions in the policy set are evaluated to true. At this time, the defaultResultLevel value must be LOW.
+        description:
+          type: string
+          description: A string that specifies a description for this policy set. This is an optional property. Valid characters consist of any Unicode letter, mark (for example, accent, umlaut), numeric character, punctuation character, or space. Maximum size is 1024 characters.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        name:
+          type: string
+          description: A string that specifies a name for this policy set. Valid characters consist of any Unicode letter, mark (for example, accent, umlaut), numeric character, forward slash, dot, apostrophe, underscore, space, or hyphen. Maximum size is 256 characters.
+        riskPolicies:
+          type: array
+          description: An array of policies related to this policy set.
+          items:
+            type: object
+            properties:
+              condition:
+                type: object
+                description: The condition logic that determines when a policy is evaluated to true and when it is evaluated to false.
+                properties:
+                  value:
+                    type: string
+                  equals:
+                    type: object
+                  aggregatedWeights:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value:
+                          type: string
+                        weight:
+                          type: integer
+                  between:
+                    type: object
+                    properties:
+                      minScore:
+                        type: integer
+                      maxScore:
+                        type: integer
+              createdAt:
+                type: string
+                readOnly: true
+                description: The time the resource was first created (format ISO-8061).
+              description:
+                type: string
+                description: A string that specifies a description for this risk policy. This is an optional property. Valid characters consist of any Unicode letter, mark (for example, accent, umlaut), numeric character, punctuation character, or space. Maximum size is 1024 characters.
+              environment:
+                $ref: '#/components/schemas/ObjectEnvironment'
+              id:
+                type: string
+                readOnly: true
+                description: A string that specifies the resource’s unique identifier.
+              name:
+                type: string
+                description: A string that specifies a name for this risk policy. Valid characters consist of any Unicode letter, mark (for example, accent, umlaut), numeric character, forward slash, dot, apostrophe, underscore, space, or hyphen. Maximum size is 256 characters.
+              priority:
+                type: integer
+                description: An integer that specifies priority of the policy inside a risk policy set, designating which policy should run first. This is a read-only value. The priority is determined by the order in which policies are listed in the policy set. The first policy in the list is assigned priority 1 and is evaluated first. The next policy in the list is assigned priority 2 and so on.
+              result:
+                $ref: '#/components/schemas/RiskPolicyResult'
+                description: A result object that specifies the result returned if the policy is evaluated as true. If several policies are evaluated as true, the result related to the highest priority policy is returned. for more information, see the Result attribute data model in the Risk Evaluations topic.
+              updatedAt:
+                type: string
+                readOnly: true
+                description: The time the resource was last updated (format ISO-8061).
+        updatedAt:
+          type: string
+          readOnly: true
+          description: The time the resource was last updated (format ISO-8061).
+    RiskPolicyResult:
+      type: object
+      properties:
+        level:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        type:
+          type: string
+          enum: [VALUE]
     RiskPredictor:
       type: object
       properties:
@@ -962,7 +1060,7 @@ components:
         type:
           type: string
           enum: [VELOCITY, USER_RISK_BEHAVIOR, MAP]
-          description: A string type. This specifies the desription of the risk predictor. Maximum length is 1024 characters.
+          description: An enum type. This can be either VELOCITY, USER_RISK_BEHAVIOR, or MAP
         description:
           type: string
           description: A string type. This specifies the desription of the risk predictor. Maximum length is 1024 characters.
@@ -999,12 +1097,12 @@ components:
           description: An object that defines the mapping of risk levels for the list of all results.
           properties:
             high:
-              $ref: '#/components/schemas/RiskPredictorMap'
+              $ref: '#/components/schemas/RiskPredictorItemMap'
             medium:
-              $ref: '#/components/schemas/RiskPredictorMap'
+              $ref: '#/components/schemas/RiskPredictorItemMap'
             low:
-              $ref: '#/components/schemas/RiskPredictorMap'
-    RiskPredictorMap:
+              $ref: '#/components/schemas/RiskPredictorItemMap'
+    RiskPredictorItemMap:
       type: object
       properties:
         contains:
@@ -10459,6 +10557,7 @@ paths:
       tags:
         - Management APIs > Risk Management > Risk Policies
       summary: CREATE Risk Policy Set
+      operationId: createRiskPolicySet
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10467,7 +10566,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/RiskPolicySet'
               example:
                 name: Example Policy
                 description: This is an example policy.
@@ -10536,11 +10635,14 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskPolicySet'
     get:
       tags:
         - Management APIs > Risk Management > Risk Policies
       summary: READ Risk Policy Sets
+      operationId: readRiskPolicySets
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10561,12 +10663,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/environments/{envID}/riskPolicySets/{riskPolicySetID}:
     get:
       tags:
         - Management APIs > Risk Management > Risk Policies
       summary: READ One Risk Policy Set
+      operationId: readOneRiskPolicySet
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10592,11 +10697,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskPolicySet'
     put:
       tags:
         - Management APIs > Risk Management > Risk Policies
       summary: UPDATE Risk Policy Set
+      operationId: updateRiskPolicySet
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -10605,7 +10713,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/RiskPolicySet'
               example:
                 name: Example Policy
                 description: This is an example policy.
@@ -10679,11 +10787,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskPolicySet'
     delete:
       tags:
         - Management APIs > Risk Management > Risk Policies
       summary: 'DELETE Risk Policy Set '
+      operationId: deleteRiskPolicySet
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
