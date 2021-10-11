@@ -7,12 +7,16 @@ externalDocs:
   url: https://apidocs.pingidentity.com/pingone/platform/v1/api/
   description: PingOne Platform API Reference
 servers:
-  - url: https://api.pingone.eu
-    description: PingOne EU API
-  - url: https://api.pingone.com
-    description: PingOne US API
-  - url: https://api.pingone.asia
-    description: PingOne APAC API
+  - url: https://api.pingone.{suffix}
+    description: PingOne API
+    variables:
+      suffix:
+        enum:
+          - 'eu'
+          - 'com'
+          - 'asia'
+          - 'ca'
+        default: 'eu'
 components:
   securitySchemes:
     bearer:
