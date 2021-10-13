@@ -165,8 +165,7 @@ components:
           type: string
           description: A string that specifies the description of the application.
         enabled:
-          type: string
-          enum: [ENABLED, DISABLED]
+          type: boolean
           description: A string that specifies the current enabled state of the application. Options are ENABLED or DISABLED.
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
@@ -206,32 +205,6 @@ components:
           type: string
           readOnly: true
           description: The time the resource was last updated.
-        mobile:
-          type: object
-          properties:
-            bundleId:
-              type: string
-              description: A string that specifies the bundle associated with the application, for push notifications in native apps. The value of the bundleId property is unique per environment, and once defined, is immutable.
-            packageName:
-              type: string
-              description: A string that specifies the package name associated with the application, for push notifications in native apps. The value of the mobile.packageName property is unique per environment, and once defined, is immutable.
-            integrityDetection:
-              type: object
-              properties:
-                mode:
-                  type: string
-                  enum: [ENABLED, DISABLED]
-                  description: A string that specifies whether device integrity detection takes place on mobile devices, for the application's enrollment and authentication events ENABLED, DISABLED
-                cacheDuration:
-                  type: object
-                  properties:
-                    amount:
-                      type: integer
-                      description: An integer that specifies the number of minutes or hours that specify the duration between successful integrity detection calls. Every attestation request entails a certain time tradeoff. You can choose to cache successful integrity detection calls for a predefined duration, between a minimum of 1 minute and a maximum of 48 hours. If mobile.integrityDetection.mode is ENABLED, the cache duration must be set.
-                    units:
-                      type: string
-                      enum: [MINUTES, HOURS]
-                      description: A string that specifies the time units of the mobile.integrityDetection.cacheDuration.amount :MINUTES, HOURS
         supportUnsignedRequestObject:
           type: boolean
           description: A boolean that specifies whether the request query parameter JWT is allowed to be unsigned. If false or null (default), an unsigned request object is not allowed.
@@ -295,10 +268,44 @@ components:
         - $ref: '#/components/schemas/Application'
         - type: object
           properties:
-            grantTypes:
+            mobile:
+              type: object
+              properties:
+                bundleId:
+                  type: string
+                  description: A string that specifies the bundle associated with the application, for push notifications in native apps. The value of the bundleId property is unique per environment, and once defined, is immutable.  this setting overrides the top-level bundleId field
+                packageName:
+                  type: string
+                  description: A string that specifies the package name associated with the application, for push notifications in native apps. The value of the mobile.packageName property is unique per environment, and once defined, is immutable.  this setting overrides the top-level packageName field.
+                integrityDetection:
+                  type: object
+                  properties:
+                    mode:
+                      type: string
+                      enum: [ENABLED, DISABLED]
+                      description: A string that specifies whether device integrity detection takes place on mobile devices, for the application's enrollment and authentication events ENABLED, DISABLED
+                    cacheDuration:
+                      type: object
+                      properties:
+                        amount:
+                          type: integer
+                          description: An integer that specifies the number of minutes or hours that specify the duration between successful integrity detection calls. Every attestation request entails a certain time tradeoff. You can choose to cache successful integrity detection calls for a predefined duration, between a minimum of 1 minute and a maximum of 48 hours. If mobile.integrityDetection.mode is ENABLED, the cache duration must be set.
+                        units:
+                          type: string
+                          enum: [MINUTES, HOURS]
+                          description: A string that specifies the time units of the mobile.integrityDetection.cacheDuration.amount :MINUTES, HOURS
+            bundleId:
               type: string
-              enum: [authorization_code, implicit, refresh_token, client_credentials]
-              description: A string that specifies the grant type for the authorization request. This is a required property. Options are authorization_code, implicit, refresh_token, and client_credentials.
+              description: A string that specifies the bundle associated with the application, for push notifications in native apps. The value of the bundleId property is unique per environment, and once defined, is immutable.
+            packageName:
+              type: string
+              description: A string that specifies the package name associated with the application, for push notifications in native apps. The value of the mobile.packageName property is unique per environment, and once defined, is immutable.
+            grantTypes:
+              type: array
+              description: A string that specifies the grant type for the authorization request. This is a required property. Options are AUTHORIZATION_CODE, IMPLICIT, REFRESH_TOKEN, CLIENT_CREDENTIALS.
+              items:
+                type: string
+                enum: [AUTHORIZATION_CODE, IMPLICIT, REFRESH_TOKEN, CLIENT_CREDENTIALS]
             homePageUrl:
               type: string
               description: A string that specifies the custom home page URL for the application.
@@ -323,9 +330,11 @@ components:
               type: integer
               description: An integer that specifies the number of seconds a refresh token can be exchanged before re-authentication is required. If a value is not provided, the refresh token is valid forever. Valid values are between 60 and 2147483647. After this property is set, the value cannot be nullified. This value is used to generate the value for the exp claim when minting a new refresh token.
             responseTypes:
-              type: string
-              enum: [TOKEN, ID_TOKEN, CODE]
+              type: array
               description: A string that specifies the code or token type returned by an authorization request. Options are TOKEN, ID_TOKEN, and CODE. Note that CODE cannot be used in an authorization request with TOKEN or ID_TOKEN because PingOne does not currently support OIDC hybrid flows.
+              items:
+                type: string
+                enum: [TOKEN, ID_TOKEN, CODE]
             tokenEndpointAuthMethod:
               type: string
               enum: [NONE, CLIENT_SECRET_BASIC, CLIENT_SECRET_POST]
