@@ -143,6 +143,8 @@ components:
                 type:
                   type: string
                   description: A string that specifies the user role required to access the application. Options are ADMIN_USERS_ONLY. A user is an admin user if the user has one or more of the following roles Organization Admin, Environment Admin, Identity Data Admin, or Client Application Developer.
+              required:
+                - type
             group:
               type: object
               properties:
@@ -154,6 +156,9 @@ components:
                   description: A set that specifies the group IDs for the groups the actor must belong to for access to the application.
                   items:
                     type: string
+              required:
+                - type
+                - groups
         assignActorRoles:
           type: boolean
           description: A boolean that specifies whether the permissions service should assign default roles to the application. This property is set only on the POST request. The property is ignored when included in a PUT request.
@@ -177,6 +182,9 @@ components:
               type: string
             href:
               type: string
+          required:
+            - id
+            - href
         id:
           type: string
           readOnly: true
@@ -208,6 +216,11 @@ components:
         supportUnsignedRequestObject:
           type: boolean
           description: A boolean that specifies whether the request query parameter JWT is allowed to be unsigned. If false or null (default), an unsigned request object is not allowed.
+      required:
+        - enabled
+        - name
+        - type
+        - protocol
     ApplicationSAML:
       allOf:
         - $ref: '#/components/schemas/Application'
@@ -233,6 +246,10 @@ components:
                     id:
                       type: string
                       description: A string that specifies the certificate to be used by the identity provider to sign assertions and responses. If this property is omitted, the default signing certificate for the environment is used.
+                  required:
+                    - id
+              required:
+                - key
             nameIdFormat:
               type: string
               description: A string that specifies the format of the Subject NameID attibute in the SAML assertion
@@ -263,6 +280,12 @@ components:
                       id:
                         type: string
                         description: An array that specifies the certificate IDs used to verify the service provider signature.
+              required:
+                - certificates
+          required:
+            - spEntityId
+            - acsUrls
+            - assertionDuration
     ApplicationOIDC:
       allOf:
         - $ref: '#/components/schemas/Application'
@@ -339,6 +362,9 @@ components:
               type: string
               enum: [NONE, CLIENT_SECRET_BASIC, CLIENT_SECRET_POST]
               description: A string that specifies the client authentication methods supported by the token endpoint. This is a required property. Options are NONE, CLIENT_SECRET_BASIC, and CLIENT_SECRET_POST.  
+          required:
+            - grantTypes
+            - tokenEndpointAuthMethod
     ApplicationAttributeMapping:
       type: object
       properties:
@@ -363,6 +389,10 @@ components:
         value:
           type: string
           description: A string that specifies the string constants or expression for mapping the attribute path against a specific source. The expression format is ${<source>.<attribute_path>}. The only supported source is user (for example, ${user.id}). This is a required property.
+      required:
+        - name
+        - value
+        - required
     ApplicationResourceGrant:
       type: object
       properties:
@@ -388,6 +418,8 @@ components:
             id:
               type: string
               description: A string that specifies the ID of the protected resource associated with this grant. This is a required property.
+          required:
+            - id
         scopes:
           type: array
           items:
@@ -396,10 +428,15 @@ components:
               id:
                 type: string
                 description: id	A array that specifies the IDs of the scopes associated with this grant. This is a required property.
+            required:
+              - id
         updatedAt:
           type: string
           readOnly: true
           description: The time the resource was last updated.
+      required:
+        - resource
+        - scopes
     ApplicationSecret:
       type: object
       properties:
@@ -444,6 +481,8 @@ components:
                   href:
                     type: string
                     description: Primary console link for certain products
+                required:
+                  - href
               bookmarks:
                 type: array
                 description: Optional array of custom bookmarks. Maximum of five bookmarks per product.
@@ -456,6 +495,11 @@ components:
                     href:
                       type: string
                       description: A valid URL for the bookmark.
+                  required:
+                    - name
+                    - href
+            required:
+              - type
     Environment:
       type: object
       properties:
@@ -478,6 +522,8 @@ components:
             id:
               type: string
               description: A string that specifies the active license associated with this environment. This property is required only if your organization has more than one active license.
+          required:
+            - id
         name:
           type: string
           description: A string that specifies the environment name, which must be provided and must be unique within an organization.
@@ -499,6 +545,11 @@ components:
           type: string
           description: The time the resource was last updated.
           readOnly: true
+      required:
+        - name
+        - type
+        - region
+        - license
       example:
         name: New-Env
         description: New environment description
@@ -559,12 +610,16 @@ components:
             users:
               type: integer
               description: Number of users with direct membership
+      required:
+        - name
     GroupMembership:
       type: object
       properties:
         id:
           type: string
           description: ID of the group to assign
+      required:
+       - id
     Population:
       type: object
       properties:
@@ -590,6 +645,8 @@ components:
           type: integer
           description: The number of users that belong to the population
           readOnly: true
+      required:
+        - name
     RiskEvaluation:
       type: object
       properties:
@@ -605,7 +662,6 @@ components:
           $ref: '#/components/schemas/ObjectEnvironment'
         event:
           $ref: '#/components/schemas/RiskEvaluationEvent'
-          readOnly: true
           description: An object that specifies the attributes to identify the event. This is a required property. For more information about event attributes, see the Event Data Model table.
         id:
           type: string
@@ -628,6 +684,8 @@ components:
           type: string
           readOnly: true
           description: The time the resource was last updated (format ISO-8061).
+      required:
+        - event
     RiskEvaluationDetails:
       type: object
       readOnly: true
@@ -911,6 +969,8 @@ components:
             id:
               type: string
               description: A string that specifies a unique session ID associated with the event.
+          required:
+            - id
         targetResource:
           type: object
           properties:
@@ -942,10 +1002,16 @@ components:
                   name:
                     type: string
                     description: A string that specifies the name of the group (maximum size 1024 characters).
+          required:
+            - id
+            - type
         sharingType:
           type: string
           enum: [UNSPECIFIED, SHARED, PRIVATE]
           description: A string that specifies the device sharing type. Options are UNSPECIFIED, SHARED, and PRIVATE.
+      required:
+        - ip
+        - user
     RiskEvaluationResult:
       type: object
       properties:
@@ -1001,7 +1067,9 @@ components:
                   value:
                     type: string
                   equals:
-                    type: object
+                    oneOf:
+                    - type: string
+                    - type: boolean
                   aggregatedWeights:
                     type: array
                     items:
@@ -1044,10 +1112,16 @@ components:
                 type: string
                 readOnly: true
                 description: The time the resource was last updated (format ISO-8061).
+            required:
+              - name
+              - result
+              - condition
         updatedAt:
           type: string
           readOnly: true
           description: The time the resource was last updated (format ISO-8061).
+      required:
+        - name
     RiskPolicyResult:
       type: object
       properties:
@@ -1057,6 +1131,8 @@ components:
         type:
           type: string
           enum: [VALUE]
+      required:
+        - level
     RiskPredictor:
       type: object
       properties:
@@ -1105,6 +1181,11 @@ components:
                 type:
                   type: string
                   enum: [VALUE]
+              required:
+                - level
+          required:
+            - weight
+            - result
         map:
           type: object
           description: An object that defines the mapping of risk levels for the list of all results.
@@ -1115,6 +1196,10 @@ components:
               $ref: '#/components/schemas/RiskPredictorItemMap'
             low:
               $ref: '#/components/schemas/RiskPredictorItemMap'
+      required:
+        - name
+        - compactName
+        - type
     RiskPredictorItemMap:
       type: object
       properties:
@@ -1133,11 +1218,16 @@ components:
               type: integer
             maxScore:
               type: integer
+          required:
+            - minScore
+            - maxScore
         list:
           type: array
           description: An array that specifies the list of entities that represent the risk conditions.
           items:
             type: string
+      required:
+        - contains
     Resource:
       type: object
       properties:
@@ -1171,6 +1261,8 @@ components:
           type: string
           readOnly: true
           description: The time the resource was last updated.
+      required:
+        - name
     Role:
       type: object
       properties:
@@ -1225,6 +1317,8 @@ components:
             id:
               type: string
               description: A string that specifies the role ID.
+          required:
+            - id
         scope:
           type: object
           properties:
@@ -1235,6 +1329,12 @@ components:
               type: string
               enum: [ORGANIZATION, ENVIRONMENT, POPULATION]
               description: A string that specifies the type of resource defining the scope of the Role assignment. Options are ORGANIZATION, ENVIRONMENT, and POPULATION.
+          required:
+            - id
+            - type
+      required:
+        - role
+        - scope
     Schema:
       type: object
       properties:
@@ -1306,6 +1406,10 @@ components:
         multiValued:
           type: boolean
           description: A boolean that specifies whether the attribute has multiple values or a single one. This value can only change from false to true, as changing from true to false is not allowed. Maximum number of values stored is 1,000.
+      required:
+        - name
+        - enabled
+        - type
     User:
       type: object
       properties:
@@ -1483,6 +1587,8 @@ components:
             id:
               type: string
               description: A string that specifies the identifier of the population resource associated with the user. This property cannot be updated using PUT {{apiPath}}/environments/{{envID}}/users/{{userID}}. However, it can be updated using PUT /environments/{{envID}}/users/{{userID}}/population.
+          required:
+            - id
         preferredLanguage:
           type: string
           description: A string that specifies the user’s preferred written or spoken languages, which are optional. This may be explicitly set to null when updating a user to unset it. If provided, the format of the value must be a valid language range and the same as the HTTP Accept-Language header field (not including Accept-Language:) and is specified in Section 5.3.5 of RFC 7231. For example en-US, en-gb;q=0.8, en;q=0.7.
@@ -1508,6 +1614,10 @@ components:
           type: string
           enum: [NOT_INITIATED, ENABLED, DISABLED]
           description: Indicates whether ID verification can be done for the user. This value can be NOT_INITIATED (the initial value), ENABLED, or DISABLED. If the user verification status is DISABLED, a new verification status cannot be created for that user until the status is changed to ENABLED.
+      required:
+        - population
+        - email
+        - username
 security:
   - bearer: []
 tags:
