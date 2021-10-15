@@ -64,10 +64,24 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/ApplicationSAML'
                   - $ref: '#/components/schemas/ApplicationOIDC'
+            credentials:
+              type: array
+              items:
+                $ref: '#/components/schemas/GatewayCredential'
             environments:
               type: array
               items:
                 $ref: '#/components/schemas/Environment'
+            gatewayInstances:
+              type: array
+              items:
+                $ref: '#/components/schemas/GatewayInstance'
+            gateways:
+              type: array
+              items:
+                anyOf:
+                  - $ref: '#/components/schemas/Gateway'
+                  - $ref: '#/components/schemas/GatewayLDAP'
             grants:
               type: array
               items:
@@ -577,6 +591,218 @@ components:
               href: https://example.com
         license:
           id: 34f0efac-21d9-4a17-8a35-196bb3362983
+    Gateway:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the instance ID of the gateway. The gateway instance ID is created by the gateway when it starts up.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        credentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/GatewayCredential'
+        name:
+          type: string
+          description: A string that specifies the resource name, which must be provided and must be unique within an environment. Valid characters are any Unicode letter, mark, numeric character, forward slash, dot, apostrophe, underscore, space, or hyphen.
+        description:
+          type: string
+          description: (Optional) A string that specifies the description of the resource.
+        type:
+          type: string
+          enum: [LDAP, PING_FEDERATE]
+          description: A string that specifies the type of gateway resource. Options are LDAP and PING_FEDERATE. This is a required property.
+        enabled:
+          type: boolean
+          description: A boolean that specifies whether the gateway is enabled. This is a required property.
+        supportedVersions:
+          type: object
+          description: An array that lists the LDAP gateway versions associated with this gateway resource. This information is returned on a GET {{apiPath}}/environments/{{envID}}/gateways request, and it is used to trigger alerts if the gateway tries to connect with an unsupported version (or a version that is not the latest or recommended version).
+          properties:
+             version:
+              type: string
+              description: A string that specifies the gateway version number.
+             image:
+              type: string
+              description: A string that identifies the gateway image path.
+             recommended:
+              type: boolean
+              description: A boolean that specifies whether this is the recommended LDAP gateway version.
+             latest:
+              type: boolean
+              description: A boolean that specifies whether this is the latest LDAP gateway version.
+      required:
+        - name
+        - type
+    GatewayLDAP:
+      allOf:
+        - $ref: '#/components/schemas/Gateway'
+        - type: object
+          properties:
+            bindDN:
+              type: string
+              description: A string that specifies the distinguished name information to bind to the LDAP database (for example, uid=pingone,dc=example,dc=com).
+            bindPassword:
+              type: string
+              description: A string that specifies the bind password for the LDAP database. This is a required property.
+            connectionSecurity:
+              type: string
+              enum: [None, TLS, StartTLS]
+              description: (Optional) A string that specifies the connection security type. Options are None, TLS, and StartTLS. The default value is None.
+            serversHostAndPort:
+              type: array
+              items:
+                type: string
+              description: An array of strings that specifies the LDAP server host name and port number (for example, ["ds1.example.com:389", "ds2.example.com:389"]).
+            userTypes:
+              type: array
+              description: (Optional) An array of the userTypes properties for the users to be provisioned in PingOne. userTypes specifies which user properties in PingOne correspond to the user properties in an external LDAP directory. You can use an LDAP browser to view the user properties in the external LDAP directory.
+              items:
+                type: object
+                properties:
+                  allowPasswordChanges:
+                    type: boolean
+                    description: (Optional) Defaults to false if this property isn't specified in the request. If false, the user cannot change the password in the remote LDAP directory. In this case, operations for forgotten passwords or resetting of passwords are not available to a user referencing this gateway.
+                  id:
+                    type: string
+                    description: (Optional) The UUID of the user type. This correlates to the password.external.gateway.userType.id User property.
+                  newUserLookup:
+                    type: object
+                    description: (Optional) The configurations for initially authenticating new users who will be migrated to PingOne. Note If there are multiple users having the same user name, only the first user processed is provisioned.
+                    properties:
+                      attributeMappings:
+                        type: array
+                        description: A list of objects supplying a mapping of PingOne attributes to external LDAP attributes. One of the entries must be a mapping for "username”. This is required for the PingOne user schema.
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              description: The PingOne username attribute. See Users properties for the complete list of PingOne user attributes.
+                            value:
+                              type: string
+                              description: A placeholder reference to the corresponding external LDAP attribute for name.
+                          required:
+                            - name
+                            - value
+                      ldapFilterPattern:
+                        type: string
+                        description: (Optional) The LDAP user search filter to use to match users against the entered user identifier at login. For example, (((uid=${identifier})(mail=${identifier})). Alternatively, this can be a search against the user directory.
+                      population:
+                        type: object
+                        description: (Optional) The PingOne population to use to create user entries during lookup.
+                        properties:
+                          id:
+                            type: string
+                            description: (Optional) The ID of the population to use to create user entries during lookup.
+                        required:
+                          - id
+                    required:
+                      - attributeMappings
+                required:
+                  - newUserLookup
+            validateTlsCertificates:
+              type: boolean
+              description: (Optional) A boolean that specifies whether or not to trust all SSL certificates (defaults to true). If this value is false, TLS certificates are not validated. When the value is set to true, only certificates that are signed by the default JVM CAs, or the CA certs that the customer has uploaded to the certificate service are trusted.
+            vendor:
+              type: string
+              description: A string that specifies the LDAP vendor. Options are PingDirectory, Microsoft Active Directory, Oracle Directory Server Enterprise Edition, Oracle Unified Directory, CA Directory, OpenDJ Directory, IBM (Tivoli) Security Directory Server, and LDAP v3 compliant Directory Server.
+          required:
+            - bindDN
+            - bindPassword
+            - userTypes
+            - vendor
+    GatewayCredential:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the auto-generated ID for this credential. This is the JWT's jti claim. This is a required property.
+        createdAt:
+          type: string
+          readOnly: true
+          description: A date that specifies the date the credential was created in Coordinated Universal Time (UTC). This is a required property.
+        lastUsedAt:
+          type: string
+          readOnly: true
+          description: A date that specifies the date the credential was last used in UTC. This is a required property.
+        token:
+          type: string
+          readOnly: true
+          description: A string that specifies the signed JWT for the gateway credential. This property is present only when the gateway credential is created.
+    GatewayInstance:
+      type: object
+      properties:
+        connected:
+          type: boolean
+          description: A boolean that specifies whether or not the gateway instance has one or more connections. This is a required property.
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the instance ID of the gateway. The gateway instance ID is created by the gateway when it starts up.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        gateway:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: A string that specifies the gateway ID.
+        credential:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: A string that specifies the credential ID.
+        currentErrors:
+          type: array
+          description: An array of strings that lists the messages that are maintained by the gateway instance.
+          items:
+            type: string
+        healthStatus:
+          type: string
+          enum: [HEALTHY, DEGRADED, UNHEALTHY]
+          description: An enumeration that specifies whether or not the gateway is in a healthy state. Options are HEALTHY, DEGRADED, UNHEALTHY. This is a required property.
+        hostname:
+          type: string
+          description: A string that specifies the hostname of the container running in the customer’s infrastructure. This is a required property.
+        initializedAt:
+          type: string
+          description: A timestamp that specifies when gateway was initialized (when the first connect to PingOne was made).
+        lastReportedAt:
+          type: string
+          description: A timestamp that specifies the last reported timestamp, heartbeat, or other message.
+        version:
+          type: object
+          description: An object containing the version of the gateway running for the instance.
+          properties:
+            versionNumber:
+              type: string
+              description: A string that specifies the version number of the gateway running for the instance. This is a required property.
+            updateStatus:
+              type: string
+              description: >-
+                An enumeration that specifies one of the following values:
+                AT_LATEST: The gateway instance's version is at or after the supported version marked latest.
+                UPGRADE_AVAILABLE: The gateway instance's version is at the supported version that is marked recommended but there is a later supported version marked recommended.
+                UPGRADE_RECOMMENDED: The gateway instance's version is at a known version but the version is not marked as recommended or latest. The version has greater than 30 days support.
+                UPGRADE_REQUIRED: The gateway instance's version is at a known version but the version is not marked as recommended or latest. The version has support ending within the next month.
+                NOT_SUPPORTED: The gateway instance's version is not known or supported.
+              enum: [AT_LATEST, UPGRADE_AVAILABLE, UPGRADE_RECOMMENDED, UPGRADE_REQUIRED, NOT_SUPPORTED]
+        busyPercentage:
+          type: integer
+          description: An integer that specifies the gateway instance's busy percentage. When this percentage is high, then more instances should be added.
+        operationsPerSecond:
+          type: number
+          description: A number that specifies the recent throughput of the gateway instance.
+        responseTimeMillis:
+          type: number
+          description: A number that specifies the processing time of the gateway instance in milliseconds.
     Group:
       type: object
       properties:
@@ -1383,6 +1609,13 @@ components:
       properties:
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
+        gateway:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: A string that specifies the gateway ID.
         id:
           type: string
           readOnly: true
@@ -5819,6 +6052,7 @@ paths:
       tags:
         - Management APIs > Gateway Management > Gateways
       summary: READ All Gateways
+      operationId: readAllGateways
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -5839,11 +6073,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Management APIs > Gateway Management > Gateways
-      summary: CREATE Ping Federate Gateway
+      summary: CREATE Gateway
+      operationId: createGateway
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -5852,22 +6089,13 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              oneOf:
+                - $ref: '#/components/schemas/Gateway'
+                - $ref: '#/components/schemas/GatewayLDAP'
               example:
-                name: PING_FED-Gateway-Test
-                description: My gateway
+                name: PING_FED-Gateway
+                description: My PingFederate Gateway
                 type: PING_FEDERATE
-                enabled: true
-                vendor: PingDirectory
-                serversHostAndPort:
-                  - host1:389
-                  - host.domain.com:389
-                  - 10.10.10.10:636
-                  - 2001:0db8:85a3:0000:0000:8a2e:0370:7334:389
-                bindDN: cn=svc-account
-                bindPassword: password
-                searchBaseDN: o=example
-                userCorrelationFilterPattern: (|(uid=$username$)(mail=$username$))
       parameters:
         - name: envID
           in: path
@@ -5884,12 +6112,17 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Gateway'
+                  - $ref: '#/components/schemas/GatewayLDAP'
   /v1/environments/{envID}/gateways/{gatewayID}:
     get:
       tags:
         - Management APIs > Gateway Management > Gateways
       summary: READ One Gateway
+      operationId: readOneGateway
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -5915,11 +6148,16 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Gateway'
+                  - $ref: '#/components/schemas/GatewayLDAP'
     put:
       tags:
         - Management APIs > Gateway Management > Gateways
       summary: UPDATE Gateway
+      operationId: updateGateway
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -5928,22 +6166,13 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              oneOf:
+                - $ref: '#/components/schemas/Gateway'
+                - $ref: '#/components/schemas/GatewayLDAP'
               example:
-                name: LDAP-Gateway
-                description: My LDAP gateway
-                type: LDAP
-                enabled: true
-                vendor: PingDirectory
-                serversHostAndPort:
-                  - host1:389
-                  - host.domain.com:389
-                  - 10.10.10.10:636
-                  - 2001:0db8:85a3:0000:0000:8a2e:0370:7334:389
-                bindDN: cn=svc-account
-                bindPassword: password
-                searchBaseDN: o=example
-                userCorrelationFilterPattern: (|(uid=$username$)(mail=$username$))
+                name: PING_FED-Gateway
+                description: My PingFederate Gateway
+                type: PING_FEDERATE
       parameters:
         - name: envID
           in: path
@@ -5965,11 +6194,16 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Gateway'
+                  - $ref: '#/components/schemas/GatewayLDAP'
     delete:
       tags:
         - Management APIs > Gateway Management > Gateways
       summary: DELETE Gateway
+      operationId: deleteGateway
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -5999,6 +6233,7 @@ paths:
       tags:
         - Management APIs > Gateway Management > Gateway Credentials
       summary: CREATE Gateway Credentials
+      operationId: createGatewayCredential
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -6024,12 +6259,15 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayCredential'
   /v1/environments/{envID}/gateways/{gatewayID}/credentials/{credentialID}:
     delete:
       tags:
         - Management APIs > Gateway Management > Gateway Credentials
       summary: DELETE Gateway Credentials
+      operationId: deleteGatewayCredential
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -6064,6 +6302,7 @@ paths:
       tags:
         - Management APIs > Gateway Management > Gateway Instances
       summary: READ All Gateway Instances
+      operationId: readAllGatewayInstances
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -6089,12 +6328,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/environments/{envID}/gateways/{gatewayID}/instances/{instanceID}:
     get:
       tags:
         - Management APIs > Gateway Management > Gateway Instances
       summary: READ One Gateway Instance
+      operationId: readOneGatewayInstance
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -6125,12 +6367,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayInstance'
   /v1/environments/{envID}/gateways/{gatewayID}/roleAssignments:
     get:
       tags:
         - Management APIs > Gateway Management > Gateway Role Assignments
       summary: READ Gateway Role Assignments
+      operationId: readGatewayRoleAssignments
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -6156,11 +6401,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Management APIs > Gateway Management > Gateway Role Assignments
       summary: CREATE Gateway Role Assignments
+      operationId: createGatewayRoleAssignment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -6169,7 +6417,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/RoleAssignment'
               example:
                 role:
                   id: '{{envRoleID}}'
@@ -6197,12 +6445,15 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
-  /v1/environments/{envID}/gateways/{gatewayID}/roleAssignments/{gatewayRoleAssignmentsID}:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAssignment'
+  /v1/environments/{envID}/gateways/{gatewayID}/roleAssignments/{gatewayRoleAssignmentID}:
     get:
       tags:
         - Management APIs > Gateway Management > Gateway Role Assignments
       summary: READ One Gateway Role Assignment
+      operationId: readOneGatewayRoleAssignment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -6218,7 +6469,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: gatewayRoleAssignmentsID
+        - name: gatewayRoleAssignmentID
           in: path
           schema:
             type: string
@@ -6233,11 +6484,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAssignment'
     put:
       tags:
         - Management APIs > Gateway Management > Gateway Role Assignments
       summary: UPDATE Gateway Role Assignments
+      operationId: updateGatewayRoleAssignment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -6264,7 +6518,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: gatewayRoleAssignmentsID
+        - name: gatewayRoleAssignmentID
           in: path
           schema:
             type: string
@@ -6279,11 +6533,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAssignment'
     delete:
       tags:
         - Management APIs > Gateway Management > Gateway Role Assignments
       summary: DELETE Gateway Role Assignment
+      operationId: deleteGatewayRoleAssignment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -6299,7 +6556,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: gatewayRoleAssignmentsID
+        - name: gatewayRoleAssignmentID
           in: path
           schema:
             type: string
