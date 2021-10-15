@@ -636,6 +636,7 @@ components:
       required:
         - name
         - type
+        - enabled
     GatewayLDAP:
       allOf:
         - $ref: '#/components/schemas/Gateway'
@@ -725,11 +726,25 @@ components:
           type: string
           readOnly: true
           description: A date that specifies the date the credential was created in Coordinated Universal Time (UTC). This is a required property.
+        gatewayType:
+          type: string
+          enum: [LDAP, PING_FEDERATE, PING_INTELLIGENCE]
+          readOnly: true
+          description: A date that specifies the date the credential was created in Coordinated Universal Time (UTC). This is a required property.
         lastUsedAt:
           type: string
           readOnly: true
           description: A date that specifies the date the credential was last used in UTC. This is a required property.
-        token:
+        consoleUrl:
+          type: string
+          readOnly: true
+        apiUrl:
+          type: string
+          readOnly: true
+        authUrl:
+          type: string
+          readOnly: true
+        credential:
           type: string
           readOnly: true
           description: A string that specifies the signed JWT for the gateway credential. This property is present only when the gateway credential is created.
