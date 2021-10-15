@@ -3831,6 +3831,7 @@ paths:
       tags:
         - Management APIs > Applications > Application Role Assignments
       summary: READ Application Role Assignments
+      operationId: readApplicationRoleAssignments
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -3856,11 +3857,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Management APIs > Applications > Application Role Assignments
       summary: CREATE Application Role Assignments
+      operationId: createApplicationRoleAssignment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -3869,7 +3873,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/RoleAssignment'
               example:
                 role:
                   id: '{{roleID}}'
@@ -3897,12 +3901,15 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAssignment'
   /v1/environments/{envID}/applications/{appID}/roleAssignments/{roleAssignmentID}:
     get:
       tags:
         - Management APIs > Applications > Application Role Assignments
       summary: READ One Application Role Assignment
+      operationId: readOneApplicationRoleAssignment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -3933,11 +3940,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAssignment'
     delete:
       tags:
         - Management APIs > Applications > Application Role Assignments
       summary: DELETE Application Role Assignment
+      operationId: deleteApplicationRoleAssignment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -14284,7 +14294,7 @@ paths:
       tags:
         - Management APIs > Users > User Role Assignments
       summary: READ One Role Assignment
-      operationId: readOneRoleAssignment
+      operationId: readOneUserRoleAssignment
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
