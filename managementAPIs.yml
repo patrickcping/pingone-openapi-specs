@@ -1389,6 +1389,12 @@ components:
                 type: object
                 description: The condition logic that determines when a policy is evaluated to true and when it is evaluated to false.
                 properties:
+                  contains:
+                    type: string
+                  ipRange:
+                    type: array
+                    items:
+                      type: string
                   value:
                     type: string
                   equals:
@@ -1404,6 +1410,9 @@ components:
                           type: string
                         weight:
                           type: integer
+                      required:
+                        - value
+                        - weight
                   between:
                     type: object
                     properties:
@@ -1411,6 +1420,9 @@ components:
                         type: integer
                       maxScore:
                         type: integer
+                    required:
+                      - minScore
+                      - maxScore
               createdAt:
                 type: string
                 readOnly: true
@@ -1456,6 +1468,8 @@ components:
         type:
           type: string
           enum: [VALUE]
+        value:
+          type: string
       required:
         - level
     RiskPredictor:
