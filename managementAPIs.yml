@@ -98,6 +98,12 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Population'
+            pushCredentials:
+              type: array
+              items:
+                anyOf:
+                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
             resources:
               type: array
               items:
@@ -877,6 +883,68 @@ components:
           description: ID of the group to assign
       required:
        - id
+    Image:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        targets:
+          type: object
+          properties:
+            href:
+              type: string
+              readOnly: true
+              description: A string that specifies the URL or fully qualified path to the image source file.
+            id:
+              type: string
+              readOnly: true
+              description: A string that specifies the UUID of the target image.
+            type:
+              type: string
+              enum: [PNG, JPG, GIF]
+              readOnly: true
+              description: A string that specifies the type of format used for the image. Options are jpg, png, and gif.
+            width:
+              type: integer
+              readOnly: true
+              description: The width of the image (in pixels).
+            height:
+              type: integer
+              readOnly: true
+              description: The height of the image (in pixels).
+    MFAPushCredential:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [APNS, FCM]
+          description: A string that specifies the type of the push credentials. Mandatory. Valid values APNS, FCM
+        key:
+          type: string
+          description: A string that Apple uses as an identifier to identify an authentication key.  Mandatory.
+      required:
+        - type
+        - key
+    MFAPushCredentialAPNS:
+      allOf:
+        - $ref: '#/components/schemas/MFAPushCredential'
+        - type: object
+          properties:
+            teamId:
+              type: string
+              description: A string that Apple uses as an identifier to identify teams.
+            token:
+              type: string
+              description: A string that Apple uses as the authentication token signing key to securely connect to APNS. This is a p8 file with a private key format.
+          required:
+            - teamId
+            - token
+    MFAPushCredentialFCM:
+      $ref: '#/components/schemas/MFAPushCredential'
     Population:
       type: object
       properties:
@@ -1472,9 +1540,9 @@ components:
           description: Minimum and maximum boundaries
           properties:
             minScore:
-              type: integer
+              type: number
             maxScore:
-              type: integer
+              type: number
           required:
             - minScore
             - maxScore
@@ -4178,6 +4246,7 @@ paths:
       tags:
         - Management APIs > Applications > Application MFA Push Credentials
       summary: READ All MFA Push Credentials
+      operationId: readAllMFAPushCredentials
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -4203,11 +4272,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Management APIs > Applications > Application MFA Push Credentials
-      summary: CREATE MFA Push Credential (FCM)
+      summary: CREATE MFA Push Credential
+      operationId: createMFAPushCredential
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -4216,7 +4288,9 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              oneOf:
+                - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                - $ref: '#/components/schemas/MFAPushCredentialFCM'
               example:
                 type: FCM
                 key: key.value
@@ -4241,12 +4315,17 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
   /v1/environments/{envID}/applications/{appID}/pushCredentials/{pushCredID}:
     get:
       tags:
         - Management APIs > Applications > Application MFA Push Credentials
       summary: READ One MFA Push Credential
+      operationId: readOneMFAPushCredential
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -4277,11 +4356,16 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
     put:
       tags:
         - Management APIs > Applications > Application MFA Push Credentials
       summary: UPDATE MFA Push Credential
+      operationId: updateMFAPushCredential
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -4290,7 +4374,9 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              oneOf:
+                - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                - $ref: '#/components/schemas/MFAPushCredentialFCM'
               example:
                 type: APNS
                 key: key.value.updated
@@ -4325,11 +4411,16 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
     delete:
       tags:
         - Management APIs > Applications > Application MFA Push Credentials
       summary: DELETE MFA Push Credential
+      operationId: deleteMFAPushCredential
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -8322,10 +8413,17 @@ paths:
       tags:
         - Management APIs > Images
       summary: CREATE Image
+      operationId: createImage
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
         href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
       parameters:
         - name: Content-Type
           in: header
@@ -8352,12 +8450,15 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
   /v1/environments/{envID}/images/{imgID}:
     get:
       tags:
         - Management APIs > Images
       summary: READ Image
+      operationId: readImage
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
@@ -8383,11 +8484,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
     delete:
       tags:
         - Management APIs > Images
       summary: DELETE Image
+      operationId: deleteImage
       description: >-
         By design, PingOne requests solely comprise this collection. For
         complete documentation, direct a browser to <a
