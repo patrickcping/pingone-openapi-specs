@@ -483,6 +483,10 @@ components:
     BillOfMaterials:
       type: object
       properties:
+        solutionType:
+          type: string
+          enum: [WORKFORCE, CUSTOMER]
+          description: The solution set of the bill of materials
         createdAt:
           type: string
           description: The time the resource was created.
@@ -503,8 +507,8 @@ components:
                 description: A string that specifies the BOM ID
               type:
                 type: string
-                enum: [PING_ONE_MFA, PING_ONE_RISK, PING_ONE_VERIFY, PING_ONE_BASE, PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_DATA_SYNC, PING_DATA_GOVERNANCE, PING_ONE_FOR_ENTERPRISE, PING_ID, PING_ID_SDK, PING_INTELLIGENCE, PING_CENTRAL]
-                description: A string that specifies the Ping Identity product type. Options for PingOne platform products are PING_ONE_MFA, PING_ONE_RISK, PING_ONE_VERIFY, and PING_ONE_BASE. The PING_ONE_BASE product represents the default set of services that an environment can use on the PingOne platform. Options for other Ping Identity products are PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_DATA_SYNC, PING_DATA_GOVERNANCE, PING_ONE_FOR_ENTERPRISE, PING_ID, PING_ID_SDK, PING_INTELLIGENCE, and PING_CENTRAL
+                enum: [PING_ONE_MFA, PING_ONE_ORCHESTRATE, PING_ONE_RISK, PING_ONE_VERIFY, PING_ONE_CREDENTIALS, PING_ONE_AUTHORIZE, PING_ONE_BASE, PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_AUTHORIZE, PING_ID, PING_INTELLIGENCE, PING_CENTRAL]
+                description: A string that specifies the Ping Identity product type. Options for PingOne platform products are PING_ONE_ORCHESTRATE, PING_ONE_MFA, PING_ONE_RISK, PING_ONE_VERIFY, PING_ONE_CREDENTIALS, PING_ONE_AUTHORIZE and PING_ONE_BASE. The PING_ONE_BASE product represents the default set of services that an environment can use on the PingOne platform. Options for other Ping Identity products are PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_AUTHORIZE, PING_ID, PING_INTELLIGENCE, and PING_CENTRAL
               description:
                 type: string
                 description: A string that specifies the description of the product or standalone service
@@ -517,6 +521,13 @@ components:
                     description: Primary console link for certain products
                 required:
                   - href
+              deployment:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The ID of the PingID deployment
+                    readOnly: true
               bookmarks:
                 type: array
                 description: Optional array of custom bookmarks. Maximum of five bookmarks per product.
@@ -534,6 +545,8 @@ components:
                     - href
             required:
               - type
+      required:
+        - products
     Environment:
       type: object
       properties:
@@ -962,6 +975,15 @@ components:
         name:
           type: string
           description: A string that specifies the population name, which must be provided and must be unique within an environment.
+        passwordPolicy:
+          type: object
+          description: The object reference to the password policy resource. This is an optional property.
+          properties:
+            id:
+              type: string
+              description: The ID of the password policy that is used for this population. If absent, the environment's default is used. Requried if `passwordPolicy` is used.
+          required:
+            - id
         updatedAt:
           type: string
           description: The time the resource was last updated.
