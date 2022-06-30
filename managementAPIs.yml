@@ -896,6 +896,14 @@ components:
           description: ID of the group to assign
       required:
        - id
+    GroupNesting:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the group to nest
+      required:
+       - id
     Image:
       type: object
       properties:
@@ -6822,6 +6830,115 @@ paths:
             type: string
           required: true
         - name: groupID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
+  /v1/environments/{envID}/groups/{groupID}/memberOfGroups:
+    get:
+      tags:
+        - Management APIs > Groups
+      summary: READ Group Nesting
+      operationId: readGroupNesting
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: groupID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Management APIs > Groups
+      summary: CREATE Group Nesting
+      operationId: createGroupNesting
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupNesting'
+              example:
+                id: e1d6564e-bc8e-443c-ba01-70af86cf06e4
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: groupID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+  /v1/environments/{envID}/groups/{groupID}/memberOfGroups/{nestedGroupID}:
+    delete:
+      tags:
+        - Management APIs > Groups
+      summary: DELETE Group Nesting
+      operationId: deleteGroupNesting
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: groupID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: nestedGroupID
           in: path
           schema:
             type: string
