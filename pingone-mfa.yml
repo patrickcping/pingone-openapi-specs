@@ -1,0 +1,1042 @@
+openapi: 3.0.0
+info:
+  title: PingOne Platform API - PingOne MFA
+  description: The PingOne Platform API covering the PingOne MFA service
+  version: 1.0.0
+externalDocs:
+  url: https://apidocs.pingidentity.com/pingone/platform/v1/api/#pingone-mfa
+  description: PingOne Platform API Reference - PingOne MFA APIs
+servers:
+  - url: https://api.pingone.{suffix}
+    description: PingOne Platform API Endpoint
+    variables:
+      suffix:
+        enum:
+          - 'eu'
+          - 'com'
+          - 'asia'
+          - 'ca'
+        default: 'eu'
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: OAuth bearer token (see documentation)
+  schemas:
+    P1Error:
+      type: object
+      properties: 
+        id:
+          type: string
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              target:
+                type: string
+              message:
+                type: string
+    EntityArray:
+      type: object
+      properties:
+        '_embedded':
+          type: object
+          properties:
+            pushCredentials:
+              type: array
+              items:
+                anyOf:
+                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
+        count:
+          type: number
+        size:
+          type: number
+    ObjectEnvironment:
+      type: object
+      readOnly: true
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the environment associated with the object.
+    MFAPushCredential:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [APNS, FCM]
+          description: A string that specifies the type of the push credentials. Mandatory. Valid values APNS, FCM
+        key:
+          type: string
+          description: A string that Apple uses as an identifier to identify an authentication key.  Mandatory.
+      required:
+        - type
+        - key
+    MFAPushCredentialAPNS:
+      allOf:
+        - $ref: '#/components/schemas/MFAPushCredential'
+        - type: object
+          properties:
+            teamId:
+              type: string
+              description: A string that Apple uses as an identifier to identify teams.
+            token:
+              type: string
+              description: A string that Apple uses as the authentication token signing key to securely connect to APNS. This is a p8 file with a private key format.
+          required:
+            - teamId
+            - token
+    MFAPushCredentialFCM:
+      $ref: '#/components/schemas/MFAPushCredential'
+security:
+  - bearer: []
+tags:
+  - name: MFA Settings
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+  - name: Users > MFA Devices
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+  - name: Users > MFA Devices > FIDO2 Biometrics Devices
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+  - name: Users > Enable Users MFA
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+  - name: Users > MFA Pairing Keys
+    description: >-
+      By design, PingOne requests solely comprise this collection. For complete
+      documentation, direct a browser to <a
+      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+paths:
+  /v1/environments/{envID}/applications/{appID}/pushCredentials:
+    get:
+      tags:
+        - Applications > Application MFA Push Credentials
+      summary: READ All MFA Push Credentials
+      operationId: readAllMFAPushCredentials
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: appID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Applications > Application MFA Push Credentials
+      summary: CREATE MFA Push Credential
+      operationId: createMFAPushCredential
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                - $ref: '#/components/schemas/MFAPushCredentialFCM'
+              example:
+                type: FCM
+                key: key.value
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: appID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
+  /v1/environments/{envID}/applications/{appID}/pushCredentials/{pushCredID}:
+    get:
+      tags:
+        - Applications > Application MFA Push Credentials
+      summary: READ One MFA Push Credential
+      operationId: readOneMFAPushCredential
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: appID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: pushCredID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
+    put:
+      tags:
+        - Applications > Application MFA Push Credentials
+      summary: UPDATE MFA Push Credential
+      operationId: updateMFAPushCredential
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                - $ref: '#/components/schemas/MFAPushCredentialFCM'
+              example:
+                type: APNS
+                key: key.value.updated
+                teamId: team.id.updated
+                token: |-
+                  -----BEGIN PRIVATE KEY-----
+                  MIGTAgEA****7HUikGZU
+                  -----END PRIVATE KEY-----
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: appID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: pushCredID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
+    delete:
+      tags:
+        - Applications > Application MFA Push Credentials
+      summary: DELETE MFA Push Credential
+      operationId: deleteMFAPushCredential
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{accessToken}}
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: appID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: pushCredID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
+  /v1/environments/{envID}/deviceAuthenticationPolicy:
+    get:
+      tags:
+        - Device Authentication Policy
+      summary: READ Device Authentication Policy
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/environments/{envID}/deviceAuthenticationPolicy/{deviceAuthPolicyID}:
+    put:
+      tags:
+        - Device Authentication Policy
+      summary: UPDATE Device Authentication Policy
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Environment Policy
+                sms:
+                  enabled: true
+                  otp:
+                    failure:
+                      count: 3
+                      coolDown:
+                        duration: 0
+                        timeUnit: MINUTES
+                    lifeTime:
+                      duration: 30
+                      timeUnit: MINUTES
+                email:
+                  enabled: true
+                  otp:
+                    failure:
+                      count: 3
+                      coolDown:
+                        duration: 0
+                        timeUnit: MINUTES
+                    lifeTime:
+                      duration: 30
+                      timeUnit: MINUTES
+                mobile:
+                  enabled: true
+                  otp:
+                    failure:
+                      count: 3
+                      coolDown:
+                        duration: 2
+                        timeUnit: MINUTES
+                    window:
+                      stepSize:
+                        duration: 30
+                        timeUnit: SECONDS
+                totp:
+                  enabled: true
+                  otp:
+                    failure:
+                      count: 3
+                      coolDown:
+                        duration: 2
+                        timeUnit: MINUTES
+                voice:
+                  enabled: true
+                  otp:
+                    failure:
+                      count: 3
+                      coolDown:
+                        duration: 0
+                        timeUnit: MINUTES
+                    lifeTime:
+                      duration: 30
+                      timeUnit: MINUTES
+                securityKey:
+                  enabled: true
+                forSignOnPolicy: true
+                platform:
+                  enabled: true
+                default: false
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: deviceAuthPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/environments/{envID}/mfaSettings:
+    get:
+      tags:
+        - MFA Settings
+      summary: READ MFA Settings
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - MFA Settings
+      summary: UPDATE MFA Settings
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                pairing:
+                  maxAllowedDevices: 10
+                lockout:
+                  failureCount: 8
+                  durationSeconds: 600
+                authentication:
+                  deviceSelection: DEFAULT_TO_FIRST
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - MFA Settings
+      summary: RESET MFA Settings
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
+  /v1/environments/{envID}/users/{userID}/devices:
+    post:
+      tags:
+        - Users > MFA Devices
+      summary: SET Device Order
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                order:
+                  - id: '{{deviceID}}'
+                  - id: '{{deviceID2}}'
+                  - id: '{{deviceID3}}'
+                  - id: '{{deviceID4}}'
+                  - id: '{{deviceID5}}'
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/vnd.pingidentity.devices.reorder+json
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Users > MFA Devices
+      summary: READ All MFA User Devices
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Users > MFA Devices
+      summary: DELETE Device Order
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/vnd.pingidentity.devices.order.remove+json
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
+  /v1/environments/{envID}/users/{userID}/devices/{deviceID}:
+    post:
+      tags:
+        - Users > MFA Devices
+      summary: ACTIVATE MFA User Device
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                otp: xxxxxx
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/vnd.pingidentity.device.activate+json
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: deviceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Users > MFA Devices
+      summary: READ One MFA User Device
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: deviceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Users > MFA Devices
+      summary: DELETE MFA User Device
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: deviceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
+  /v1/environments/{envID}/users/{userID}/devices/{deviceID}/nickname:
+    put:
+      tags:
+        - Users > MFA Devices
+      summary: UPDATE Device Nickname
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                nickname: My phone
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: deviceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/environments/{envID}/users/{userID}/devices/{deviceID}/logs:
+    put:
+      tags:
+        - Users > MFA Devices
+      summary: SEND MFA Device Logs
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                status: PENDING
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: deviceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/environments/{envID}/users/{userID}/mfaEnabled:
+    get:
+      tags:
+        - Users > Enable Users MFA
+      summary: READ User MFA Enabled
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - Users > Enable Users MFA
+      summary: UPDATE User MFA Enabled
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                mfaEnabled: true
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /v1/environments/{envID}/users/{userID}/pairingKeys/{pairingKeyID}:
+    get:
+      tags:
+        - Users > MFA Pairing Keys
+      summary: READ One MFA Pairing Key
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: pairingKeyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Users > MFA Pairing Keys
+      summary: DELETE MFA Pairing Key
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: pairingKeyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
+  /v1/environments/{envID}/users/{userID}/pairingKeys:
+    post:
+      tags:
+        - Users > MFA Pairing Keys
+      summary: CREATE MFA Pairing Key
+      description: >-
+        By design, PingOne requests solely comprise this collection. For
+        complete documentation, direct a browser to <a
+        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                applications:
+                  - id: '{{appID}}'
+      parameters:
+        - name: envID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: userID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '201':
+          description: Successful response
+          content:
+            application/json: {}
