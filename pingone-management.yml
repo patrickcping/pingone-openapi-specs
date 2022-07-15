@@ -8585,7 +8585,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Population'
-  /v1/environments/{environmentID}/populations/{popID}:
+  /v1/environments/{environmentID}/populations/{populationID}:
     get:
       tags:
         - Populations
@@ -8597,7 +8597,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: popID
+        - name: populationID
           in: path
           schema:
             type: string
@@ -8631,7 +8631,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: popID
+        - name: populationID
           in: path
           schema:
             type: string
@@ -8660,7 +8660,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: popID
+        - name: populationID
           in: path
           schema:
             type: string
@@ -9805,7 +9805,7 @@ paths:
                     - USER.CREATED
                     - USER.UPDATED
                   includedPopulations:
-                    - id: '{{popID}}'
+                    - id: '{{populationID}}'
                   includedApplications:
                     - id: '{{applicationID}}'
                 httpEndpoint:
@@ -9896,7 +9896,7 @@ paths:
                     - USER.CREATED
                     - USER.MODIFIED
                   includedPopulations:
-                    - id: '{popID}'
+                    - id: '{populationID}'
                   includedApplications:
                     - id: '{applicationID}'
                 httpEndpoint:
@@ -10061,7 +10061,7 @@ paths:
                   given: Test
                   family: User
                 population:
-                  id: '{{popID}}'
+                  id: '{{populationID}}'
                 username: import-user_{{$timestamp}}
                 password:
                   value: <This can be plain text or an acceptable hashed value.>
