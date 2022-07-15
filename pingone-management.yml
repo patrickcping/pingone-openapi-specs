@@ -1564,7 +1564,6 @@ components:
                 description: ID of the identity provider that can be used for the social login sign-on flow.
             required:
               - id
-      required:
     SignOnPolicyActionMFA:
       type: object
       properties:
