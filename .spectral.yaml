@@ -1,5 +1,6 @@
+extends: "spectral:oas"
 rules:
-  must-have-operationId:
+  operation-operationId:
     description: GET Path requests should have an operationId
     given: $.paths[*].[post,patch,put,delete,get]
     severity: error
