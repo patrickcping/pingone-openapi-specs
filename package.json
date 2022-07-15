@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/patrickcping/pingone-openapi-specs#readme",
   "devDependencies": {
-    "@apidevtools/swagger-cli": "^4.0.4"
+    "@apidevtools/swagger-cli": "^4.0.4",
+    "@stoplight/spectral-cli": "^6.4.1"
   }
 }

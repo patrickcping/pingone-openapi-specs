@@ -1,0 +1,64 @@
+rules:
+  must-have-operationId:
+    description: GET Path requests should have an operationId
+    given: $.paths[*].[post,patch,put,delete,get]
+    severity: error
+    then:
+      field: operationId
+      function: truthy
+
+  must-have-response-schema:
+    description: POST, PATCH, PUT Path requests should have a response schema
+    given: $.paths[*].[post,patch,put].responses.[201,200].content.application/json
+    severity: error
+    then:
+      field: schema
+      function: truthy
+
+  must-have-400:
+    description: POST, PATCH, PUT requests should have a 400 error
+    given: $.paths[*].[post,patch,put].responses
+    severity: error
+    then:
+      field: '400'
+      function: truthy
+
+  must-have-401:
+    description: All requests should have a 401 error
+    given: $.paths[*].[*].responses
+    severity: error
+    then:
+      field: '401'
+      function: truthy
+    
+  must-have-403:
+    description: All requests should have a 403 error
+    given: $.paths[*].[*].responses
+    severity: error
+    then:
+      field: '403'
+      function: truthy
+
+  must-have-405:
+    description: POST requests should have a 405 error
+    given: $.paths[*].post.responses
+    severity: error
+    then:
+      field: '405'
+      function: truthy
+
+  must-have-429:
+    description: All requests should have a 429 error
+    given: $.paths[*].[*].responses
+    severity: error
+    then:
+      field: '429'
+      function: truthy
+
+  must-have-500:
+    description: All requests should have a 500 error
+    given: $.paths[*].[*].responses
+    severity: error
+    then:
+      field: '500'
+      function: truthy

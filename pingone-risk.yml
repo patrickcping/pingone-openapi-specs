@@ -772,8 +772,38 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '405':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -797,7 +827,25 @@ paths:
           required: true
       responses:
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -827,7 +875,25 @@ paths:
           required: true
       responses:
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -912,8 +978,32 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -942,7 +1032,25 @@ paths:
           required: true
       responses:
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -1044,8 +1152,38 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '405':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -1075,7 +1213,25 @@ paths:
           required: true
       responses:
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -1111,8 +1267,32 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -1169,8 +1349,38 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '405':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -1194,7 +1404,25 @@ paths:
           required: true
       responses:
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -1224,7 +1452,25 @@ paths:
           required: true
       responses:
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -1285,8 +1531,32 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
@@ -1315,7 +1585,25 @@ paths:
           required: true
       responses:
         '401':
-          description: Unauthorised
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
           content:
             application/json:
               schema:
