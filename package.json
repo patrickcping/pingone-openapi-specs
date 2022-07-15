@@ -1,0 +1,23 @@
+{
+  "name": "pingone-openapi-specs",
+  "version": "0.1.0",
+  "description": "PingOne API OpenAPI 3 Specifications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "validate": "./node_modules/@apidevtools/swagger-cli/bin/swagger-cli.js validate pingone-management.yml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patrickcping/pingone-openapi-specs.git"
+  },
+  "author": "Patrick Cowland",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/patrickcping/pingone-openapi-specs/issues"
+  },
+  "homepage": "https://github.com/patrickcping/pingone-openapi-specs#readme",
+  "devDependencies": {
+    "@apidevtools/swagger-cli": "^4.0.4"
+  }
+}
