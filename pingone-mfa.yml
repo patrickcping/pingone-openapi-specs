@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: PingOne Platform API - PingOne MFA
   description: The PingOne Platform API covering the PingOne MFA service
-  version: 1.0.0
+  version: '2021-10-17'
 externalDocs:
   url: https://apidocs.pingidentity.com/pingone/platform/v1/api/#pingone-mfa
   description: PingOne Platform API Reference - PingOne MFA APIs
@@ -25,6 +25,61 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
+    EntityArray:
+      type: object
+      properties:
+        '_embedded':
+          type: object
+          properties:
+            pushCredentials:
+              type: array
+              items:
+                anyOf:
+                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
+        count:
+          type: number
+        size:
+          type: number
+    EnumMFAPushCredentialAttrType:
+      type: string
+      enum: [APNS, FCM]
+      description: A string that specifies the type of the push credentials. Mandatory. Valid values APNS, FCM
+    MFAPushCredential:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/EnumMFAPushCredentialAttrType'
+        key:
+          type: string
+          description: A string that Apple uses as an identifier to identify an authentication key.  Mandatory.
+      required:
+        - type
+        - key
+    MFAPushCredentialAPNS:
+      allOf:
+        - $ref: '#/components/schemas/MFAPushCredential'
+        - type: object
+          properties:
+            teamId:
+              type: string
+              description: A string that Apple uses as an identifier to identify teams.
+            token:
+              type: string
+              description: A string that Apple uses as the authentication token signing key to securely connect to APNS. This is a p8 file with a private key format.
+          required:
+            - teamId
+            - token
+    MFAPushCredentialFCM:
+      $ref: '#/components/schemas/MFAPushCredential'
+    ObjectEnvironment:
+      type: object
+      readOnly: true
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the environment associated with the object.
     P1Error:
       type: object
       properties: 
@@ -73,59 +128,6 @@ components:
                   maximumValue:
                     description: The maximum value allowed for the request.
                     type: integer
-    EntityArray:
-      type: object
-      properties:
-        '_embedded':
-          type: object
-          properties:
-            pushCredentials:
-              type: array
-              items:
-                anyOf:
-                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
-                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
-        count:
-          type: number
-        size:
-          type: number
-    ObjectEnvironment:
-      type: object
-      readOnly: true
-      properties:
-        id:
-          type: string
-          readOnly: true
-          description: A string that specifies the environment associated with the object.
-    MFAPushCredential:
-      type: object
-      properties:
-        type:
-          type: string
-          enum: [APNS, FCM]
-          description: A string that specifies the type of the push credentials. Mandatory. Valid values APNS, FCM
-        key:
-          type: string
-          description: A string that Apple uses as an identifier to identify an authentication key.  Mandatory.
-      required:
-        - type
-        - key
-    MFAPushCredentialAPNS:
-      allOf:
-        - $ref: '#/components/schemas/MFAPushCredential'
-        - type: object
-          properties:
-            teamId:
-              type: string
-              description: A string that Apple uses as an identifier to identify teams.
-            token:
-              type: string
-              description: A string that Apple uses as the authentication token signing key to securely connect to APNS. This is a p8 file with a private key format.
-          required:
-            - teamId
-            - token
-    MFAPushCredentialFCM:
-      $ref: '#/components/schemas/MFAPushCredential'
 security:
   - bearer: []
 tags:

@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: PingOne Platform API - SSO and Base
   description: The PingOne Platform API covering the base and SSO services (otherwise known as the Management APIs)
-  version: 1.0.0
+  version: '2022-07-14'
 externalDocs:
   url: https://apidocs.pingidentity.com/pingone/platform/v1/api/#management-apis
   description: PingOne Platform API Reference - Management APIs
@@ -25,54 +25,532 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
-    P1Error:
+    EnumApplicationOIDCGrantType:
+      type: string
+      enum: [AUTHORIZATION_CODE, IMPLICIT, REFRESH_TOKEN, CLIENT_CREDENTIALS]
+    EnumApplicationOIDCPKCEOption:
+      type: string
+      enum: [OPTIONAL, REQUIRED, S256_REQUIRED]
+      description: A string that specifies how PKCE request parameters are handled on the authorize request. Options are OPTIONAL PKCE code_challenge is optional and any code challenge method is acceptable. REQUIRED PKCE code_challenge is required and any code challenge method is acceptable. S256_REQUIRED PKCE code_challege is required and the code_challenge_method must be S256.
+    EnumApplicationOIDCResponseType:
+      type: string
+      enum: [TOKEN, ID_TOKEN, CODE]
+    EnumApplicationOIDCTokenAuthMethod:
+      type: string
+      enum: [NONE, CLIENT_SECRET_BASIC, CLIENT_SECRET_POST]
+      description: A string that specifies the client authentication methods supported by the token endpoint.
+    EnumApplicationProtocol:
+      type: string
+      enum: [OPENID_CONNECT, SAML]
+      description: A string that specifies the protocol for the Application.
+    EnumApplicationSAMLSloBinding:
+      type: string
+      enum: [HTTP_REDIRECT, HTTP_POST]
+      description: A string that specifies the binding protocol to be used for the logout response. Options are HTTP_REDIRECT or HTTP_POST. The default is HTTP_POST; existing configurations with no data default to HTTP_POST.
+    EnumApplicationTags:
+      type: string
+      enum: [PING_FED_CONNECTION_INTEGRATION]
+    EnumApplicationType:
+      type: string
+      enum: [WEB_APP, NATIVE_APP, SINGLE_PAGE_APP, WORKER, SERVICE, CUSTOM_APP]
+      description: A string that specifies the type associated with the application. This is a required property. Options are WEB_APP, NATIVE_APP, SINGLE_PAGE_APP, and WORKER.
+    EnumAttributeMappingType:
+      type: string
+      enum: [CORE, SCOPE, CUSTOM]
+      description: A string that specifies the mapping type of the attribute. Options are CORE, SCOPE, and CUSTOM. The CORE and SCOPE mapping types are for reserved attributes managed by the API and cannot be removed. Attribute values for these mapping types can be updated. The CUSTOM mapping type is for user-defined attributes. Attributes of this type can be updated and deleted.
+    EnumEnvironmentType:
+      type: string
+      enum: [PRODUCTION, SANDBOX]
+      description: A string that specifies the type of environment to use.
+    EnumGatewayLDAPSecurity:
+      type: string
+      enum: [None, TLS, StartTLS]
+      description: (Optional) A string that specifies the connection security type. Options are None, TLS, and StartTLS. The default value is None.
+    EnumGatewayType:
+      type: string
+      enum: [LDAP, PING_FEDERATE, PING_INTELLIGENCE]
+      description: A string that specifies the type of gateway resource. Options are LDAP, PING_FEDERATE and PING_INTELLIGENCE. This is a required property.
+    EnumHealthStatus:
+      type: string
+      enum: [HEALTHY, DEGRADED, UNHEALTHY]
+      description: An enumeration that specifies whether or not the gateway is in a healthy state.
+    EnumIdentityProvider:
+      type: string
+      enum: [FACEBOOK, GOOGLE, LINKEDIN, APPLE, TWITTER, AMAZON, YAHOO, MICROSOFT, PAYPAL, GITHUB, OPENID_CONNECT, SAML, PING_ONE]
+      description: A string that identifies the type of identity provider used to authenticate the user. The default value of `PING_ONE` is set when a value for identityProvider.id is not provided. The `PING_ONE` value is the default for all pre-existing users. There is currently no search filter support for this attribute.
+    EnumImageFormat:
+      type: string
+      enum: [PNG, JPG, GIF]
+      description: A string that specifies the type of format used for the image. Options are jpg, png, and gif.
+    EnumOrganizationType:
+      type: string
+      enum: [PAID, TRIAL]
+      description: A string that specifies the organization type. If the organization has any paid licenses, the type property value is set to `PAID`. Otherwise, the property value is set to `TRIAL`.
+    EnumProductType:
+      type: string
+      enum: [PING_ONE_MFA, PING_ONE_ORCHESTRATE, PING_ONE_RISK, PING_ONE_VERIFY, PING_ONE_CREDENTIALS, PING_ONE_AUTHORIZE, PING_ONE_BASE, PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_AUTHORIZE, PING_ID, PING_INTELLIGENCE, PING_CENTRAL]
+      description: A string that specifies the Ping Identity product type. Options for PingOne platform products are PING_ONE_ORCHESTRATE, PING_ONE_MFA, PING_ONE_RISK, PING_ONE_VERIFY, PING_ONE_CREDENTIALS, PING_ONE_AUTHORIZE and PING_ONE_BASE. The PING_ONE_BASE product represents the default set of services that an environment can use on the PingOne platform. Options for other Ping Identity products are PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_AUTHORIZE, PING_ID, PING_INTELLIGENCE, and PING_CENTRAL
+    EnumRegionCode:
+      type: string
+      enum: [AP, CA, EU, NA]
+      description: A string that specifies the region in which this environment will be used. The value is set when the environment is created and cannot be updated.
+    EnumResourceAttributeType:
+      type: string
+      enum: [CORE, CUSTOM]
+      description: A string that specifies the type of resource attribute. Options are CORE - The claim is required and cannot not be removed., CUSTOM - The claim is not a CORE attribute. All created attributes are of this type.
+    EnumResourceType:
+      type: string
+      enum: [OPENID_CONNECT, PING_ONE_API, CUSTOM]
+      description: A string that specifies the type of resource. Options are OPENID_CONNECT, PING_ONE_API, and CUSTOM. Only the CUSTOM resource type can be created. OPENID_CONNECT specifies the built-in platform resource for OpenID Connect. PING_ONE_API specifies the built-in platform resource for PingOne.
+    EnumRoleName:
+      type: string
+      description: The name of the role
+      enum: ["Organization Admin",
+        "Environment Admin",
+        "Identity Data Admin",
+        "Client Application Developer",
+        "Identity Data Read Only",
+        "Configuration Read Only",
+        "PingFederate Administrator",
+        "PingFederate Expression Administrator",
+        "PingFederate Crypto Administrator",
+        "PingFederate User Administrator",
+        "PingFederate Auditor"]
+    EnumRoleAssignmentScopeType:
+      type: string
+      enum: [ORGANIZATION, ENVIRONMENT, POPULATION]
+      description: A string that specifies the type of resource defining the scope of the Role assignment.
+    EnumSchemaAttributeSchemaType:
+      type: string
+      enum: [ CORE, STANDARD, CUSTOM ]
+      description: A string that specifies the schema type of the attribute. It may be one of CORE, STANDARD or CUSTOM. Core and standard attributes are present out-of-the-box. Core attributes may not be updated or deleted. Standard attributes may not be deleted, but their mutable properties may be updated. Custom attributes may be deleted, and their mutable properties may be updated. New attributes are created with a schema type of CUSTOM.
+    EnumSchemaAttributeType:
+      type: string
+      enum: [ STRING, JSON, BOOLEAN, COMPLEX ]
+      description: A string that specifies the the type of the attribute. It may be one of STRING, JSON, BOOLEAN, or COMPLEX. If the type is not provided during creation, then it defaults to STRING. Complex and boolean attributes may not be created, but standard attributes of those types may be updated. JSON attributes are limited by size (total size must not exceed 16KB).
+    EnumSignOnPolicyExtraVerification:
+      type: string
+      enum: [disabled, permissive, restrictive]
+      default: disabled
+      description: |
+        Specifies the level of further verification when deviceAuthorization is enabled. The PingOne platform performs an extra verification check by sending a silent push notification to the customer native application, and receives a confirmation in return.  `extraVerification` can be one of the following levels:
+        `disabled` (default): The PingOne platform does not perform the extra verification check.
+        `permissive`: The PingOne platform performs the extra verification check. Upon timeout or failure to get a response from the native app, the MFA step is treated as successfully completed.
+        `restrictive`: The PingOne platform performs the extra verification check.The PingOne platform performs the extra verification check. Upon timeout or failure to get a response from the native app, the MFA step is treated as failed.
+    EnumSignOnPolicyNoDeviceMode:
+      type: string
+      enum: [BYPASS, BLOCK]
+      description: A string that specifies the device mode for the MFA flow. Options are `BYPASS` to allow MFA without a specified device, or `BLOCK` to block the MFA flow if no device is specified. To use this configuration option, the authorize request must include a signed `login_hint_token` property. For more information, see Authorize (Browserless and MFA Only Flows)
+    EnumSignOnPolicyType:
+      type: string
+      description: A string that specifies the type of action. Options are `LOGIN`, `MULTI_FACTOR_AUTHENTICATION`, `IDENTIFIER_FIRST`, `IDENTITY_PROVIDER` `AGREEMENT` and `PROGRESSIVE_PROFILING`.
+      enum: [LOGIN, MULTI_FACTOR_AUTHENTICATION, IDENTIFIER_FIRST, IDENTITY_PROVIDER, PROGRESSIVE_PROFILING, AGREEMENT]
+    EnumSolutionType:
+      type: string
+      enum: [WORKFORCE, CUSTOMER]
+      description: The solution set of the environment
+    EnumEnabledStatus:
+      type: string
+      enum: [ENABLED, DISABLED]
+      description: A string that specifies whether device integrity detection takes place on mobile devices, for the application's enrollment and authentication events ENABLED, DISABLED
+    EnumDurationUnitMinsHours:
+      type: string
+      enum: [MINUTES, HOURS]
+    EnumUpdateStatus:
+      type: string
+      description: >-
+        An enumeration that specifies one of the following values:
+        AT_LATEST: The gateway instance's version is at or after the supported version marked latest.
+        UPGRADE_AVAILABLE: The gateway instance's version is at the supported version that is marked recommended but there is a later supported version marked recommended.
+        UPGRADE_RECOMMENDED: The gateway instance's version is at a known version but the version is not marked as recommended or latest. The version has greater than 30 days support.
+        UPGRADE_REQUIRED: The gateway instance's version is at a known version but the version is not marked as recommended or latest. The version has support ending within the next month.
+        NOT_SUPPORTED: The gateway instance's version is not known or supported.
+      enum: [AT_LATEST, UPGRADE_AVAILABLE, UPGRADE_RECOMMENDED, UPGRADE_REQUIRED, NOT_SUPPORTED]
+    EnumUserLifecycleStatus:
+      type: string
+      enum: [ACCOUNT_OK, VERIFICATION_REQUIRED]
+      description: A string that specifies information about the account lifecycle. Options for status are `ACCOUNT_OK` and `VERIFICATION_REQUIRED`. This property value is only allowed to be set when importing a user to set the initial account status. If the initial status is set to `VERIFICATION_REQUIRED` and an email address is provided, a verification email is sent.
+    EnumUserRequestInclude:
+      type: string
+      enum: [memberOfGroupIDs, memberOfGroupNames]
+    EnumUserStatus:
+      type: string
+      enum: [LOCKED, OK]
+      description: A string that specifies the account locked state.
+    EnumUserVerifyStatus:
+      type: string
+      enum: [NOT_INITIATED, ENABLED, DISABLED]
+      description: Indicates whether ID verification can be done for the user. This value can be NOT_INITIATED (the initial value), ENABLED, or DISABLED. If the user verification status is DISABLED, a new verification status cannot be created for that user until the status is changed to ENABLED.
+    Application:
       type: object
-      properties: 
+      properties:
+        accessControl:
+          type: object
+          properties:
+            role:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: A string that specifies the user role required to access the application. Options are ADMIN_USERS_ONLY. A user is an admin user if the user has one or more of the following roles Organization Admin, Environment Admin, Identity Data Admin, or Client Application Developer.
+              required:
+                - type
+            group:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: A string that specifies the group type required to access the application. Options are ANY_GROUP (the actor must belong to at least one group listed in the accessControl.group.groups property) and ALL_GROUPS (the actor must belong to all groups listed in the accessControl.group.groups property).
+                groups:
+                  type: array
+                  description: A set that specifies the group IDs for the groups the actor must belong to for access to the application.
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required:
+                      - id
+              required:
+                - type
+                - groups
+        assignActorRoles:
+          type: boolean
+          description: A boolean that specifies whether the permissions service should assign default roles to the application. This property is set only on the POST request. The property is ignored when included in a PUT request.
+        createdAt:
+          type: string
+          readOnly: true
+          description: The time the resource was created.
+        description:
+          type: string
+          description: A string that specifies the description of the application.
+        enabled:
+          type: boolean
+          description: A string that specifies the current enabled state of the application. Options are ENABLED or DISABLED.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        icon:
+          type: object
+          description: The HREF and the ID for the application icon.
+          properties:
+            id:
+              type: string
+            href:
+              type: string
+          required:
+            - id
+            - href
         id:
-          description: A unique identifier that is stored in log files and always included in an error response. This value can be used to track the error received by the client, with server-side activity included for troubleshooting purposes.
           type: string
-        code:
-          description: A general fault code which the client must handle to provide all exception handling routines and to localize messages for users. This code is common across all PingOne services and is human readable (such as a defined constant rather than a number).
+          readOnly: true
+          description: A string that specifies the application ID.
+        loginPageUrl:
           type: string
-        message:
-          description: A short description of the error. This message is intended to assist with debugging and is returned in English only.
+          description: A string that specifies the custom login page URL for the application. If you set the loginPageUrl property for applications in an environment that sets a custom domain, the URL should include the top-level domain and at least one additional domain level. Warning To avoid issues with third-party cookies in some browsers, a custom domain must be used, giving your PingOne environment the same parent domain as your authentication application. For more information about custom domains, see Custom domains.
+        name:
           type: string
-        details:
-          description: Additional details about the error. Optional information to help resolve the error and to display to users.
+          description: A string that specifies the name of the application. This is a required property.
+        protocol:
+          $ref: '#/components/schemas/EnumApplicationProtocol'
+        tags:
+          type: array
+          description: An array that specifies the list of labels associated with the application. Options are PING_FED_CONNECTION_INTEGRATION.
+          items:
+            $ref: '#/components/schemas/EnumApplicationTags'
+        type:
+          $ref: '#/components/schemas/EnumApplicationType'
+        updatedAt:
+          type: string
+          readOnly: true
+          description: The time the resource was last updated.
+        supportUnsignedRequestObject:
+          type: boolean
+          description: A boolean that specifies whether the request query parameter JWT is allowed to be unsigned. If false or null (default), an unsigned request object is not allowed.
+      required:
+        - enabled
+        - name
+        - type
+        - protocol
+    ApplicationSAML:
+      allOf:
+        - $ref: '#/components/schemas/Application'
+        - type: object
+          properties:
+            acsUrls:
+              type: array
+              description: A string that specifies the Assertion Consumer Service URLs. The first URL in the list is used as default (there must be at least one URL). This is a required property.
+              items:
+                type: string
+            assertionDuration:
+              type: integer
+              description: An integer that specifies the assertion validity duration in seconds. This is a required property.
+            assertionSigned:
+              type: boolean
+              description: A boolean that specifies whether the SAML assertion itself should be signed. The default value is true.
+            idpSigningtype:
+              type: object
+              properties:
+                key:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: A string that specifies the certificate to be used by the identity provider to sign assertions and responses. If this property is omitted, the default signing certificate for the environment is used.
+                  required:
+                    - id
+              required:
+                - key
+            nameIdFormat:
+              type: string
+              description: A string that specifies the format of the Subject NameID attibute in the SAML assertion
+            responseSigned:
+              type: boolean
+              description: A boolean that specifies whether the SAML assertion response itself should be signed. The default value is False.
+            sloBinding:
+              $ref: '#/components/schemas/EnumApplicationSAMLSloBinding'
+            sloEndpoint:
+              type: string
+              description: A string that specifies the logout endpoint URL. This is an optional property. However, if a sloEndpoint logout endpoint URL is not defined, logout actions result in an error.
+            sloResponseEndpoint:
+              type: string
+              description: A string that specifies the endpoint URL to submit the logout response. If a value is not provided, the sloEndpoint property value is used to submit SLO response.
+            spEntityId:
+              type: string
+              description: A string that specifies the service provider entity ID used to lookup the application. This is a required property and is unique within the environment.
+            spVerification:
+              type: object
+              properties:
+                certificates:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: An array that specifies the certificate IDs used to verify the service provider signature.
+              required:
+                - certificates
+          required:
+            - spEntityId
+            - acsUrls
+            - assertionDuration
+    ApplicationOIDC:
+      allOf:
+        - $ref: '#/components/schemas/Application'
+        - type: object
+          properties:
+            mobile:
+              type: object
+              properties:
+                bundleId:
+                  type: string
+                  description: A string that specifies the bundle associated with the application, for push notifications in native apps. The value of the bundleId property is unique per environment, and once defined, is immutable.  this setting overrides the top-level bundleId field
+                packageName:
+                  type: string
+                  description: A string that specifies the package name associated with the application, for push notifications in native apps. The value of the mobile.packageName property is unique per environment, and once defined, is immutable.  this setting overrides the top-level packageName field.
+                integrityDetection:
+                  type: object
+                  properties:
+                    mode:
+                      $ref: '#/components/schemas/EnumEnabledStatus'
+                      description: A string that specifies whether device integrity detection takes place on mobile devices, for the application's enrollment and authentication events ENABLED, DISABLED
+                    cacheDuration:
+                      type: object
+                      properties:
+                        amount:
+                          type: integer
+                          description: An integer that specifies the number of minutes or hours that specify the duration between successful integrity detection calls. Every attestation request entails a certain time tradeoff. You can choose to cache successful integrity detection calls for a predefined duration, between a minimum of 1 minute and a maximum of 48 hours. If mobile.integrityDetection.mode is ENABLED, the cache duration must be set.
+                        units:
+                          $ref: '#/components/schemas/EnumDurationUnitMinsHours'
+                          description: A string that specifies the time units of the mobile.integrityDetection.cacheDuration.amount :MINUTES, HOURS
+            bundleId:
+              type: string
+              description: A string that specifies the bundle associated with the application, for push notifications in native apps. The value of the bundleId property is unique per environment, and once defined, is immutable.
+            packageName:
+              type: string
+              description: A string that specifies the package name associated with the application, for push notifications in native apps. The value of the mobile.packageName property is unique per environment, and once defined, is immutable.
+            grantTypes:
+              type: array
+              description: A string that specifies the grant type for the authorization request. This is a required property. Options are AUTHORIZATION_CODE, IMPLICIT, REFRESH_TOKEN, CLIENT_CREDENTIALS.
+              items:
+                $ref: '#/components/schemas/EnumApplicationOIDCGrantType'
+            homePageUrl:
+              type: string
+              description: A string that specifies the custom home page URL for the application.
+            pkceEnforcement:
+              $ref: '#/components/schemas/EnumApplicationOIDCPKCEOption'
+            postLogoutRedirectUris:
+              type: array
+              description: A string that specifies the URLs that the browser can be redirected to after logout.
+              items:
+                type: string
+            redirectUris:
+              type: array
+              description: A string that specifies the callback URI for the authentication response.
+              items:
+                type: string
+            refreshTokenDuration:
+              type: integer
+              description: An integer that specifies the lifetime in seconds of the refresh token. If a value is not provided, the default value is 2592000, or 30 days. Valid values are between 60 and 2147483647. If the refreshTokenRollingDuration property is specified for the application, then this property must be less than or equal to the value of refreshTokenRollingDuration. After this property is set, the value cannot be nullified. This value is used to generate the value for the exp claim when minting a new refresh token.
+            refreshTokenRollingDuration:
+              type: integer
+              description: An integer that specifies the number of seconds a refresh token can be exchanged before re-authentication is required. If a value is not provided, the refresh token is valid forever. Valid values are between 60 and 2147483647. After this property is set, the value cannot be nullified. This value is used to generate the value for the exp claim when minting a new refresh token.
+            responseTypes:
+              type: array
+              description: A string that specifies the code or token type returned by an authorization request. Options are TOKEN, ID_TOKEN, and CODE. Note that CODE cannot be used in an authorization request with TOKEN or ID_TOKEN because PingOne does not currently support OIDC hybrid flows.
+              items:
+                $ref: '#/components/schemas/EnumApplicationOIDCResponseType'
+            tokenEndpointAuthMethod:
+              $ref: '#/components/schemas/EnumApplicationOIDCTokenAuthMethod'
+          required:
+            - grantTypes
+            - tokenEndpointAuthMethod
+    ApplicationAttributeMapping:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the application ID.
+        createdAt:
+          type: string
+          readOnly: true
+          description: The time the resource was created.
+        mappingType:
+          $ref: '#/components/schemas/EnumAttributeMappingType'
+        name:
+          type: string
+          description: A string that specifies the name of attribute and must be unique within an application. For SAML applications, the samlAssertion.subject name is a reserved case-insensitive name which indicates the mapping to be used for the subject in an assertion. For OpenID Connect applications, the following names are reserved and cannot be used acr, amr, at_hash, aud, auth_time, azp, client_id, exp, iat, iss, jti, nbf, nonce, org, scope, sid, sub  This is a required property.
+        required:
+          type: boolean
+          description: A boolean to specify whether a mapping value is required for this attribute. If true, a value must be set and a non-empty value must be available in the SAML assertion or ID token.
+        updatedAt:
+          type: string
+          readOnly: true
+          description: The time the resource was updated.
+        value:
+          type: string
+          description: A string that specifies the string constants or expression for mapping the attribute path against a specific source. The expression format is ${<source>.<attribute_path>}. The only supported source is user (for example, ${user.id}). This is a required property.
+      required:
+        - name
+        - value
+        - required
+    ApplicationResourceGrant:
+      type: object
+      properties:
+        application:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              readOnly: true
+              description: A string that specifies the application resource ID.
+        createdAt:
+          type: string
+          readOnly: true
+          description: The time the resource was created.
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the application resource grant ID.
+        resource:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A string that specifies the ID of the protected resource associated with this grant. This is a required property.
+          required:
+            - id
+        scopes:
           type: array
           items:
             type: object
             properties:
-              code:
-                description: A general fault code which the client must handle to provide all exception handling routines and to localize messages for users. This code is common across all PingOne services and is human readable (such as a defined constant rather than a number).
+              id:
                 type: string
-              target:
-                description: The item that caused the error (such as a form field ID or an attribute inside a JSON object).
+                description: id	A array that specifies the IDs of the scopes associated with this grant. This is a required property.
+            required:
+              - id
+        updatedAt:
+          type: string
+          readOnly: true
+          description: The time the resource was last updated.
+      required:
+        - resource
+        - scopes
+    ApplicationSecret:
+      type: object
+      properties:
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        secret:
+          type: string
+          readOnly: true
+          description: A string that specifies the application secret ID used to authenticate to the authorization server.
+    BillOfMaterials:
+      type: object
+      properties:
+        solutionType:
+          $ref: '#/components/schemas/EnumSolutionType'
+        createdAt:
+          type: string
+          description: The time the resource was created.
+          readOnly: true
+        updatedAt:
+          type: string
+          description: The time the resource was last updated.
+          readOnly: true
+        products:
+          type: array
+          description: An array that specifies the products associated with this bill of materials
+          items:
+            type: object
+            properties:
+              id:
                 type: string
-              message:
-                description: A short description of the error. This message is intended to assist with debugging and is returned in English only.
+                readOnly: true
+                description: A string that specifies the BOM ID
+              type:
+                $ref: '#/components/schemas/EnumProductType'
+              description:
                 type: string
-              innerError:
-                description: Additional details to help the client developer resolve the fault (primarily for UI validation reasons).
+                description: A string that specifies the description of the product or standalone service
+                readOnly: true
+              console:
                 type: object
                 properties:
-                  rangeMinimumValue:
-                    description: Errors that failed due to range violation. This attribute represents the minimum value of the range.
-                    type: integer
-                  rangeMaximumValue:
-                    description: The maximum range or value of an attribute.
-                    type: integer
-                  allowedPattern:
-                    description: A regex pattern describing an acceptable input pattern.
+                  href:
                     type: string
-                  allowedValues:
-                    description: A list describing acceptable values.
-                    type: array
-                    items:
+                    description: Primary console link for certain products
+                required:
+                  - href
+              deployment:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The ID of the PingID deployment
+                    readOnly: true
+              bookmarks:
+                type: array
+                description: Optional array of custom bookmarks. Maximum of five bookmarks per product.
+                items:
+                  type: object
+                  properties:
+                    name:
                       type: string
-                  maximumValue:
-                    description: The maximum value allowed for the request.
-                    type: integer
+                      description: Name of the custom bookmark. The name must be unique among the product bookmarks and be 50 characters or fewer.
+                    href:
+                      type: string
+                      description: A valid URL for the bookmark.
+                  required:
+                    - name
+                    - href
+            required:
+              - type
+      required:
+        - products
     EntityArray:
       type: object
       properties:
@@ -174,421 +652,6 @@ components:
           type: number
         size:
           type: number
-    ObjectApplication:
-      type: object
-      readOnly: true
-      properties:
-        id:
-          type: string
-          readOnly: true
-          description: A string that specifies the application resource ID associated with the object.
-    ObjectEnvironment:
-      type: object
-      readOnly: true
-      properties:
-        id:
-          type: string
-          readOnly: true
-          description: A string that specifies the environment associated with the object.
-    ObjectPopulation:
-      type: object
-      readOnly: true
-      properties:
-        id:
-          type: string
-          readOnly: true
-          description: A string that specifies the population associated with the object.
-    Application:
-      type: object
-      properties:
-        accessControl:
-          type: object
-          properties:
-            role:
-              type: object
-              properties:
-                type:
-                  type: string
-                  description: A string that specifies the user role required to access the application. Options are ADMIN_USERS_ONLY. A user is an admin user if the user has one or more of the following roles Organization Admin, Environment Admin, Identity Data Admin, or Client Application Developer.
-              required:
-                - type
-            group:
-              type: object
-              properties:
-                type:
-                  type: string
-                  description: A string that specifies the group type required to access the application. Options are ANY_GROUP (the actor must belong to at least one group listed in the accessControl.group.groups property) and ALL_GROUPS (the actor must belong to all groups listed in the accessControl.group.groups property).
-                groups:
-                  type: array
-                  description: A set that specifies the group IDs for the groups the actor must belong to for access to the application.
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                    required:
-                      - id
-              required:
-                - type
-                - groups
-        assignActorRoles:
-          type: boolean
-          description: A boolean that specifies whether the permissions service should assign default roles to the application. This property is set only on the POST request. The property is ignored when included in a PUT request.
-        createdAt:
-          type: string
-          readOnly: true
-          description: The time the resource was created.
-        description:
-          type: string
-          description: A string that specifies the description of the application.
-        enabled:
-          type: boolean
-          description: A string that specifies the current enabled state of the application. Options are ENABLED or DISABLED.
-        environment:
-          $ref: '#/components/schemas/ObjectEnvironment'
-        icon:
-          type: object
-          description: The HREF and the ID for the application icon.
-          properties:
-            id:
-              type: string
-            href:
-              type: string
-          required:
-            - id
-            - href
-        id:
-          type: string
-          readOnly: true
-          description: A string that specifies the application ID.
-        loginPageUrl:
-          type: string
-          description: A string that specifies the custom login page URL for the application. If you set the loginPageUrl property for applications in an environment that sets a custom domain, the URL should include the top-level domain and at least one additional domain level. Warning To avoid issues with third-party cookies in some browsers, a custom domain must be used, giving your PingOne environment the same parent domain as your authentication application. For more information about custom domains, see Custom domains.
-        name:
-          type: string
-          description: A string that specifies the name of the application. This is a required property.
-        protocol:
-          type: string
-          enum: [OPENID_CONNECT, SAML]
-          description: A string that specifies the protocol for the Application. Options are OPENID_CONNECT and SAML.
-        tags:
-          type: array
-          description: An array that specifies the list of labels associated with the application. Options are PING_FED_CONNECTION_INTEGRATION.
-          items:
-            type: string
-            enum: [PING_FED_CONNECTION_INTEGRATION]
-        type:
-          type: string
-          enum: [WEB_APP, NATIVE_APP, SINGLE_PAGE_APP, WORKER, SERVICE, CUSTOM_APP]
-          description: A string that specifies the type associated with the application. This is a required property. Options are WEB_APP, NATIVE_APP, SINGLE_PAGE_APP, and WORKER.
-        updatedAt:
-          type: string
-          readOnly: true
-          description: The time the resource was last updated.
-        supportUnsignedRequestObject:
-          type: boolean
-          description: A boolean that specifies whether the request query parameter JWT is allowed to be unsigned. If false or null (default), an unsigned request object is not allowed.
-      required:
-        - enabled
-        - name
-        - type
-        - protocol
-    ApplicationSAML:
-      allOf:
-        - $ref: '#/components/schemas/Application'
-        - type: object
-          properties:
-            acsUrls:
-              type: array
-              description: A string that specifies the Assertion Consumer Service URLs. The first URL in the list is used as default (there must be at least one URL). This is a required property.
-              items:
-                type: string
-            assertionDuration:
-              type: integer
-              description: An integer that specifies the assertion validity duration in seconds. This is a required property.
-            assertionSigned:
-              type: boolean
-              description: A boolean that specifies whether the SAML assertion itself should be signed. The default value is true.
-            idpSigningtype:
-              type: object
-              properties:
-                key:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      description: A string that specifies the certificate to be used by the identity provider to sign assertions and responses. If this property is omitted, the default signing certificate for the environment is used.
-                  required:
-                    - id
-              required:
-                - key
-            nameIdFormat:
-              type: string
-              description: A string that specifies the format of the Subject NameID attibute in the SAML assertion
-            responseSigned:
-              type: boolean
-              description: A boolean that specifies whether the SAML assertion response itself should be signed. The default value is False.
-            sloBinding:
-              type: string
-              enum: [HTTP_REDIRECT, HTTP_POST]
-              description: A string that specifies the binding protocol to be used for the logout response. Options are HTTP_REDIRECT or HTTP_POST. The default is HTTP_POST; existing configurations with no data default to HTTP_POST. This is an optional property.
-            sloEndpoint:
-              type: string
-              description: A string that specifies the logout endpoint URL. This is an optional property. However, if a sloEndpoint logout endpoint URL is not defined, logout actions result in an error.
-            sloResponseEndpoint:
-              type: string
-              description: A string that specifies the endpoint URL to submit the logout response. If a value is not provided, the sloEndpoint property value is used to submit SLO response.
-            spEntityId:
-              type: string
-              description: A string that specifies the service provider entity ID used to lookup the application. This is a required property and is unique within the environment.
-            spVerification:
-              type: object
-              properties:
-                certificates:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        description: An array that specifies the certificate IDs used to verify the service provider signature.
-              required:
-                - certificates
-          required:
-            - spEntityId
-            - acsUrls
-            - assertionDuration
-    ApplicationOIDC:
-      allOf:
-        - $ref: '#/components/schemas/Application'
-        - type: object
-          properties:
-            mobile:
-              type: object
-              properties:
-                bundleId:
-                  type: string
-                  description: A string that specifies the bundle associated with the application, for push notifications in native apps. The value of the bundleId property is unique per environment, and once defined, is immutable.  this setting overrides the top-level bundleId field
-                packageName:
-                  type: string
-                  description: A string that specifies the package name associated with the application, for push notifications in native apps. The value of the mobile.packageName property is unique per environment, and once defined, is immutable.  this setting overrides the top-level packageName field.
-                integrityDetection:
-                  type: object
-                  properties:
-                    mode:
-                      type: string
-                      enum: [ENABLED, DISABLED]
-                      description: A string that specifies whether device integrity detection takes place on mobile devices, for the application's enrollment and authentication events ENABLED, DISABLED
-                    cacheDuration:
-                      type: object
-                      properties:
-                        amount:
-                          type: integer
-                          description: An integer that specifies the number of minutes or hours that specify the duration between successful integrity detection calls. Every attestation request entails a certain time tradeoff. You can choose to cache successful integrity detection calls for a predefined duration, between a minimum of 1 minute and a maximum of 48 hours. If mobile.integrityDetection.mode is ENABLED, the cache duration must be set.
-                        units:
-                          type: string
-                          enum: [MINUTES, HOURS]
-                          description: A string that specifies the time units of the mobile.integrityDetection.cacheDuration.amount :MINUTES, HOURS
-            bundleId:
-              type: string
-              description: A string that specifies the bundle associated with the application, for push notifications in native apps. The value of the bundleId property is unique per environment, and once defined, is immutable.
-            packageName:
-              type: string
-              description: A string that specifies the package name associated with the application, for push notifications in native apps. The value of the mobile.packageName property is unique per environment, and once defined, is immutable.
-            grantTypes:
-              type: array
-              description: A string that specifies the grant type for the authorization request. This is a required property. Options are AUTHORIZATION_CODE, IMPLICIT, REFRESH_TOKEN, CLIENT_CREDENTIALS.
-              items:
-                type: string
-                enum: [AUTHORIZATION_CODE, IMPLICIT, REFRESH_TOKEN, CLIENT_CREDENTIALS]
-            homePageUrl:
-              type: string
-              description: A string that specifies the custom home page URL for the application.
-            pkceEnforcement:
-              type: string
-              enum: [OPTIONAL, REQUIRED, S256_REQUIRED]
-              description: A string that specifies how PKCE request parameters are handled on the authorize request. Options are OPTIONAL PKCE code_challenge is optional and any code challenge method is acceptable. REQUIRED PKCE code_challenge is required and any code challenge method is acceptable. S256_REQUIRED PKCE code_challege is required and the code_challenge_method must be S256.
-            postLogoutRedirectUris:
-              type: array
-              description: A string that specifies the URLs that the browser can be redirected to after logout.
-              items:
-                type: string
-            redirectUris:
-              type: array
-              description: A string that specifies the callback URI for the authentication response.
-              items:
-                type: string
-            refreshTokenDuration:
-              type: integer
-              description: An integer that specifies the lifetime in seconds of the refresh token. If a value is not provided, the default value is 2592000, or 30 days. Valid values are between 60 and 2147483647. If the refreshTokenRollingDuration property is specified for the application, then this property must be less than or equal to the value of refreshTokenRollingDuration. After this property is set, the value cannot be nullified. This value is used to generate the value for the exp claim when minting a new refresh token.
-            refreshTokenRollingDuration:
-              type: integer
-              description: An integer that specifies the number of seconds a refresh token can be exchanged before re-authentication is required. If a value is not provided, the refresh token is valid forever. Valid values are between 60 and 2147483647. After this property is set, the value cannot be nullified. This value is used to generate the value for the exp claim when minting a new refresh token.
-            responseTypes:
-              type: array
-              description: A string that specifies the code or token type returned by an authorization request. Options are TOKEN, ID_TOKEN, and CODE. Note that CODE cannot be used in an authorization request with TOKEN or ID_TOKEN because PingOne does not currently support OIDC hybrid flows.
-              items:
-                type: string
-                enum: [TOKEN, ID_TOKEN, CODE]
-            tokenEndpointAuthMethod:
-              type: string
-              enum: [NONE, CLIENT_SECRET_BASIC, CLIENT_SECRET_POST]
-              description: A string that specifies the client authentication methods supported by the token endpoint. This is a required property. Options are NONE, CLIENT_SECRET_BASIC, and CLIENT_SECRET_POST.  
-          required:
-            - grantTypes
-            - tokenEndpointAuthMethod
-    ApplicationAttributeMapping:
-      type: object
-      properties:
-        id:
-          type: string
-          readOnly: true
-          description: A string that specifies the application ID.
-        createdAt:
-          type: string
-          readOnly: true
-          description: The time the resource was created.
-        mappingType:
-          type: string
-          enum: [CORE, SCOPE, CUSTOM]
-          description: A string that specifies the mapping type of the attribute. Options are CORE, SCOPE, and CUSTOM. The CORE and SCOPE mapping types are for reserved attributes managed by the API and cannot be removed. Attribute values for these mapping types can be updated. The CUSTOM mapping type is for user-defined attributes. Attributes of this type can be updated and deleted.
-        name:
-          type: string
-          description: A string that specifies the name of attribute and must be unique within an application. For SAML applications, the samlAssertion.subject name is a reserved case-insensitive name which indicates the mapping to be used for the subject in an assertion. For OpenID Connect applications, the following names are reserved and cannot be used acr, amr, at_hash, aud, auth_time, azp, client_id, exp, iat, iss, jti, nbf, nonce, org, scope, sid, sub  This is a required property.
-        required:
-          type: boolean
-          description: A boolean to specify whether a mapping value is required for this attribute. If true, a value must be set and a non-empty value must be available in the SAML assertion or ID token.
-        updatedAt:
-          type: string
-          readOnly: true
-          description: The time the resource was updated.
-        value:
-          type: string
-          description: A string that specifies the string constants or expression for mapping the attribute path against a specific source. The expression format is ${<source>.<attribute_path>}. The only supported source is user (for example, ${user.id}). This is a required property.
-      required:
-        - name
-        - value
-        - required
-    ApplicationResourceGrant:
-      type: object
-      properties:
-        application:
-          type: object
-          readOnly: true
-          properties:
-            id:
-              type: string
-              readOnly: true
-              description: A string that specifies the application resource ID.
-        createdAt:
-          type: string
-          readOnly: true
-          description: The time the resource was created.
-        id:
-          type: string
-          readOnly: true
-          description: A string that specifies the application resource grant ID.
-        resource:
-          type: object
-          properties:
-            id:
-              type: string
-              description: A string that specifies the ID of the protected resource associated with this grant. This is a required property.
-          required:
-            - id
-        scopes:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: id	A array that specifies the IDs of the scopes associated with this grant. This is a required property.
-            required:
-              - id
-        updatedAt:
-          type: string
-          readOnly: true
-          description: The time the resource was last updated.
-      required:
-        - resource
-        - scopes
-    ApplicationSecret:
-      type: object
-      properties:
-        environment:
-          $ref: '#/components/schemas/ObjectEnvironment'
-        secret:
-          type: string
-          readOnly: true
-          description: A string that specifies the application secret ID used to authenticate to the authorization server.
-    BillOfMaterials:
-      type: object
-      properties:
-        solutionType:
-          type: string
-          enum: [WORKFORCE, CUSTOMER]
-          description: The solution set of the bill of materials
-        createdAt:
-          type: string
-          description: The time the resource was created.
-          readOnly: true
-        updatedAt:
-          type: string
-          description: The time the resource was last updated.
-          readOnly: true
-        products:
-          type: array
-          description: An array that specifies the products associated with this bill of materials
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                readOnly: true
-                description: A string that specifies the BOM ID
-              type:
-                type: string
-                enum: [PING_ONE_MFA, PING_ONE_ORCHESTRATE, PING_ONE_RISK, PING_ONE_VERIFY, PING_ONE_CREDENTIALS, PING_ONE_AUTHORIZE, PING_ONE_BASE, PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_AUTHORIZE, PING_ID, PING_INTELLIGENCE, PING_CENTRAL]
-                description: A string that specifies the Ping Identity product type. Options for PingOne platform products are PING_ONE_ORCHESTRATE, PING_ONE_MFA, PING_ONE_RISK, PING_ONE_VERIFY, PING_ONE_CREDENTIALS, PING_ONE_AUTHORIZE and PING_ONE_BASE. The PING_ONE_BASE product represents the default set of services that an environment can use on the PingOne platform. Options for other Ping Identity products are PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_AUTHORIZE, PING_ID, PING_INTELLIGENCE, and PING_CENTRAL
-              description:
-                type: string
-                description: A string that specifies the description of the product or standalone service
-                readOnly: true
-              console:
-                type: object
-                properties:
-                  href:
-                    type: string
-                    description: Primary console link for certain products
-                required:
-                  - href
-              deployment:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    description: The ID of the PingID deployment
-                    readOnly: true
-              bookmarks:
-                type: array
-                description: Optional array of custom bookmarks. Maximum of five bookmarks per product.
-                items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                      description: Name of the custom bookmark. The name must be unique among the product bookmarks and be 50 characters or fewer.
-                    href:
-                      type: string
-                      description: A valid URL for the bookmark.
-                  required:
-                    - name
-                    - href
-            required:
-              - type
-      required:
-        - products
     Environment:
       type: object
       properties:
@@ -623,13 +686,9 @@ components:
               type: string
               description: A string that specifies the organization resource’s unique identifier associated with the environment.
         region:
-          type: string
-          enum: [NA, EU, AP]
-          description: A string that specifies the region in which this environment will be used. The value is set when the environment is created and cannot be updated. Options are NA, EU, and AP.
+          $ref: '#/components/schemas/EnumRegionCode'
         type:
-          type: string
-          enum: [PRODUCTION, SANDBOX]
-          description: A string that specifies the type of environment to use. Options are PRODUCTION and SANDBOX.
+          $ref: '#/components/schemas/EnumEnvironmentType'
         updatedAt:
           type: string
           description: The time the resource was last updated.
@@ -672,9 +731,7 @@ components:
           type: string
           description: (Optional) A string that specifies the description of the resource.
         type:
-          type: string
-          enum: [LDAP, PING_FEDERATE, PING_INTELLIGENCE]
-          description: A string that specifies the type of gateway resource. Options are LDAP, PING_FEDERATE and PING_INTELLIGENCE. This is a required property.
+          $ref: '#/components/schemas/EnumGatewayType'
         enabled:
           type: boolean
           description: A boolean that specifies whether the gateway is enabled. This is a required property.
@@ -710,9 +767,7 @@ components:
               type: string
               description: A string that specifies the bind password for the LDAP database. This is a required property.
             connectionSecurity:
-              type: string
-              enum: [None, TLS, StartTLS]
-              description: (Optional) A string that specifies the connection security type. Options are None, TLS, and StartTLS. The default value is None.
+              $ref: '#/components/schemas/EnumGatewayLDAPSecurity'
             serversHostAndPort:
               type: array
               items:
@@ -788,10 +843,8 @@ components:
           readOnly: true
           description: A date that specifies the date the credential was created in Coordinated Universal Time (UTC). This is a required property.
         gatewayType:
-          type: string
-          enum: [LDAP, PING_FEDERATE, PING_INTELLIGENCE]
+          $ref: '#/components/schemas/EnumGatewayType'
           readOnly: true
-          description: A date that specifies the date the credential was created in Coordinated Universal Time (UTC). This is a required property.
         lastUsedAt:
           type: string
           readOnly: true
@@ -841,9 +894,7 @@ components:
           items:
             type: string
         healthStatus:
-          type: string
-          enum: [HEALTHY, DEGRADED, UNHEALTHY]
-          description: An enumeration that specifies whether or not the gateway is in a healthy state. Options are HEALTHY, DEGRADED, UNHEALTHY. This is a required property.
+          $ref: '#/components/schemas/EnumHealthStatus'
         hostname:
           type: string
           description: A string that specifies the hostname of the container running in the customer’s infrastructure. This is a required property.
@@ -861,15 +912,7 @@ components:
               type: string
               description: A string that specifies the version number of the gateway running for the instance. This is a required property.
             updateStatus:
-              type: string
-              description: >-
-                An enumeration that specifies one of the following values:
-                AT_LATEST: The gateway instance's version is at or after the supported version marked latest.
-                UPGRADE_AVAILABLE: The gateway instance's version is at the supported version that is marked recommended but there is a later supported version marked recommended.
-                UPGRADE_RECOMMENDED: The gateway instance's version is at a known version but the version is not marked as recommended or latest. The version has greater than 30 days support.
-                UPGRADE_REQUIRED: The gateway instance's version is at a known version but the version is not marked as recommended or latest. The version has support ending within the next month.
-                NOT_SUPPORTED: The gateway instance's version is not known or supported.
-              enum: [AT_LATEST, UPGRADE_AVAILABLE, UPGRADE_RECOMMENDED, UPGRADE_REQUIRED, NOT_SUPPORTED]
+              $ref: '#/components/schemas/EnumUpdateStatus'
         busyPercentage:
           type: integer
           description: An integer that specifies the gateway instance's busy percentage. When this percentage is high, then more instances should be added.
@@ -967,10 +1010,8 @@ components:
               readOnly: true
               description: A string that specifies the UUID of the target image.
             type:
-              type: string
-              enum: [PNG, JPG, GIF]
+              $ref: '#/components/schemas/EnumImageFormat'
               readOnly: true
-              description: A string that specifies the type of format used for the image. Options are jpg, png, and gif.
             width:
               type: integer
               readOnly: true
@@ -979,6 +1020,30 @@ components:
               type: integer
               readOnly: true
               description: The height of the image (in pixels).
+    ObjectApplication:
+      type: object
+      readOnly: true
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the application resource ID associated with the object.
+    ObjectEnvironment:
+      type: object
+      readOnly: true
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the environment associated with the object.
+    ObjectPopulation:
+      type: object
+      readOnly: true
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the population associated with the object.
     Organization:
       type: object
       properties:
@@ -1003,9 +1068,7 @@ components:
           description: The time the resource was last updated.
           readOnly: true
         type:
-          type: string
-          enum: [PAID, TRIAL]
-          description: A string that specifies the organization type. If the organization has any paid licenses, the type property value is set to `PAID`. Otherwise, the property value is set to `TRIAL`.
+          $ref: '#/components/schemas/EnumOrganizationType'
           readOnly: true
         billingConnections:
           type: array
@@ -1017,6 +1080,54 @@ components:
                 description: A string that specifies the list of the BillingConnection resource IDs for the organization.
                 readOnly: true
           readOnly: true
+    P1Error:
+      type: object
+      properties: 
+        id:
+          description: A unique identifier that is stored in log files and always included in an error response. This value can be used to track the error received by the client, with server-side activity included for troubleshooting purposes.
+          type: string
+        code:
+          description: A general fault code which the client must handle to provide all exception handling routines and to localize messages for users. This code is common across all PingOne services and is human readable (such as a defined constant rather than a number).
+          type: string
+        message:
+          description: A short description of the error. This message is intended to assist with debugging and is returned in English only.
+          type: string
+        details:
+          description: Additional details about the error. Optional information to help resolve the error and to display to users.
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                description: A general fault code which the client must handle to provide all exception handling routines and to localize messages for users. This code is common across all PingOne services and is human readable (such as a defined constant rather than a number).
+                type: string
+              target:
+                description: The item that caused the error (such as a form field ID or an attribute inside a JSON object).
+                type: string
+              message:
+                description: A short description of the error. This message is intended to assist with debugging and is returned in English only.
+                type: string
+              innerError:
+                description: Additional details to help the client developer resolve the fault (primarily for UI validation reasons).
+                type: object
+                properties:
+                  rangeMinimumValue:
+                    description: Errors that failed due to range violation. This attribute represents the minimum value of the range.
+                    type: integer
+                  rangeMaximumValue:
+                    description: The maximum range or value of an attribute.
+                    type: integer
+                  allowedPattern:
+                    description: A regex pattern describing an acceptable input pattern.
+                    type: string
+                  allowedValues:
+                    description: A list describing acceptable values.
+                    type: array
+                    items:
+                      type: string
+                  maximumValue:
+                    description: The maximum value allowed for the request.
+                    type: integer
     PasswordPolicy:
       type: object
       properties:
@@ -1210,9 +1321,7 @@ components:
           type: string
           description: A string that specifies the resource name, which must be provided and must be unique within an environment.
         type:
-          type: string
-          enum: [OPENID_CONNECT, PING_ONE_API, CUSTOM]
-          description: A string that specifies the type of resource. Options are OPENID_CONNECT, PING_ONE_API, and CUSTOM. Only the CUSTOM resource type can be created. OPENID_CONNECT specifies the built-in platform resource for OpenID Connect. PING_ONE_API specifies the built-in platform resource for PingOne.
+          $ref: '#/components/schemas/EnumResourceType'
         updatedAt:
           type: string
           readOnly: true
@@ -1230,9 +1339,7 @@ components:
           type: string
           description: A string that specifies the name of the custom resource attribute to be included in the access token
         type:
-          type: string
-          enum: [CORE, CUSTOM]
-          description: A string that specifies the type of resource attribute. Options are CORE - The claim is required and cannot not be removed., CUSTOM - The claim is not a CORE attribute. All created attributes are of this type.
+          $ref: '#/components/schemas/EnumResourceAttributeType'
         value:
           type: string
           description: A string that specifies the value of the custom resource attribute. This value can be a placeholder that references an attribute in the user schema, expressed as “${user.path.to.value}”, or it can be a static string. Placeholders must be valid, enabled attributes in the environment’s user schema. Examples fo valid values are “${user.email}”, “${user.name.family}”, and “myClaimValueString”
@@ -1295,8 +1402,7 @@ components:
           readOnly: true
           description: A string that specifies the ID of the role.
         name:
-          type: string
-          description: The name of the role
+          $ref: '#/components/schemas/EnumRoleName'
         permissions:
           type: array
           readOnly: true
@@ -1347,9 +1453,7 @@ components:
               type: string
               description: A string that specifies the role assignment scope ID.
             type:
-              type: string
-              enum: [ORGANIZATION, ENVIRONMENT, POPULATION]
-              description: A string that specifies the type of resource defining the scope of the Role assignment. Options are ORGANIZATION, ENVIRONMENT, and POPULATION.
+              $ref: '#/components/schemas/EnumRoleAssignmentScopeType'
           required:
             - id
             - type
@@ -1414,13 +1518,9 @@ components:
               readOnly: true
               description: A string that specifies the identifier of the resource referenced by this relationship.
         schemaType:
-          type: string
-          enum: [ CORE, STANDARD, CUSTOM ]
-          description: A string that specifies the schema type of the attribute. It may be one of CORE, STANDARD or CUSTOM. Core and standard attributes are present out-of-the-box. Core attributes may not be updated or deleted. Standard attributes may not be deleted, but their mutable properties may be updated. Custom attributes may be deleted, and their mutable properties may be updated. New attributes are created with a schema type of CUSTOM.
+          $ref: '#/components/schemas/EnumSchemaAttributeSchemaType'
         type:
-          type: string
-          enum: [ STRING, JSON, BOOLEAN, COMPLEX ]
-          description: A string that specifies the the type of the attribute. It may be one of STRING, JSON, BOOLEAN, or COMPLEX. If the type is not provided during creation, then it defaults to STRING. Complex and boolean attributes may not be created, but standard attributes of those types may be updated. JSON attributes are limited by size (total size must not exceed 16KB).
+          $ref: '#/components/schemas/EnumSchemaAttributeType'
         unique:
           type: boolean
           description: A boolean that specifies whether or not the attribute must have a unique value within the environment. This is a required property for POST and PUT operations; it cannot be omitted or explicitly set to null.
@@ -1502,9 +1602,7 @@ components:
           required:
             - id
         type:
-          type: string
-          description: A string that specifies the type of action. Options are `LOGIN`, `MULTI_FACTOR_AUTHENTICATION`, `IDENTIFIER_FIRST`, `IDENTITY_PROVIDER` `AGREEMENT` and `PROGRESSIVE_PROFILING`.
-          enum: [LOGIN, MULTI_FACTOR_AUTHENTICATION, IDENTIFIER_FIRST, IDENTITY_PROVIDER, PROGRESSIVE_PROFILING, AGREEMENT]
+          $ref: '#/components/schemas/EnumSignOnPolicyType'
       required:
         - priority
         - signOnPolicy
@@ -1638,20 +1736,11 @@ components:
                     default: false
                     description: A boolean that specifies the enabled/disabled state of automatic MFA for native devices paired with the user for the specified application.
                   extraVerification:
-                    type: string
-                    enum: [disabled, permissive, restrictive]
-                    default: disabled
-                    description: |
-                      Specifies the level of further verification when deviceAuthorization is enabled. The PingOne platform performs an extra verification check by sending a silent push notification to the customer native application, and receives a confirmation in return.  `extraVerification` can be one of the following levels:
-                      `disabled` (default): The PingOne platform does not perform the extra verification check.
-                      `permissive`: The PingOne platform performs the extra verification check. Upon timeout or failure to get a response from the native app, the MFA step is treated as successfully completed.
-                      `restrictive`: The PingOne platform performs the extra verification check.The PingOne platform performs the extra verification check. Upon timeout or failure to get a response from the native app, the MFA step is treated as failed.
+                    $ref: '#/components/schemas/EnumSignOnPolicyExtraVerification'
             required:
               - id
         noDeviceMode:
-          type: string
-          enum: [BYPASS, BLOCK]
-          description: A string that specifies the device mode for the MFA flow. Options are `BYPASS` to allow MFA without a specified device, or `BLOCK` to block the MFA flow if no device is specified. To use this configuration option, the authorize request must include a signed `login_hint_token` property. For more information, see Authorize (Browserless and MFA Only Flows)
+          $ref: '#/components/schemas/EnumSignOnPolicyNoDeviceMode'
     SignOnPolicyActionIDFirst:
       type: object
       properties:
@@ -1862,9 +1951,7 @@ components:
               type: integer
               description: An integer that specifies the number of seconds until the user's account is unlocked. This property is absent if the account is unlocked, or if it will not automatically unlock (and must be unlocked by an administrator).
             status:
-              type: string
-              enum: [LOCKED, OK]
-              description: A string that specifies the account locked state. Options are LOCKED and OK.
+              $ref: '#/components/schemas/EnumUserStatus'
             unlockAt:
               type: string
               description: The time the specified user account will be unlocked. This property is absent if the account is unlocked, or if it will not automatically unlock (and must be unlocked by an administrator).
@@ -1910,11 +1997,7 @@ components:
               readOnly: true
               description: A read-only boolean attribute that specifies whether the user is enabled. This attribute is set to ‘true’ by default when the user is created.
         environment:
-          type: object
-          properties:
-            id:
-              type: string
-              description: A string that specifies the environment resource’s unique identifier associated with the user.
+          $ref: '#/components/schemas/ObjectEnvironment'
         externalId:
           type: string
           minLength: 1
@@ -1931,10 +2014,8 @@ components:
               type: string
               description: A mutable string that identifies the external identity provider used to authenticate the user. If not provided, PingOne is the identity provider. This attribute is required if the identity provider is authoritative for just-in-time user provisioning.
             type:
-              type: string
+              $ref: '#/components/schemas/EnumIdentityProvider'
               readOnly: true
-              enum: [FACEBOOK, GOOGLE, LINKEDIN, APPLE, TWITTER, AMAZON, YAHOO, MICROSOFT, PAYPAL, GITHUB, OPENID_CONNECT, SAML, PING_ONE]
-              description: A read-only string that identifies the type of identity provider used to authenticate the user. Possible values are `FACEBOOK`, `GOOGLE`, `LINKEDIN`, `APPLE`, `TWITTER`, `AMAZON`, `YAHOO`, `MICROSOFT`, `PAYPAL`, `GITHUB`, `OPENID_CONNECT`, `SAML`, and `PING_ONE`. The default value of `PING_ONE` is set when a value for identityProvider.id is not provided. The `PING_ONE` value is the default for all pre-existing users. There is currently no search filter support for this attribute.
         lastSignOn:
           type: object
           properties:
@@ -1948,9 +2029,7 @@ components:
           type: object
           properties:
             status:
-              type: string
-              enum: [ACCOUNT_OK, VERIFICATION_REQUIRED]
-              description: A string that specifies information about the account lifecycle. Options for status are `ACCOUNT_OK` and `VERIFICATION_REQUIRED`. This property value is only allowed to be set when importing a user to set the initial account status. If the initial status is set to `VERIFICATION_REQUIRED` and an email address is provided, a verification email is sent.
+              $ref: '#/components/schemas/EnumUserLifecycleStatus'
         locale:
           type: string
           pattern: '^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$'
@@ -2097,9 +2176,7 @@ components:
           maxLength: 128
           description: A string that specifies the user name, which must be provided and must be unique within an environment. The username must either be a well-formed email address or a string. The string can contain any letters, numbers, combining characters, math and currency symbols, dingbats and drawing characters, and invisible whitespace (regex `^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$`). It can have a length of no more than 128 characters (min/max=1/128).
         verifyStatus:
-          type: string
-          enum: [NOT_INITIATED, ENABLED, DISABLED]
-          description: Indicates whether ID verification can be done for the user. This value can be NOT_INITIATED (the initial value), ENABLED, or DISABLED. If the user verification status is DISABLED, a new verification status cannot be created for that user until the status is changed to ENABLED.
+          $ref: '#/components/schemas/EnumUserVerifyStatus'
       required:
         - email
         - username
@@ -7216,9 +7293,7 @@ paths:
               type: object
               properties:
                 type:
-                  type: string
-                  enum: [PRODUCTION, SANDBOX]
-                  description: A string that specifies the type of environment to use. Options are PRODUCTION and SANDBOX.
+                  $ref: '#/components/schemas/EnumEnvironmentType'
               example:
                 type: PRODUCTION
       parameters:
@@ -16028,8 +16103,7 @@ paths:
         - name: include
           in: query
           schema:
-            type: string
-            enum: [memberOfGroupIDs, memberOfGroupNames]
+            $ref: '#/components/schemas/EnumUserRequestInclude'
           example: memberOfGroupIDs
         - name: environmentID
           in: path

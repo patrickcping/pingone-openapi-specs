@@ -1,15 +1,9 @@
 extends: "spectral:oas"
 rules:
-  operation-operationId:
-    description: GET Path requests should have an operationId
-    given: $.paths[*].[post,patch,put,delete,get]
-    severity: error
-    then:
-      field: operationId
-      function: truthy
+  operation-operationId: error
 
   must-have-response-schema:
-    description: POST, PATCH, PUT Path requests should have a response schema
+    description: POST, PATCH, PUT requests should have a response schema
     given: $.paths[*].[post,patch,put].responses.[201,200].content.application/json
     severity: error
     then:

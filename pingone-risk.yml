@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: PingOne Platform API - PingOne Risk
   description: The PingOne Platform API covering the PingOne Risk service
-  version: 1.0.0
+  version: '2021-10-17'
 externalDocs:
   url: https://apidocs.pingidentity.com/pingone/platform/v1/api/#pingone-risk
   description: PingOne Platform API Reference - PingOne Risk APIs
@@ -25,6 +25,69 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
+    EntityArray:
+      type: object
+      properties:
+        '_embedded':
+          type: object
+          properties:
+            riskPolicySets:
+              type: array
+              items:
+                $ref: '#/components/schemas/RiskPolicySet'
+            riskPredictors:
+              type: array
+              items:
+                $ref: '#/components/schemas/RiskPredictor'
+        count:
+          type: number
+        size:
+          type: number
+    EnumCompletionStatus:
+      type: string
+      enum: [FAILED, IN_PROGRESS, SUCCESS]
+      description: A string that specifies the state of the transaction. Options are FAILED, IN_PROGRESS, and SUCCESS. If a value is not provided, the value defaults to IN_PROGRESS. The value of this property can be changed only if its current state is IN_PROGRESS.
+    EnumEventSharingType:
+      type: string
+      enum: [UNSPECIFIED, SHARED, PRIVATE]
+      description: A string that specifies the device sharing type. Options are UNSPECIFIED, SHARED, and PRIVATE.
+    EnumFlowType:
+      type: string
+      enum: [AUTHENTICATION]
+      description: A string that specifies the flow type for the event. The only option (and default) is AUTHENTICATION.
+    EnumPredictorType:
+      type: string
+      enum: [VELOCITY, USER_RISK_BEHAVIOR, MAP]
+      description: An enum type. This can be either VELOCITY, USER_RISK_BEHAVIOR, or MAP
+    EnumResultType:
+      type: string
+      enum: [VALUE]
+      description: A string that specifies the risk evaluation result type. Options are VALUE.
+    EnumRiskLevel:
+      type: string
+      enum: [LOW, MEDIUM, HIGH]
+      description: Enum string that specifies a given risk level
+    EnumThresholdSource:
+      type: string
+      enum: [MIN_NOT_REACHED, CALCULATED, ENVIRONMENT_FALLBACK, DEFAULT_FALLBACK]
+      description:  >-
+        An enum indicating the source used to calculate the threshold. This can be
+        MIN_NOT_REACHED. If the measure is less than every.minSample, the threshold isn't calculated. Instead, a value of LOW is automatically assigned. If less than five IPs were used by the user during the past hour, MIN_NOT_REACHED is set.
+        CALCULATED. Indicates the threshold is guaranteed to be calculated.
+        ENVIRONMENT_FALLBACK. Indicates a global threshold calculated for the entire environment is used. The global threshold is used when the ipVelocityByUser.threshold couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the threshold calculation.
+        DEFAULT_FALLBACK. Indicates the default threshold defined for the predictor (in threshold.medium or threshold.high) is used. The default threshold is used when ENVIRONMENT_FALLBACK (the global threshold) couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the environment threshold calculation.
+    EnumUserType:
+      type: string
+      enum: [EXTERNAL]
+      description: A string that specifies the type of user associated with the event. Options are EXTERNAL.
+    ObjectEnvironment:
+      type: object
+      readOnly: true
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the environment associated with the object.
     P1Error:
       type: object
       properties: 
@@ -73,32 +136,6 @@ components:
                   maximumValue:
                     description: The maximum value allowed for the request.
                     type: integer
-    EntityArray:
-      type: object
-      properties:
-        '_embedded':
-          type: object
-          properties:
-            riskPolicySets:
-              type: array
-              items:
-                $ref: '#/components/schemas/RiskPolicySet'
-            riskPredictors:
-              type: array
-              items:
-                $ref: '#/components/schemas/RiskPredictor'
-        count:
-          type: number
-        size:
-          type: number
-    ObjectEnvironment:
-      type: object
-      readOnly: true
-      properties:
-        id:
-          type: string
-          readOnly: true
-          description: A string that specifies the environment associated with the object.
     RiskEvaluation:
       type: object
       properties:
@@ -146,8 +183,7 @@ components:
           type: object
           properties: 
             level:
-              type: string
-              enum: [LOW, MEDIUM, HIGH]
+              $ref: '#/components/schemas/EnumRiskLevel'
               description: A string that specifies the risk level of the evaluated IP address. Options are LOW, MEDIUM, and HIGH. If the score is less than 55, the level is LOW; if the score is greater than 77, the level is HIGH; if the score is between 55 and 77, the level is MEDIUM. Note that these guidelines could change based on data analytics and product consideration. If the ipAddressReputation.score is unknown, NULL is returned.
             score:
               type: integer
@@ -156,8 +192,7 @@ components:
           type: object
           properties: 
             level:
-              type: string
-              enum: [LOW, MEDIUM, HIGH]
+              $ref: '#/components/schemas/EnumRiskLevel'
               description: An enum indicating whether the number of distinct IPs for the user in the past hour is flagged as LOW, MEDIUM, or HIGH.
             reason:
               type: string
@@ -173,14 +208,7 @@ components:
                   type: integer
                   description: An integer indicating the value calculated for the medium threshold. If the user accessed more than the medium number of IPs during the past hour, they're flagged as a MEDIUM ipVelocityByUser.level.
                 source:
-                  type: string
-                  enum: [MIN_NOT_REACHED, CALCULATED, ENVIRONMENT_FALLBACK, DEFAULT_FALLBACK]
-                  description:  >-
-                    An enum indicating the source used to calculate the threshold. This can be
-                    MIN_NOT_REACHED. If the measure is less than every.minSample, the threshold isn't calculated. Instead, a value of LOW is automatically assigned. If less than five IPs were used by the user during the past hour, MIN_NOT_REACHED is set.
-                    CALCULATED. Indicates the threshold is guaranteed to be calculated.
-                    ENVIRONMENT_FALLBACK. Indicates a global threshold calculated for the entire environment is used. The global threshold is used when the ipVelocityByUser.threshold couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the threshold calculation.
-                    DEFAULT_FALLBACK. Indicates the default threshold defined for the predictor (in threshold.medium or threshold.high) is used. The default threshold is used when ENVIRONMENT_FALLBACK (the global threshold) couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the environment threshold calculation.
+                  $ref: '#/components/schemas/EnumThresholdSource'
                 calculatedAt:
                   type: string
                   description: A date-time indicating the timestamp for the calculated threshold.
@@ -201,8 +229,7 @@ components:
           type: object
           properties: 
             level:
-              type: string
-              enum: [LOW, MEDIUM, HIGH]
+              $ref: '#/components/schemas/EnumRiskLevel'
               description: An enum indicating whether the calculated number of users per IP is LOW, MEDIUM, or HIGH.
             reason:
               type: string
@@ -218,14 +245,7 @@ components:
                   type: integer
                   description: An integer indicating the value calculated for the medium threshold. If the IP was accessed by more than the medium number of users during the past hour, the IP is flagged as a MEDIUM userVelocityByIp.level
                 source:
-                  type: string
-                  enum: [MIN_NOT_REACHED, CALCULATED, ENVIRONMENT_FALLBACK, DEFAULT_FALLBACK]
-                  description:  >-
-                    An enum indicating the source used to calculate the threshold. This can be:
-                    MIN_NOT_REACHED. If the measure is less than every.minSample, the threshold isn't calculated. Instead, a value of LOW is automatically assigned.
-                    CALCULATED. Indicates the threshold was calculated.
-                    ENVIRONMENT_FALLBACK. Indicates a global threshold calculated for the entire environment is used. The global threshold is used when the userVelocityByIp.threshold couldn't be calculated for the user, generally due to a lack of past transactions for the risk predictor to use for the threshold calculation.
-                    DEFAULT_FALLBACK. Indicates the default threshold defined for the predictor (in threshold.medium or threshold.high) is used. The default threshold is used when ENVIRONMENT_FALLBACK (the global threshold) couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the global threshold calculation.
+                  $ref: '#/components/schemas/EnumThresholdSource'
                 calculatedAt:
                     type: string
                     description: A date-time indicating the timestamp for the calculated threshold.
@@ -297,8 +317,7 @@ components:
           type: object
           properties:
             level:
-              type: string
-              enum: [LOW, MEDIUM, HIGH]
+              $ref: '#/components/schemas/EnumRiskLevel'
               description: A string that specifies the risk score calculated for the user behavior for all transactions associated with the accessing device, and for the current authentication attempt. Options are LOW, MEDIUM, and HIGH. This information is available only if customers have agreed to data consent and the intelligence.allowDataConsent property in the PingOne license is set to true.
             reason:
               type: string
@@ -307,8 +326,7 @@ components:
           type: object
           properties:
             level:
-              type: string
-              enum: [LOW, MEDIUM, HIGH]
+              $ref: '#/components/schemas/EnumRiskLevel'
               description: A string that specifies the risk score calculated for the user behavior within the organization associated with the accessing device, and for the current authentication attempt. Options are LOW, MEDIUM, and HIGH. This information is available only if customers have agreed to data consent and the intelligence.allowDataConsent property in the PingOne license is set to true.
             reason:
               type: string
@@ -389,16 +407,12 @@ components:
             audio:
               type: string
         completionStatus:
-          type: string
-          enum: [FAILED, IN_PROGRESS, SUCCESS]
-          description: A string that specifies the state of the transaction. Options are FAILED, IN_PROGRESS, and SUCCESS. If a value is not provided, the value defaults to IN_PROGRESS. The value of this property can be changed only if its current state is IN_PROGRESS.
+          $ref: '#/components/schemas/EnumCompletionStatus'
         evaluatedFactors:
           type: object
           properties:
             status:
-              type: string
-              enum: [FAILED, IN_PROGRESS, SUCCESS]
-              description: A string that specifies the state of the transaction. Options are FAILED, IN_PROGRESS, and SUCCESS.
+              $ref: '#/components/schemas/EnumCompletionStatus'
             type:
               type: string
               description: A string that specifies the transaction type.
@@ -409,9 +423,7 @@ components:
           type: object
           properties:
             type:
-              type: string
-              enum: [AUTHENTICATION]
-              description: A string that specifies the flow type for the event. The only option (and default) is AUTHENTICATION.
+              $ref: '#/components/schemas/EnumFlowType'
         origin:
           type: string
           description: A string that specifies the calling service.
@@ -442,9 +454,7 @@ components:
               type: string
               description: A string that specifies the name of the user associated with the event (maximum size 1024 characters).
             type:
-              type: string
-              enum: [EXTERNAL]
-              description: A string that specifies the type of user associated with the event. Options are EXTERNAL. This is a required property.
+              $ref: '#/components/schemas/EnumUserType'
             groups:
               type: array
               description: An array of group names.
@@ -458,9 +468,7 @@ components:
             - id
             - type
         sharingType:
-          type: string
-          enum: [UNSPECIFIED, SHARED, PRIVATE]
-          description: A string that specifies the device sharing type. Options are UNSPECIFIED, SHARED, and PRIVATE.
+          $ref: '#/components/schemas/EnumEventSharingType'
       required:
         - ip
         - user
@@ -468,14 +476,11 @@ components:
       type: object
       properties:
         type:
-          type: string
+          $ref: '#/components/schemas/EnumResultType'
           readOnly: true
-          enum: [VALUE]
-          description: A string that specifies the risk evaluation result type. Options are VALUE.
         level:
-          type: string
+          $ref: '#/components/schemas/EnumRiskLevel'
           readOnly: true
-          enum: [HIGH, MEDIUM, LOW]
           description: A string that specifies the risk evaluation result level. Options are HIGH, MEDIUM, and LOW.
         value:
           type: string
@@ -590,11 +595,9 @@ components:
       type: object
       properties:
         level:
-          type: string
-          enum: [LOW, MEDIUM, HIGH]
+          $ref: '#/components/schemas/EnumRiskLevel'
         type:
-          type: string
-          enum: [VALUE]
+          $ref: '#/components/schemas/EnumResultType'
         value:
           type: string
       required:
@@ -613,9 +616,7 @@ components:
           type: string
           description: A string type. A unique name for the predictor. This property is immutable; it cannot be modified after initial creation. The value must be alpha-numeric, with no special characters or spaces. This name is used in the API both for policy configuration, and in the Risk Evaluation response (under details).
         type:
-          type: string
-          enum: [VELOCITY, USER_RISK_BEHAVIOR, MAP]
-          description: An enum type. This can be either VELOCITY, USER_RISK_BEHAVIOR, or MAP
+          $ref: '#/components/schemas/EnumPredictorType'
         description:
           type: string
           description: A string type. This specifies the desription of the risk predictor. Maximum length is 1024 characters.
@@ -641,12 +642,10 @@ components:
                 In the weighted policy, the predictor will have a weight of 0.
               properties:
                 level:
-                  type: string
-                  enum: [HIGH,MEDIUM,LOW]
+                  $ref: '#/components/schemas/EnumRiskLevel'
                   description: A string that identifies the risk level. Options are HIGH, MEDIUM, and LOW.
                 type:
-                  type: string
-                  enum: [VALUE]
+                  $ref: '#/components/schemas/EnumResultType'
               required:
                 - level
           required:
