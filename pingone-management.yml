@@ -1568,22 +1568,138 @@ components:
         - $ref: '#/components/schemas/SignOnPolicyActionIDP'
         - $ref: '#/components/schemas/SignOnPolicyActionAgreement'
         - $ref: '#/components/schemas/SignOnPolicyActionProgressiveProfiling'
+    SignOnPolicyActionCommonConditionGreater:
+      type: object
+      properties:
+        greater:
+          type: integer
+          description: An integer that specifies the maximum number of seconds to wait since the last sign on before prompting for a new sign-on action.
+          minimum: 1
+        secondsSince:
+          type: string
+          description: A string representing a condition variable.  For more information, see documenation at https://apidocs.pingidentity.com/pingone/platform/v1/api/#sign-on-policy-actions .
+      required:
+        - greater
+        - secondsSince
+    SignOnPolicyActionCommonConditionIPRange:
+      type: object
+      properties:
+        contains:
+          type: string
+        ipRange:
+          type: array
+          items:
+            type: string
+      required:
+        - contains
+        - ipRange
+    SignOnPolicyActionCommonConditionIPRisk:
+      type: object
+      properties:
+        ipRisk:
+          type: object
+          properties:
+            minScore:
+              type: integer
+              minimum: 1
+            maxScore:
+              type: integer
+              minimum: 1
+          required:
+            - minScore
+            - maxScore
+        valid:
+          type: string
+      required:
+        - ipRisk
+        - valid
+    SignOnPolicyActionCommonConditionGeovelocity:
+      type: object
+      properties:
+        geoVelocity:
+          type: string
+        valid:
+          type: object
+          properties:
+            previousSuccessfulAuthenticationIp:
+              type: string
+            previousSuccessfulAuthenticationTime:
+              type: string
+          required:
+            - previousSuccessfulAuthenticationIp
+            - previousSuccessfulAuthenticationTime
+      required:
+        - geoVelocity
+        - valid
+    SignOnPolicyActionCommonConditionAnonymousNetwork:
+      type: object
+      properties:
+        anonymousNetwork:
+          type: array
+          items:
+            type: string
+        valid:
+          type: string
+      required:
+        - anonymousNetwork
+        - valid
+    SignOnPolicyActionCommonConditionEquals:
+      type: object
+      properties:
+        value:
+          type: string
+        equals:
+          type: string
+      required:
+        - value
+        - equals
+    SignOnPolicyActionCommonConditionOr:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGreater'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRisk'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRange'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGeovelocity'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnonymousNetwork'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionEquals'
+    SignOnPolicyActionCommonConditionAnd:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGreater'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRisk'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRange'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGeovelocity'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnonymousNetwork'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionEquals'
+    SignOnPolicyActionCommonConditionNot:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGreater'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRisk'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRange'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGeovelocity'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnonymousNetwork'
+          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionEquals'
     SignOnPolicyActionCommon:
       type: object
       properties:
         _links:
           type: object
           readOnly: true
-        conditions:
-          type: object
-          properties:
-            ipRange:
-              type: string
-              description: A string that specifies the supported network IP addresses expressed as classless inter-domain routing (CIDR) strings.
-            secondsSince:
-              type: integer
-              description: An integer that specifies the maximum number of minutes to wait since the last sign on before prompting for a new sign-on action.
-              minimum: 1
+        condition:
+          oneOf:
+            - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionOr'
+            - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnd'
+            - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionNot'
+            - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGreater'
+            - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRisk'
+            - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRange'
+            - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGeovelocity'
+            - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnonymousNetwork'
+            - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionEquals'
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
         id:
