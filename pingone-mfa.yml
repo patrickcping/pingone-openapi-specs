@@ -25,6 +25,166 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
+    DeviceAuthenticationPolicyOfflineDevice:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Enabled or disabled in the policy.
+        otp:
+          type: object
+          properties:
+            lifetime:
+              type: object
+              properties:
+                duration:
+                  type: integer
+                  description: The duration (number of time units) that the passcode is valid before it expires.
+                timeUnit:
+                  $ref: '#/components/schemas/EnumTimeUnit'
+            failure:
+              type: object
+              properties:
+                count:
+                  type: integer
+                  description: The maximum number of times that the OTP entry can fail for a user, before they are blocked.
+                coolDown:
+                  type: object
+                  properties:
+                    duration:
+                      type: integer
+                      description: The duration (number of time units) the user is blocked after reaching the maximum number of passcode failures.
+                    timeUnit:
+                      $ref: '#/components/schemas/EnumTimeUnit'
+    DeviceAuthenticationPolicy:
+      type: object
+      properties:
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        id:
+          type: string
+          description: Device authentication policy's UUID.
+          readOnly: true
+        name:
+          type: string
+          description: Device authentication policy's name.
+        sms:
+          $ref: '#/components/schemas/DeviceAuthenticationPolicyOfflineDevice'
+        voice:
+          $ref: '#/components/schemas/DeviceAuthenticationPolicyOfflineDevice'
+        email:
+          $ref: '#/components/schemas/DeviceAuthenticationPolicyOfflineDevice'
+        mobile:
+          type: object
+          description: Mobile device authentication policy settings.
+          properties:
+            enabled:
+              type: boolean
+              description: Enabled or disabled in the policy.
+            otp:
+              type: object
+              properties:
+                window:
+                  type: object
+                  properties:
+                    failure:
+                      type: object
+                      properties:
+                        count:
+                          type: integer
+                          description: The maximum number of times that the OTP entry can fail for a user, before they are blocked.
+                        coolDown:
+                          type: object
+                          properties:
+                            duration:
+                              type: integer
+                              description: The duration (number of time units) the user is blocked after reaching the maximum number of passcode failures.
+                            timeUnit:
+                              $ref: '#/components/schemas/EnumTimeUnit'
+            applications:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The application's ID.
+                  push:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                        description: Specifies whether push notification is enabled or disabled for the policy.
+                  otp:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                        description: Specifies whether OTP authentication is enabled or disabled for the policy.
+                  deviceAuthorization:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                        description: Specifies the enabled or disabled state of automatic MFA for native devices paired with the user, for the specified application.
+                      extraVerification:
+                        type: string
+                        description: Specifies the level of further verification when deviceAuthorization is enabled. The PingOne platform performs an extra verification check by sending a “silent” push notification to the customer native application, and receives a confirmation in return.
+                        enum: [disabled,permissive,restrictive]
+                  autoEnrollment:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                        description: Set to true if you want the application to allow Auto Enrollment. Auto Enrollment means that the user can authenticate for the first time from an unpaired device, and the successful authentication will result in the pairing of the device for MFA.
+        totp:
+          type: object
+          description: TOTP device authentication policy settings.
+          properties:
+            enabled:
+              type: boolean
+              description: Enabled or disabled in the policy.
+            otp:
+              type: object
+              properties:
+                failure:
+                  type: object
+                  properties:
+                    count:
+                      type: integer
+                      description: The maximum number of times that the OTP entry can fail for a user, before they are blocked.
+                    coolDown:
+                      type: object
+                      properties:
+                        duration:
+                          type: integer
+                          description: The duration (number of time units) the user is blocked after reaching the maximum number of passcode failures.
+                        timeUnit:
+                          $ref: '#/components/schemas/EnumTimeUnit'
+        securityKey:
+          type: object
+          description: Security Key
+          properties:
+            enabled:
+              type: boolean
+              description: Enabled or disabled in the policy.
+        platform:
+          type: object
+          description: FIDO2 biometrics
+          properties:
+            enabled:
+              type: boolean
+              description: Enabled or disabled in the policy.
+        default:
+          type: boolean
+          description: The default policy for Flow Manager.
+        forSignOnPolicy:
+          type: boolean
+          deprecated: true
+        updatedAt:
+          type: string
+          readOnly: true
+          description: The time the resource was last updated.
     EntityArray:
       type: object
       properties:
@@ -37,6 +197,10 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/MFAPushCredentialAPNS'
                   - $ref: '#/components/schemas/MFAPushCredentialFCM'
+            deviceAuthenticationPolicies:
+              type: array
+              items:
+                $ref: '#/components/schemas/DeviceAuthenticationPolicy'
         count:
           type: number
         size:
@@ -45,6 +209,10 @@ components:
       type: string
       enum: [APNS, FCM]
       description: A string that specifies the type of the push credentials. Mandatory. Valid values APNS, FCM
+    EnumTimeUnit:
+      type: string
+      enum: [MINUTES, SECONDS]
+      description: The type of time unit
     MFAPushCredential:
       type: object
       properties:
@@ -157,18 +325,14 @@ tags:
       documentation, direct a browser to <a
       href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
 paths:
-  /v1/environments/{envID}/applications/{appID}/pushCredentials:
+  /v1/environments/{environmentID}/applications/{appID}/pushCredentials:
     get:
       tags:
         - Applications > Application MFA Push Credentials
       summary: READ All MFA Push Credentials
       operationId: readAllMFAPushCredentials
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -214,10 +378,6 @@ paths:
         - Applications > Application MFA Push Credentials
       summary: CREATE MFA Push Credential
       operationId: createMFAPushCredential
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       requestBody:
         content:
           application/json:
@@ -229,7 +389,7 @@ paths:
                 type: FCM
                 key: key.value
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -284,18 +444,14 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/MFAPushCredentialAPNS'
                   - $ref: '#/components/schemas/MFAPushCredentialFCM'
-  /v1/environments/{envID}/applications/{appID}/pushCredentials/{pushCredID}:
+  /v1/environments/{environmentID}/applications/{appID}/pushCredentials/{pushCredID}:
     get:
       tags:
         - Applications > Application MFA Push Credentials
       summary: READ One MFA Push Credential
       operationId: readOneMFAPushCredential
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -348,10 +504,6 @@ paths:
         - Applications > Application MFA Push Credentials
       summary: UPDATE MFA Push Credential
       operationId: updateMFAPushCredential
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       requestBody:
         content:
           application/json:
@@ -368,7 +520,7 @@ paths:
                   MIGTAgEA****7HUikGZU
                   -----END PRIVATE KEY-----
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -427,17 +579,13 @@ paths:
         - Applications > Application MFA Push Credentials
       summary: DELETE MFA Push Credential
       operationId: deleteMFAPushCredential
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
         - name: Authorization
           in: header
           schema:
             type: string
           example: Bearer {{accessToken}}
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -479,17 +627,14 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{envID}/deviceAuthenticationPolicy:
+  /v1/environments/{environmentID}/deviceAuthenticationPolicies:
     get:
       tags:
         - Device Authentication Policy
-      summary: READ Device Authentication Policy
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
+      summary: READ Device Authentication Policies
+      operationId: readDeviceAuthenticationPolicies
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -522,16 +667,120 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
-  /v1/environments/{envID}/deviceAuthenticationPolicy/{deviceAuthPolicyID}:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Device Authentication Policy
+      summary: CREATE Device Authentication Policy
+      operationId: createDeviceAuthenticationPolicies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceAuthenticationPolicy'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '405':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceAuthenticationPolicy'
+  /v1/environments/{environmentID}/deviceAuthenticationPolicy/{deviceAuthPolicyID}:
+    get:
+      tags:
+        - Device Authentication Policy
+      summary: READ One Device Authentication Policy
+      operationId: readOneDeviceAuthenticationPolicy
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: deviceAuthPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceAuthenticationPolicy'
     put:
       tags:
         - Device Authentication Policy
       summary: UPDATE Device Authentication Policy
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       requestBody:
         content:
           application/json:
@@ -599,7 +848,7 @@ paths:
                   enabled: true
                 default: false
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -644,17 +893,56 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{envID}/mfaSettings:
+    delete:
+      tags:
+        - Device Authentication Policy
+      summary: DELETE Device Authentication Policy
+      operationId: deleteDeviceAuthenticationPolicy
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: deviceAuthPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
+  /v1/environments/{environmentID}/mfaSettings:
     get:
       tags:
         - MFA Settings
       summary: READ MFA Settings
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -692,10 +980,6 @@ paths:
       tags:
         - MFA Settings
       summary: UPDATE MFA Settings
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       requestBody:
         content:
           application/json:
@@ -710,7 +994,7 @@ paths:
                 authentication:
                   deviceSelection: DEFAULT_TO_FIRST
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -754,12 +1038,8 @@ paths:
       tags:
         - MFA Settings
       summary: RESET MFA Settings
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -791,15 +1071,11 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{envID}/users/{userID}/devices:
+  /v1/environments/{environmentID}/users/{userID}/devices:
     post:
       tags:
         - Users > MFA Devices
       summary: SET Device Order
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       requestBody:
         content:
           application/json:
@@ -818,7 +1094,7 @@ paths:
           schema:
             type: string
           example: application/vnd.pingidentity.devices.reorder+json
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -873,12 +1149,8 @@ paths:
       tags:
         - Users > MFA Devices
       summary: READ All MFA User Devices
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -921,17 +1193,13 @@ paths:
       tags:
         - Users > MFA Devices
       summary: DELETE Device Order
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
         - name: Content-Type
           in: header
           schema:
             type: string
           example: application/vnd.pingidentity.devices.order.remove+json
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -968,15 +1236,11 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{envID}/users/{userID}/devices/{deviceID}:
+  /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}:
     post:
       tags:
         - Users > MFA Devices
       summary: ACTIVATE MFA User Device
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       requestBody:
         content:
           application/json:
@@ -990,7 +1254,7 @@ paths:
           schema:
             type: string
           example: application/vnd.pingidentity.device.activate+json
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -1050,12 +1314,8 @@ paths:
       tags:
         - Users > MFA Devices
       summary: READ One MFA User Device
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -1103,12 +1363,8 @@ paths:
       tags:
         - Users > MFA Devices
       summary: DELETE MFA User Device
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -1150,15 +1406,11 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{envID}/users/{userID}/devices/{deviceID}/nickname:
+  /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}/nickname:
     put:
       tags:
         - Users > MFA Devices
       summary: UPDATE Device Nickname
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       requestBody:
         content:
           application/json:
@@ -1167,7 +1419,7 @@ paths:
               example:
                 nickname: My phone
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -1217,15 +1469,11 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{envID}/users/{userID}/devices/{deviceID}/logs:
+  /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}/logs:
     put:
       tags:
         - Users > MFA Devices
       summary: SEND MFA Device Logs
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       requestBody:
         content:
           application/json:
@@ -1234,7 +1482,7 @@ paths:
               example:
                 status: PENDING
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -1284,17 +1532,13 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{envID}/users/{userID}/mfaEnabled:
+  /v1/environments/{environmentID}/users/{userID}/mfaEnabled:
     get:
       tags:
         - Users > Enable Users MFA
       summary: READ User MFA Enabled
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -1337,10 +1581,6 @@ paths:
       tags:
         - Users > Enable Users MFA
       summary: UPDATE User MFA Enabled
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       requestBody:
         content:
           application/json:
@@ -1349,7 +1589,7 @@ paths:
               example:
                 mfaEnabled: true
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -1394,17 +1634,13 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{envID}/users/{userID}/pairingKeys/{pairingKeyID}:
+  /v1/environments/{environmentID}/users/{userID}/pairingKeys/{pairingKeyID}:
     get:
       tags:
         - Users > MFA Pairing Keys
       summary: READ One MFA Pairing Key
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -1452,12 +1688,8 @@ paths:
       tags:
         - Users > MFA Pairing Keys
       summary: DELETE MFA Pairing Key
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
@@ -1499,15 +1731,11 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{envID}/users/{userID}/pairingKeys:
+  /v1/environments/{environmentID}/users/{userID}/pairingKeys:
     post:
       tags:
         - Users > MFA Pairing Keys
       summary: CREATE MFA Pairing Key
-      description: >-
-        By design, PingOne requests solely comprise this collection. For
-        complete documentation, direct a browser to <a
-        href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
       requestBody:
         content:
           application/json:
@@ -1517,7 +1745,7 @@ paths:
                 applications:
                   - id: '{{appID}}'
       parameters:
-        - name: envID
+        - name: environmentID
           in: path
           schema:
             type: string
