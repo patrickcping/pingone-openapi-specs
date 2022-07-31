@@ -78,6 +78,27 @@ components:
       type: string
       enum: [FACEBOOK, GOOGLE, LINKEDIN, APPLE, TWITTER, AMAZON, YAHOO, MICROSOFT, PAYPAL, GITHUB, OPENID_CONNECT, SAML, PING_ONE]
       description: A string that identifies the type of identity provider used to authenticate the user. The default value of `PING_ONE` is set when a value for identityProvider.id is not provided. The `PING_ONE` value is the default for all pre-existing users. There is currently no search filter support for this attribute.
+    EnumIdentityProviderAttributeMappingType:
+      type: string
+      description: The mapping type. Options are CORE (This attribute is required by the schema and cannot be removed. The name and update properties cannot be changed.) or CUSTOM (All user-created attributes are of this type.)
+      enum: [CORE, CUSTOM]
+    EnumIdentityProviderAttributeMappingUpdate:
+      type: string
+      description: Indicates whether to update the user attribute in the directory with the non-empty mapped value from the IdP. Options are EMPTY_ONLY (only update the user attribute if it has an empty value); ALWAYS (always update the user attribute value).
+      enum: [EMPTY_ONLY, ALWAYS]
+    EnumIdentityProviderExt:
+      type: string
+      enum: [FACEBOOK, GOOGLE, LINKEDIN, APPLE, TWITTER, AMAZON, YAHOO, MICROSOFT, PAYPAL, GITHUB, OPENID_CONNECT, SAML]
+      description: A string that identifies the type of identity provider used to authenticate the user.
+    EnumIdentityProviderOIDCTokenAuthMethod:
+      type: string
+      description: A string that specifies the OIDC identity provider's token endpoint authentication method. Options are CLIENT_SECRET_BASIC (default), CLIENT_SECRET_POST, and NONE. This is a required property.
+      default: CLIENT_SECRET_BASIC
+      enum: [CLIENT_SECRET_BASIC, CLIENT_SECRET_POST, NONE]
+    EnumIdentityProviderSAMLSSOBinding:
+      type: string
+      description: A string that specifies the binding for the authentication request. Options are HTTP_POST and HTTP_REDIRECT.
+      enum: [HTTP_POST, HTTP_REDIRECT]
     EnumImageFormat:
       type: string
       enum: [PNG, JPG, GIF]
@@ -693,6 +714,7 @@ components:
               items:
                 oneOf:
                   - $ref:  '#/components/schemas/ApplicationAttributeMapping'
+                  - $ref:  '#/components/schemas/IdentityProviderAttribute'
                   - $ref:  '#/components/schemas/SchemaAttribute'
                   - $ref:  '#/components/schemas/ResourceAttribute'
             applications:
@@ -731,6 +753,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/GroupMembership'
+            identityProviders:
+              type: array
+              items:
+                $ref: '#/components/schemas/IdentityProvider'
             languages:
               type: array
               items:
@@ -1124,6 +1150,349 @@ components:
           description: ID of the group to nest
       required:
        - id
+    IdentityProvider:
+      oneOf:
+        - $ref: '#/components/schemas/IdentityProviderFacebook'
+        - $ref: '#/components/schemas/IdentityProviderGoogle'
+        - $ref: '#/components/schemas/IdentityProviderLinkedIn'
+        - $ref: '#/components/schemas/IdentityProviderYahoo'
+        - $ref: '#/components/schemas/IdentityProviderOIDC'
+        - $ref: '#/components/schemas/IdentityProviderAmazon'
+        - $ref: '#/components/schemas/IdentityProviderTwitter'
+        - $ref: '#/components/schemas/IdentityProviderApple'
+        - $ref: '#/components/schemas/IdentityProviderPaypal'
+        - $ref: '#/components/schemas/IdentityProviderMicrosoft'
+        - $ref: '#/components/schemas/IdentityProviderGithub'
+        - $ref: '#/components/schemas/IdentityProviderSAML'
+    IdentityProviderAttribute:
+      type: object
+      properties:
+        mappingType:
+          $ref: '#/components/schemas/EnumIdentityProviderAttributeMappingType'
+        name:
+          type: string
+          description: The user attribute, which is unique per provider. The attribute must not be defined as read only from the user schema or of type COMPLEX based on the user schema. Valid examples username, and name.first. The following attributes may not be used account, id, created, updated, lifecycle, mfaEnabled, and enabled.
+        value:
+          type: string
+          description: A placeholder referring to the attribute (or attributes) from the provider. Placeholders must be valid for the attributes returned by the IdP type and use the ${} syntax (for example, username="${email}"). For SAML, any placeholder is acceptable, and it is mapped against the attributes available in the SAML assertion after authentication. The ${samlAssertion.subject} placeholder is a special reserved placeholder used to refer to the subject name ID in the SAML assertion response.
+        update:
+          $ref: '#/components/schemas/EnumIdentityProviderAttributeMappingType'
+        id:
+          type: string
+          readOnly: true
+          description: The unique identifier for the resource.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        identityProvider:
+          type: object
+          properties:
+            id:
+              type: string
+          readOnly: true
+        createdAt:
+          type: string
+          description: The time the resource was created.
+          readOnly: true
+        updatedAt:
+          type: string
+          description: The time the resource was last updated.
+          readOnly: true
+      required:
+        - name
+        - value
+        - update
+    IdentityProviderCommon:
+      type: object
+      properties:
+        description:
+          type: string
+          description: The description of the IdP.
+        enabled:
+          $ref: '#/components/schemas/EnumEnabledStatus'
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        icon:
+          type: object
+          properties:
+            id:
+              type: string
+              description: The ID for the IdP icon.
+            href:
+              type: string
+              description: The HREF for the IdP icon.
+        id:
+          type: string
+          readOnly: true
+          description: The resource ID.
+        loginButtonIcon:
+          type: object
+          properties:
+            id:
+              type: string
+              description: The image ID for the IdP login button icon. For Facebook, Google, and LinkedIn IdPs, updates to the login button are ignored to preserve the IdP branding rules.
+            href:
+              type: string
+              description: The HREF for the IdP login button icon image file. For Facebook, Google, and LinkedIn IdPs, updates to the login button are ignored to preserve the IdP branding rules.
+        name:
+          type: string
+          description: The name of the IdP.
+        registration:
+          type: object
+          properties:
+            population:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: An external IdP to use as authoritative. Setting this attribute gives management of linked users to the IdP and also triggers just-in-time provisioning of new users. These users are created in the population indicated with registration.population.id.
+        type:
+          $ref: '#/components/schemas/EnumIdentityProviderExt'
+      required:
+        - enabled
+        - name
+        - type
+    IdentityProviderFacebook:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            appId:
+              type: string
+              description: A string that specifies the application ID from Facebook. This is a required property.
+            appSecret:
+              type: string
+              description: A string that specifies the application secret from Facebook. This is a required property.
+          required:
+            - appId
+            - appSecret
+    IdentityProviderGoogle:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            clientId:
+              type: string
+              description: A string that specifies the application ID from Google. This is a required property.
+            clientSecret:
+              type: string
+              description: A string that specifies the application secret from Google. This is a required property.
+          required:
+            - clientId
+            - clientSecret
+    IdentityProviderLinkedIn:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            clientId:
+              type: string
+              description: A string that specifies the application ID from LinkedIn. This is a required property.
+            clientSecret:
+              type: string
+              description: A string that specifies the application secret from LinkedIn. This is a required property.
+          required:
+            - clientId
+            - clientSecret
+    IdentityProviderYahoo:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            clientId:
+              type: string
+              description: A string that specifies the application ID from Yahoo. This is a required property.
+            clientSecret:
+              type: string
+              description: A string that specifies the application secret from Yahoo. This is a required property.
+          required:
+            - clientId
+            - clientSecret
+    IdentityProviderOIDC:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            authorizationEndpoint:
+              type: string
+              description: A string that specifies the the OIDC identity provider's authorization endpoint. This value must be a URL that uses https. This is a required property.
+            clientId:
+              type: string
+              description: A string that specifies the application ID from the OIDC identity provider. This is a required property.
+            clientSecret:
+              type: string
+              description: A string that specifies the application secret from the OIDC identity provider. This is a required property.
+            discoveryEndpoint:
+              type: string
+              description: A string that specifies the OIDC identity provider's discovery endpoint. This value must be a URL that uses https.
+            issuer:
+              type: string
+              description: A string that specifies the issuer to which the authentication is sent for the OIDC identity provider. This value must be a URL that uses https. This is a required property.
+            jwksEndpoint:
+              type: string
+              description: A string that specifies the OIDC identity provider's jwks endpoint. This value must be a URL that uses https. This is a required property.
+            scopes:
+              type: array
+              description: An array that specifies the scopes to include in the authentication request to the OIDC identity provider. This is a required property.
+              items:
+                type: string
+            tokenEndpoint:
+              type: string
+              description: A string that specifies the OIDC identity provider's token endpoint. This is a required property.
+            tokenEndpointAuthMethod:
+              $ref: '#/components/schemas/EnumIdentityProviderOIDCTokenAuthMethod'
+            userInfoEndpoint:
+              type: string
+              description: A string that specifies the OIDC identity provider's userInfo endpoint.
+          required:
+            - authorizationEndpoint
+            - clientId
+            - clientSecret
+            - issuer
+            - jwksEndpoint
+            - scopes
+            - tokenEndpoint
+            - tokenEndpointAuthMethod
+    IdentityProviderAmazon:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            clientId:
+              type: string
+              description: A string that specifies the application ID from Amazon. This is a required property.
+            clientSecret:
+              type: string
+              description: A string that specifies the application secret from Amazon. This is a required property.
+          required:
+            - clientId
+            - clientSecret
+    IdentityProviderTwitter:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            clientId:
+              type: string
+              description: A string that specifies the application ID from Twitter. This is a required property.
+            clientSecret:
+              type: string
+              description: A string that specifies the application secret from Twitter. This is a required property.
+          required:
+            - clientId
+            - clientSecret
+    IdentityProviderApple:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            clientId:
+              type: string
+              description: A string that specifies the application ID from Apple. This is the identifier obtained after registering a services ID in the Apple developer portal. This is a required property.
+            clientSecretSigningKey:
+              type: string
+              description: A string that specifies the private key that is used to generate a client secret. This is a required property.
+            keyId:
+              type: string
+              description: A 10-character string that Apple uses to identify an authentication key. This is a required property.
+            teamId:
+              type: string
+              description: A 10-character string that Apple uses to identify teams. This is a required property.
+          required:
+            - clientId
+            - clientSecretSigningKey
+            - keyId
+            - teamId
+    IdentityProviderPaypal:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            clientId:
+              type: string
+              description: A string that specifies the application ID from PayPal. This is a required property.
+            clientSecret:
+              type: string
+              description: A string that specifies the application secret from PayPal. This is a required property.
+            clientEnvironment:
+              type: string
+              description: A string that specifies the PayPal environment. Options are sandbox, and live. This is a required property.
+          required:
+            - clientId
+            - clientSecret
+            - clientEnvironment
+    IdentityProviderMicrosoft:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            clientId:
+              type: string
+              description: A string that specifies the application ID from Microsoft. This is a required property.
+            clientSecret:
+              type: string
+              description: A string that specifies the application secret from Microsoft. This is a required property.
+          required:
+            - clientId
+            - clientSecret
+    IdentityProviderGithub:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            clientId:
+              type: string
+              description: A string that specifies the application ID from Github. This is a required property.
+            clientSecret:
+              type: string
+              description: A string that specifies the application secret from Github. This is a required property.
+          required:
+            - clientId
+            - clientSecret
+    IdentityProviderSAML:
+      allOf:
+        - $ref: '#/components/schemas/IdentityProviderCommon'
+        - type: object
+          properties:
+            authnRequestSigned:
+              type: boolean
+              description: A boolean that specifies whether the SAML authentication request will be signed when sending to the identity provider. Set this to true if the external IDP is included in an authentication policy to be used by applications that are accessed using a mix of default URLS and custom Domains URLs.
+            idpEntityId:
+              type: string
+              description: A string that specifies the entity ID URI that is checked against the issuerId tag in the incoming response.
+            idpVerification:
+              type: object
+              properties:
+                certificates:
+                  type: array
+                  description: A array that specifies the identity provider's certificate IDs used to verify the signature on the signed assertion from the identity provider. Signing is done with a private key and verified with a public key.
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required:
+                      - id
+            spEntityId:
+              type: string
+              description: A string that specifies the service provider's entity ID, used to look up the application.
+            spSigning:
+              type: object
+              properties:
+                key:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: A string that specifies the service provider's signing key ID.
+                  required:
+                    - id
+              required:
+                - key
+            ssoBinding:
+              $ref: '#/components/schemas/EnumIdentityProviderSAMLSSOBinding'
+            ssoEndpoint:
+              type: string
+              description: A string that specifies the SSO endpoint for the authentication request.
     Image:
       type: object
       properties:
@@ -10583,6 +10952,7 @@ paths:
       tags:
         - Identity Provider Management > Identity Providers
       summary: READ All Identity Providers
+      operationId: readAllIdentityProviders
       parameters:
         - name: environmentID
           in: path
@@ -10617,24 +10987,20 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Identity Provider Management > Identity Providers
-      summary: Discover OpenID Provider Metadata
+      summary: CREATE Identity Provider
+      operationId: createIdentityProvider
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                url: https://Identity_Provider_oidc_well_known_endpoint
+              $ref: '#/components/schemas/IdentityProvider'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/vnd.pingidentity.openid-configuration.discover+json
         - name: environmentID
           in: path
           schema:
@@ -10680,12 +11046,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProvider'
   /v1/environments/{environmentID}/identityProviders/{providerID}:
     get:
       tags:
         - Identity Provider Management > Identity Providers
       summary: READ One Identity Provider
+      operationId: readOneIdentityProvider
       parameters:
         - name: environmentID
           in: path
@@ -10725,16 +11094,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProvider'
     put:
       tags:
         - Identity Provider Management > Identity Providers
       summary: UPDATE Identity Provider
+      operationId: updateIdentityProvider
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/IdentityProvider'
               example:
                 '#accountLinking':
                   filter: SCIM filter for matching to a User
@@ -10798,11 +11170,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProvider'
     delete:
       tags:
         - Identity Provider Management > Identity Providers
       summary: DELETE Identity Provider
+      operationId: deleteIdentityProvider
       parameters:
         - name: environmentID
           in: path
@@ -10848,6 +11223,7 @@ paths:
           Identity Provider Management > Identity Provider
           Attributes
       summary: READ All Identity Provider Attributes
+      operationId: readAllIdentityProviderAttributes
       parameters:
         - name: environmentID
           in: path
@@ -10887,18 +11263,21 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - >-
           Identity Provider Management > Identity Provider
           Attributes
-      summary: CREATE Identity Provider Attribute (SAML)
+      summary: CREATE Identity Provider Attribute
+      operationId: createIdentityProviderAttribute
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/IdentityProviderAttribute'
               example:
                 name: externalId
                 value: ${providerAttributes.externalId}
@@ -10954,14 +11333,17 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
-  /v1/environments/{environmentID}/identityProviders/{providerID}/attributes/{idpAttrID}:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProviderAttribute'
+  /v1/environments/{environmentID}/identityProviders/{providerID}/attributes/{providerAttributeID}:
     get:
       tags:
         - >-
           Identity Provider Management > Identity Provider
           Attributes
       summary: READ One Identity Provider Attribute
+      operationId: readOneIdentityProviderAttribute
       parameters:
         - name: environmentID
           in: path
@@ -10973,7 +11355,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: idpAttrID
+        - name: providerAttributeID
           in: path
           schema:
             type: string
@@ -11006,18 +11388,21 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProviderAttribute'
     put:
       tags:
         - >-
           Identity Provider Management > Identity Provider
           Attributes
       summary: UPDATE Identity Provider Attribute
+      operationId: updateIdentityProviderAttribute
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/IdentityProviderAttribute'
               example:
                 name: name.given
                 value: ${providerAttributes.first_name}
@@ -11033,7 +11418,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: idpAttrID
+        - name: providerAttributeID
           in: path
           schema:
             type: string
@@ -11072,13 +11457,16 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProviderAttribute'
     delete:
       tags:
         - >-
           Identity Provider Management > Identity Provider
           Attributes
       summary: DELETE Identity Provider Attribute
+      operationId: deleteIdentityProviderAttribute
       parameters:
         - name: environmentID
           in: path
@@ -11090,7 +11478,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: idpAttrID
+        - name: providerAttributeID
           in: path
           schema:
             type: string
