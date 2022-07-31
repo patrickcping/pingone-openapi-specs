@@ -181,6 +181,129 @@ components:
       type: string
       enum: [NOT_INITIATED, ENABLED, DISABLED]
       description: Indicates whether ID verification can be done for the user. This value can be NOT_INITIATED (the initial value), ENABLED, or DISABLED. If the user verification status is DISABLED, a new verification status cannot be created for that user until the status is changed to ENABLED.
+    Agreement:
+      type: object
+      properties:
+        consentCountsUpdatedAt:
+          type: string
+          description: The time the consent count metric was last updated. This value is typically updated once every 24 hours.
+          readOnly: true
+        description:
+          type: string
+          description: A string that specifies the description of the agreement.
+        enabled:
+          type: boolean
+          description: A boolean that specifies the current enabled state of the agreement. This is a required property. The agreement must support the default language to be enabled. It cannot be disabled if it is referenced by a sign-on action. When an agreement is disabled, it is not used anywhere it is configured across PingOne.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        expiredUserConsents:
+          type: integer
+          description: An integer that identifies the number of users who have consented to the agreement, but their consent has expired. This value is last calculated at the consentCountsUpdatedAt time.
+          readOnly: true
+        id:
+          type: string
+          description: A string that specifies the agreement ID.
+          readOnly: true
+        name:
+          type: string
+          description: A string that specifies the name of the agreement resource. This is a required property.
+        reconsentPeriodDays:
+          type: integer
+          description: A number that represents the number of days until a consent to this agreement expires.
+        totalUserConsents:
+          type: integer
+          description: An integer that identifies the total number of users who have consented to the agreement. This value is last calculated at the consentCountsUpdatedAt time.
+          readOnly: true
+      required:
+        - enabled
+        - name
+    AgreementLanguage:
+      type: object
+      properties:
+        agreement:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A read-only string of the ID for the agreement resource for this revision.
+          readOnly: true
+        currentRevision:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A relationship that specifies the current revision associated with this language resource. The current revision is the one shown to users for new consents in the language.
+          readOnly: true
+        displayName:
+          type: string
+          description: A string that is used as the title of the agreement for the language presented to the user. This is a required property.
+        enabled:
+          type: boolean
+          description: A boolean that maps directly with a language being enabled or displayed for the environment within the platform. This is a required property.
+        id:
+          type: string
+          description: A string that specifies the language ID.
+          readOnly: true
+        locale:
+          type: string
+          description: A string that specifies the tag for identifying the language resource associated with this agreement consent (for example, en-US). This is a required property. For more information about language tags, see Tags for Identifying Languages.
+        userExperience:
+          type: object
+          properties:
+            acceptCheckboxText:
+              type: string
+              description: A string that specifies the text next to the "accept" checkbox in the end user interface. Accepted character are unicode letters, combining marks, numeric characters, whitespace, and punctuation characters (regex ^[\p{L}\p{M}\p{N}\p{Zs}\p{P}]+$).
+              pattern: '^[\p{L}\p{M}\p{N}\p{Zs}\p{P}]+$'
+            continueButtonText:
+              type: string
+              description: A string that specifies the text of the "continue" button in the end user interface. Accepted character are unicode letters, combining marks, numeric characters, whitespace, and punctuation characters (regex ^[\p{L}\p{M}\p{N}\p{Zs}\p{P}]+$).
+              pattern: '^[\p{L}\p{M}\p{N}\p{Zs}\p{P}]+$'
+            declineButtonText:
+              type: string
+              description: A string that specifies the text of the "decline" button in the end user interface. Accepted character are unicode letters, combining marks, numeric characters, whitespace, and punctuation characters (regex ^[\p{L}\p{M}\p{N}\p{Zs}\p{P}]+$).
+              pattern: '^[\p{L}\p{M}\p{N}\p{Zs}\p{P}]+$'
+      required:
+        - displayName
+        - enabled
+        - locale
+    AgreementLanguageRevision:
+      type: object
+      properties:
+        agreement:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A read-only string of the ID for the agreement resource for this revision.
+          readOnly: true
+        contentType:
+          type: string
+          description: An immutable string that specifies the content type of text. Options are text/html and text/plain, as defined by rfc-6838 and Media Types/text. This attribute is supported in POST requests only.
+          enum: [text/html,text/plain]
+        effectiveAt:
+          type: string
+          description: A date that specifies the start date that the revision is presented to users. This property value can be modified only if the current value is a date that has not already passed. The effective date must be unique for each language agreement, and the property value can be the present date or a future date only.
+        id:
+          type: string
+          description: A read-only string that specifies the revision ID.
+          readOnly: true
+        language:
+          type: object
+          properties:
+            id:
+              type: string
+              description: A relationship that specifies the language resource associated with this revision.
+          readOnly: true
+        notValidAfter:
+          type: string
+          description: A date that specifies whether the revision is still valid in the context of all revisions for a language. This property is calculated dynamically at read time, taking into consideration the agreement language, the language enabled property, and the agreement enabled property. When a new revision is added, the notValidAfter property values for all other previous revisions might be impacted. For example, if a new revision becomes effective and it forces reconsent, then all older revisions are no longer valid.
+          readOnly: true
+        requiresReconsent:
+          type: boolean
+          description: A boolean that specifies whether the user is required to provide consent to the language revision after it becomes effective.
+        text:
+          type: string
+          description: An immutable string that specifies text or HTML for the revision. This attribute is supported in POST requests only. For more information, see contentType.
     Application:
       type: object
       properties:
@@ -561,6 +684,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/SignOnPolicyAction'
+            agreements:
+              type: array
+              items:
+                $ref: '#/components/schemas/Agreement'
             attributes:
               type: array
               items:
@@ -604,6 +731,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/GroupMembership'
+            languages:
+              type: array
+              items:
+                $ref: '#/components/schemas/AgreementLanguage'
             organizations:
               type: array
               items:
@@ -620,6 +751,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Resource'
+            revisions:
+              type: array
+              items:
+                $ref: '#/components/schemas/AgreementLanguageRevision'
             scopes:
               type: array
               items:
@@ -2793,11 +2928,12 @@ paths:
       tags:
         - Agreement Management > Agreements Resources
       summary: CREATE Agreement
+      operationId: createAgreement
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/Agreement'
               example:
                 name: Agreement_2
                 description: Terms of service agreement
@@ -2849,11 +2985,14 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
     get:
       tags:
         - Agreement Management > Agreements Resources
       summary: READ All Agreements
+      operationId: readAllAgreements
       parameters:
         - name: environmentID
           in: path
@@ -2888,12 +3027,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/environments/{environmentID}/agreements/{agreementID}:
     get:
       tags:
         - Agreement Management > Agreements Resources
       summary: READ One Agreement
+      operationId: readOneAgreement
       parameters:
         - name: environmentID
           in: path
@@ -2933,16 +3075,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
     put:
       tags:
         - Agreement Management > Agreements Resources
       summary: UPDATE Agreement
+      operationId: updateAgreement
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/Agreement'
               example:
                 name: Agreement_1_UPDATED_{{$timestamp}}
                 reconsentPeriodDays: 360
@@ -2991,11 +3136,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
     delete:
       tags:
         - Agreement Management > Agreements Resources
       summary: DELETE Agreement
+      operationId: deleteAgreement
       parameters:
         - name: environmentID
           in: path
@@ -3039,11 +3187,12 @@ paths:
       tags:
         - Agreement Management > Agreement Languages Resources
       summary: CREATE Language
+      operationId: createAgreementLanguage
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/AgreementLanguage'
               example:
                 locale: en-US
                 displayName: Language_1
@@ -3099,11 +3248,14 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgreementLanguage'
     get:
       tags:
         - Agreement Management > Agreement Languages Resources
       summary: READ All Languages
+      operationId: readAllAgreementLanguages
       parameters:
         - name: environmentID
           in: path
@@ -3143,12 +3295,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/environments/{environmentID}/agreements/{agreementID}/languages/{languageID}:
     get:
       tags:
         - Agreement Management > Agreement Languages Resources
       summary: READ One Language
+      operationId: readOneAgreementLanguage
       parameters:
         - name: environmentID
           in: path
@@ -3193,11 +3348,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgreementLanguage'
     put:
       tags:
         - Agreement Management > Agreement Languages Resources
       summary: UPDATE Language
+      operationId: updateAgreementLanguage
       requestBody:
         content:
           application/json:
@@ -3256,11 +3414,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgreementLanguage'
     delete:
       tags:
         - Agreement Management > Agreement Languages Resources
       summary: DELETE Language
+      operationId: deleteAgreementLanguage
       parameters:
         - name: environmentID
           in: path
@@ -3309,11 +3470,12 @@ paths:
       tags:
         - Agreement Management > Agreement Revisions Resources
       summary: CREATE Revision
+      operationId: createAgreementLanguageRevision
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/AgreementLanguageRevision'
               example:
                 effectiveAt: '2099-08-01T22:45:44.497Z'
                 requireReconsent: false
@@ -3374,11 +3536,14 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgreementLanguageRevision'
     get:
       tags:
         - Agreement Management > Agreement Revisions Resources
       summary: READ All Revisions
+      operationId: readAllAgreementLanguageRevisions
       parameters:
         - name: environmentID
           in: path
@@ -3423,12 +3588,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/environments/{environmentID}/agreements/{agreementID}/languages/{languageID}/revisions/{revisionID}:
     get:
       tags:
         - Agreement Management > Agreement Revisions Resources
       summary: READ One Revision
+      operationId: readOneAgreementLanguageRevision
       parameters:
         - name: environmentID
           in: path
@@ -3478,11 +3646,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgreementLanguageRevision'
     delete:
       tags:
         - Agreement Management > Agreement Revisions Resources
       summary: DELETE Revision
+      operationId: deleteAgreementLanguageRevision
       parameters:
         - name: environmentID
           in: path
