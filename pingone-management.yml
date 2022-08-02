@@ -2158,35 +2158,53 @@ components:
         - value
         - equals
     SignOnPolicyActionCommonConditionOr:
-      type: array
-      items:
-        oneOf:
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGreater'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRisk'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRange'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGeovelocity'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnonymousNetwork'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionEquals'
+      type: object
+      properties:
+        or:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionOr'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnd'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionNot'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGreater'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRisk'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRange'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGeovelocity'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnonymousNetwork'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionEquals'
     SignOnPolicyActionCommonConditionAnd:
-      type: array
-      items:
-        oneOf:
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGreater'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRisk'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRange'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGeovelocity'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnonymousNetwork'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionEquals'
+      type: object
+      properties:
+        and:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionOr'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnd'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionNot'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGreater'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRisk'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRange'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGeovelocity'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnonymousNetwork'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionEquals'
     SignOnPolicyActionCommonConditionNot:
-      type: array
-      items:
-        oneOf:
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGreater'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRisk'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRange'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGeovelocity'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnonymousNetwork'
-          - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionEquals'
+      type: object
+      properties:
+        not:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionOr'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnd'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionNot'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGreater'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRisk'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRange'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGeovelocity'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnonymousNetwork'
+              - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionEquals'
     SignOnPolicyActionCommon:
       type: object
       properties:
@@ -2195,8 +2213,8 @@ components:
           readOnly: true
         condition:
           oneOf:
-            - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionOr'
             - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnd'
+            - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionOr'
             - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionNot'
             - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionGreater'
             - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionIPRisk'
