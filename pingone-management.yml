@@ -2523,6 +2523,9 @@ components:
                   description: A string that specifies the ID of the agreement to which the user must consent. This property is required.
               required:
                 - id
+            disableDeclineOption:
+              type: boolean
+              description: When enabled, the `Do Not Accept` button will terminate the Flow and display an error message to the user.
           required:
             - agreement
     SignOnPolicyActionProgressiveProfiling:
