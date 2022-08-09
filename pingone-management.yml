@@ -25,6 +25,10 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
+    EnumApplicationAccessControlType:
+      type: string
+      description: A string that specifies the user role required to access the application. Options are ADMIN_USERS_ONLY. A user is an admin user if the user has one or more of the following roles Organization Admin, Environment Admin, Identity Data Admin, or Client Application Developer.
+      enum: [ADMIN_USERS_ONLY]
     EnumApplicationOIDCGrantType:
       type: string
       enum: [AUTHORIZATION_CODE, IMPLICIT, REFRESH_TOKEN, CLIENT_CREDENTIALS]
@@ -342,8 +346,7 @@ components:
               type: object
               properties:
                 type:
-                  type: string
-                  description: A string that specifies the user role required to access the application. Options are ADMIN_USERS_ONLY. A user is an admin user if the user has one or more of the following roles Organization Admin, Environment Admin, Identity Data Admin, or Client Application Developer.
+                  $ref: '#/components/schemas/EnumApplicationAccessControlType'
               required:
                 - type
             group:
