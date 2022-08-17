@@ -2259,10 +2259,6 @@ components:
         - $ref: '#/components/schemas/SignOnPolicyActionCommon'
         - type: object
           properties:
-            confirmIdentityProviderAttributes:
-              type: boolean
-              default: false
-              description: A boolean that specifies whether users must confirm data returned from an identity provider prior to registration. Users can modify the data and omit non-required attributes. Modified attributes are added to the user's profile during account creation. This is an optional property. If omitted, the default value is set to false.
             enforceLockoutForIdentityProviders:
               type: boolean
               description: A boolean that if set to true and if the user's account is locked (the account.canAuthenticate attribute is set to false), then social sign on with an external identity provider is prevented.
@@ -2298,6 +2294,10 @@ components:
                       description: A string that specifies the population ID associated with the newly registered user.
                   required:
                     - id
+                confirmIdentityProviderAttributes:
+                  type: boolean
+                  default: false
+                  description: A boolean that specifies whether users must confirm data returned from an identity provider prior to registration. Users can modify the data and omit non-required attributes. Modified attributes are added to the user's profile during account creation. This is an optional property. If omitted, the default value is set to false.    
               required:
                 - enabled
             socialProviders:
@@ -2406,17 +2406,13 @@ components:
                   description: The ID of the MFA policy that should be used.
               required:
                 - id
-            noDeviceMode:
+            noDevicesMode:
               $ref: '#/components/schemas/EnumSignOnPolicyNoDeviceMode'
     SignOnPolicyActionIDFirst:
       allOf:
         - $ref: '#/components/schemas/SignOnPolicyActionCommon'
         - type: object
           properties:
-            confirmIdentityProviderAttributes:
-              type: boolean
-              default: false
-              description: A boolean that specifies whether users must confirm data returned from an identity provider prior to registration. Users can modify the data and omit non-required attributes. Modified attributes are added to the user's profile during account creation. This is an optional property. If omitted, the default value is set to false.
             discoveryRules:
               type: array
               description: The list of IDP discovery rules that are evaluated in order when no user is associated with the user identifier. The maximum number of rules is 100. The condition on which this identity provider is used to authenticate the user is expressed using the PingOne policy condition language
@@ -2479,6 +2475,10 @@ components:
                       description: A string that specifies the population ID associated with the newly registered user.
                   required:
                     - id
+                confirmIdentityProviderAttributes:
+                  type: boolean
+                  default: false
+                  description: A boolean that specifies whether users must confirm data returned from an identity provider prior to registration. Users can modify the data and omit non-required attributes. Modified attributes are added to the user's profile during account creation. This is an optional property. If omitted, the default value is set to false.
               required:
                 - enabled
             socialProviders:
