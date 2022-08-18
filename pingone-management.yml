@@ -130,8 +130,8 @@ components:
       description: A string that specifies the type of resource attribute. Options are CORE - The claim is required and cannot not be removed., CUSTOM - The claim is not a CORE attribute. All created attributes are of this type.
     EnumResourceType:
       type: string
-      enum: [OPENID_CONNECT, PING_ONE_API, CUSTOM]
-      description: A string that specifies the type of resource. Options are OPENID_CONNECT, PING_ONE_API, and CUSTOM. Only the CUSTOM resource type can be created. OPENID_CONNECT specifies the built-in platform resource for OpenID Connect. PING_ONE_API specifies the built-in platform resource for PingOne.
+      enum: [OPENID_CONNECT, PINGONE_API, CUSTOM]
+      description: A string that specifies the type of resource. Options are OPENID_CONNECT, PINGONE_API, and CUSTOM. Only the CUSTOM resource type can be created. OPENID_CONNECT specifies the built-in platform resource for OpenID Connect. PINGONE_API specifies the built-in platform resource for PingOne.
     EnumRoleName:
       type: string
       description: The name of the role
