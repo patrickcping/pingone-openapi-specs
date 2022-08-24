@@ -62,6 +62,38 @@ components:
       type: string
       enum: [CORE, SCOPE, CUSTOM]
       description: A string that specifies the mapping type of the attribute. Options are CORE, SCOPE, and CUSTOM. The CORE and SCOPE mapping types are for reserved attributes managed by the API and cannot be removed. Attribute values for these mapping types can be updated. The CUSTOM mapping type is for user-defined attributes. Attributes of this type can be updated and deleted.
+    EnumCertificateKeyAlgorithm:
+      type: string
+      enum: [RSA, EC, UNKNOWN]
+      description: Specifies the key algorithm. Options are RSA, EC, and UNKNOWN.
+    EnumCertificateKeySignagureAlgorithm:
+      type: string
+      description: Specifies the signature algorithm of the key. Options are SHA256withRSA and SHA512withRSA.
+      enum: [SHA256withRSA, SHA512withRSA]
+    EnumCertificateKeyStatus:
+      type: string
+      description: Specifies the status of the key. Options are VALID, EXPIRED, NOT_YET_VALID, and REVOKED.
+      enum: [VALID, EXPIRED, NOT_YET_VALID, REVOKED]
+    EnumCertificateKeyUsageType:
+      type: string
+      description: Specifies how the certificate is used. Options are ENCRYPTION and SIGNING.
+      enum: [ENCRYPTION, SIGNING]
+    EnumCreateCertificateAcceptHeader:
+      type: string
+      enum: [application/x-pkcs7-certificates]
+    EnumCSRExportHeader:
+      type: string
+      enum: [application/pkcs10]
+    EnumCSRResponseImportHeader:
+      type: string
+      enum: [application/x-pem-file]
+    EnumCustomDomainPostHeader:
+      type: string
+      enum: [application/vnd.pingidentity.certificate.import+json, application/vnd.pingidentity.domainName.verify+json]
+    EnumCustomDomainStatus:
+      type: string
+      description: A string that specifies the status of the custom domain. Options are ACTIVE, VERIFICATION_REQUIRED, and SSL_CERTIFICATE_REQUIRED.
+      enum: [ACTIVE, VERIFICATION_REQUIRED, SSL_CERTIFICATE_REQUIRED]
     EnumEnvironmentType:
       type: string
       enum: [PRODUCTION, SANDBOX]
@@ -74,6 +106,9 @@ components:
       type: string
       enum: [LDAP, PING_FEDERATE, PING_INTELLIGENCE]
       description: A string that specifies the type of gateway resource. Options are LDAP, PING_FEDERATE and PING_INTELLIGENCE. This is a required property.
+    EnumGetKeyAcceptHeader:
+      type: string
+      enum: [application/json, application/x-pkcs7-certificates, application/x-x509-ca-cert]
     EnumHealthStatus:
       type: string
       enum: [HEALTHY, DEGRADED, UNHEALTHY]
@@ -721,6 +756,120 @@ components:
               - type
       required:
         - products
+    Certificate:
+      type: object
+      properties:
+        algorithm:
+          $ref: '#/components/schemas/EnumCertificateKeyAlgorithm'
+        createdAt:
+          type: string
+          readOnly: true
+          description: The time the resource was created.
+        default:
+          type: boolean
+          description: Specifies whether this is the default key for the specified environment.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        expiresAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was created.
+        id:
+          type: string
+          readOnly: true
+          description: Specifies the resource’s unique identifier.
+        issuerDN:
+          type: string
+          description: Specifies the distinguished name of the certificate issuer.
+        keyLength:
+          type: integer
+          description: Specifies the key length. For RSA keys, options are 2048, 3072, and 7680. For elliptical curve (EC) keys, options are 224, 256, and 384.
+        name:
+          type: string
+          description: Specifies the resource name.
+        organization:
+          $ref: '#/components/schemas/ObjectOrganization'
+        serialNumber:
+          type: integer
+          description: Specifies the serial number of the key or certificate.
+        signatureAlgorithm:
+          $ref: '#/components/schemas/EnumCertificateKeySignagureAlgorithm'
+        startsAt:
+          type: string
+          description: The time the validity period starts.
+          format: date-time
+        status:
+          $ref: '#/components/schemas/EnumCertificateKeyStatus'
+        subjectDN:
+          type: string
+          description: Specifies the distinguished name of the subject being secured.
+        usageType:
+          $ref: '#/components/schemas/EnumCertificateKeyUsageType'
+        validityPeriod:
+          type: integer
+          minimum: 1
+          description: Specifies the number of days the key is valid.
+      required:
+        - algorithm
+        - default
+        - issuerDN
+        - keyLength
+        - serialNumber
+        - signatureAlgorithm
+        - startsAt
+        - status
+        - subjectDN
+        - usageType
+        - validityPeriod
+    CustomDomain:
+      type: object
+      properties:
+        certificate:
+          type: object
+          readOnly: true
+          description: An object that specifies information about the SSL certificate used by this custom domain. If this property is not present, it indicates that an SSL certificate has not been setup for this custom domain.
+          properties:
+            expiresAt:
+              type: string
+              description: The time when the certificate expires.
+              readOnly: true
+        canonicalName:
+          type: string
+          description: A string that specifies the domain name that should be used as the value of the CNAME record in the customer’s DNS.
+          readOnly: true
+        domainName:
+          type: string
+          description: A string that specifies the resource name, which must be provided and must be unique within an environment (for example, auth.shopco.com). This is a required property.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        status:
+          $ref: '#/components/schemas/EnumCustomDomainStatus'
+      required:
+        - domainName
+    CustomDomainCertificate:
+      type: object
+      properties:
+        certificate:
+          type: string
+          description: |
+            A string that specifies the PEM-encoded certificate to import. This is a required property. The following validation is performed on the certificate: \
+            It must not be expired. \
+            It MUST not be self signed. \
+            The custom domain name MUST match one of the subject alternative name (SAN) values on the certificate.
+        intermediateCertificates:
+          type: string
+          description: A string that specifies the PEM-encoded certificate chain.
+        privateKey:
+          type: string
+          description: A string that specifies the PEM-encoded, unencrypted private key that matches the certificate's public key. This is a required property.
+      required:
+        - certificate
+        - privateKey
     EntityArray:
       type: object
       properties:
@@ -749,10 +898,18 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/ApplicationSAML'
                   - $ref: '#/components/schemas/ApplicationOIDC'
+            certificates:
+              type: array
+              items:
+                $ref: '#/components/schemas/Certificate'
             credentials:
               type: array
               items:
                 $ref: '#/components/schemas/GatewayCredential'
+            customDomains:
+              type: array
+              items:
+                $ref: '#/components/schemas/CustomDomain'
             environments:
               type: array
               items:
@@ -783,6 +940,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/IdentityProvider'
+            keys:
+              type: array
+              items:
+                $ref: '#/components/schemas/Certificate'
             languages:
               type: array
               items:
@@ -1550,6 +1711,18 @@ components:
               type: integer
               readOnly: true
               description: The height of the image (in pixels).
+    PKIFileUpload:
+      type: object
+      properties:
+        usageType:
+          type: string
+          example: ENCRYPTION
+        file:
+          type: string
+          format: binary
+      required:
+        - file
+        - usageType
     ObjectApplication:
       type: object
       readOnly: true
@@ -1566,6 +1739,14 @@ components:
           type: string
           readOnly: true
           description: A string that specifies the environment associated with the object.
+    ObjectOrganization:
+      type: object
+      readOnly: true
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the organization associated with the object.
     ObjectPopulation:
       type: object
       readOnly: true
@@ -6679,6 +6860,7 @@ paths:
       tags:
         - Certificate Management
       summary: GET Keys
+      operationId: getKeys
       parameters:
         - name: environmentID
           in: path
@@ -6713,23 +6895,22 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Certificate Management
-      summary: CREATE Key with PKCS12 File
+      summary: CREATE Key
+      operationId: createKey
       requestBody:
         content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Certificate'
           multipart/form-data:
             schema:
-              type: object
-              properties:
-                usageType:
-                  type: string
-                  example: ENCRYPTION
-                file:
-                  type: string
-                  format: binary
+              $ref: '#/components/schemas/PKIFileUpload'
       parameters:
         - name: Content-Type
           in: header
@@ -6781,18 +6962,20 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
   /v1/environments/{environmentID}/keys/{keyID}:
     get:
       tags:
         - Certificate Management
-      summary: EXPORT Public Key (X509 PEM)
+      summary: GET Key
+      operationId: getKey
       parameters:
-        - name: Content-Type
+        - name: Accept
           in: header
           schema:
-            type: string
-          example: application/x-pkcs7-certificates
+            $ref: '#/components/schemas/EnumGetKeyAcceptHeader'
         - name: environmentID
           in: path
           schema:
@@ -6831,16 +7014,27 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/x-x509-ca-cert:
+              schema:
+                type: string
+                format: byte
+            application/x-pkcs7-certificates:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
     put:
       tags:
         - Certificate Management
       summary: UPDATE Key
+      operationId: updateKey
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/Certificate'
               example:
                 default: true
       parameters:
@@ -6888,11 +7082,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
     delete:
       tags:
         - Certificate Management
       summary: DELETE Key
+      operationId: deleteKey
       parameters:
         - name: environmentID
           in: path
@@ -6936,6 +7133,7 @@ paths:
       tags:
         - Certificate Management
       summary: GET Key Applications
+      operationId: getKeyApplications
       parameters:
         - name: environmentID
           in: path
@@ -6975,12 +7173,125 @@ paths:
         '200':
           description: Successful response
           content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+  /v1/environments/{environmentID}/keys/{keyID}/csr:
+    get:
+      tags:
+        - Certificate Management
+      summary: Export a certificate signing request (CSR)
+      operationId: exportCSR
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            $ref: '#/components/schemas/EnumCSRExportHeader'
+          example: application/pkcs10
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: keyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/pkcs10:
+              schema:
+                type: string
+                format: byte
+    put:
+      tags:
+        - Certificate Management
+      summary: Import Certificate Authority (CA) Response to a CSR
+      operationId: importCSRResponse
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            $ref: '#/components/schemas/EnumCSRResponseImportHeader'
+          example: application/x-pem-file
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: keyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
             application/json: {}
   /v1/environments/{environmentID}/certificates:
     get:
       tags:
         - Certificate Management
       summary: GET Certificates
+      operationId: getCertificates
       parameters:
         - name: environmentID
           in: path
@@ -7015,28 +7326,24 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Certificate Management
       summary: CREATE Certificate with PKCS7 or PEM File
+      operationId: createCertificateFromFile
       requestBody:
         content:
           multipart/form-data:
             schema:
-              type: object
-              properties:
-                usageType:
-                  type: string
-                  example: SIGNING
-                file:
-                  type: string
-                  format: binary
+              $ref: '#/components/schemas/PKIFileUpload'
       parameters:
         - name: Content-Type
           in: header
           schema:
-            type: string
+            $ref: '#/components/schemas/EnumCreateCertificateAcceptHeader'
           example: application/x-pkcs7-certificates
         - name: environmentID
           in: path
@@ -7080,15 +7387,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/P1Error'
-        '201':
+        '202':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
   /v1/environments/{environmentID}/certificates/{certID}:
     get:
       tags:
         - Certificate Management
       summary: GET Certificate
+      operationId: getCertificate
       parameters:
         - name: environmentID
           in: path
@@ -7128,11 +7438,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
     delete:
       tags:
         - Certificate Management
       summary: DELETE Certificate
+      operationId: deleteCertificate
       parameters:
         - name: environmentID
           in: path
@@ -7176,6 +7489,7 @@ paths:
       tags:
         - Certificate Management
       summary: GET Certificate Applications
+      operationId: getCertificateApplications
       parameters:
         - name: environmentID
           in: path
@@ -7215,7 +7529,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/environments/{environmentID}/encryptions:
     post:
       tags:
@@ -7467,116 +7783,12 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/keys/{keyID}/csr:
-    get:
-      tags:
-        - Certificate Management
-      summary: Export a certificate signing request (CSR)
-      parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/pkcs10
-        - name: environmentID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: keyID
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '401':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '403':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '429':
-          description: Request was rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '500':
-          description: Uncaught error occurred.  Platform outage
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-    put:
-      tags:
-        - Certificate Management
-      summary: Import Certificate Authority (CA) Response to a CSR
-      parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/x-pem-file
-        - name: environmentID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: keyID
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '400':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '401':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '403':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '429':
-          description: Request was rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '500':
-          description: Uncaught error occurred.  Platform outage
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{environmentID}/customDomains:
     get:
       tags:
         - Custom Domains
       summary: READ All Domains
+      operationId: readAllDomains
       parameters:
         - name: environmentID
           in: path
@@ -7611,16 +7823,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Custom Domains
       summary: CREATE Domain
+      operationId: createDomain
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/CustomDomain'
               example:
                 domainName: custom-domain.example.com
       parameters:
@@ -7675,6 +7890,7 @@ paths:
       tags:
         - Custom Domains
       summary: READ One Domain
+      operationId: readOneDomain
       parameters:
         - name: environmentID
           in: path
@@ -7714,38 +7930,27 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDomain'
     post:
       tags:
         - Custom Domains
-      summary: Import Certificate
+      summary: Update Domain
+      operationId: updateDomain
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                certificate: |-
-                  -----BEGIN CERTIFICATE-----
-                  ...
-                  -----END CERTIFICATE-----
-                intermediateCertificates: |-
-                  -----BEGIN CERTIFICATE-----
-                  ...
-                  -----END CERTIFICATE-----
-                  -----BEGIN CERTIFICATE-----
-                  ...
-                  -----END CERTIFICATE-----
-                privateKey: |-
-                  -----BEGIN RSA PRIVATE KEY-----
-                  ...
-                  -----END RSA PRIVATE KEY-----
+              oneOf:
+               - $ref: '#/components/schemas/CustomDomainCertificate'
+               - {}
       parameters:
         - name: Content-Type
           in: header
           schema:
-            type: string
-          example: application/vnd.pingidentity.certificate.import+json
+            $ref: '#/components/schemas/EnumCustomDomainPostHeader'
+            example: application/vnd.pingidentity.certificate.import+json
         - name: environmentID
           in: path
           schema:
@@ -7796,11 +8001,16 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/CustomDomainCertificate'
+                  - $ref: '#/components/schemas/CustomDomain'
     delete:
       tags:
         - Custom Domains
       summary: DELETE Domain
+      operationId: deleteDomain
       parameters:
         - name: environmentID
           in: path
