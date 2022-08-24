@@ -7939,12 +7939,11 @@ paths:
       summary: Update Domain
       operationId: updateDomain
       requestBody:
+        required: false
         content:
           application/json:
             schema:
-              oneOf:
-               - $ref: '#/components/schemas/CustomDomainCertificate'
-               - {}
+              $ref: '#/components/schemas/CustomDomainCertificate'
       parameters:
         - name: Content-Type
           in: header
