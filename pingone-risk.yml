@@ -789,6 +789,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '405':
           description: Invalid request received.  Malformed JSON, malformed HTTP request.
           content:
@@ -837,6 +843,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '429':
           description: Request was rate limited
           content:
@@ -881,6 +893,12 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '403':
           description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
           content:
             application/json:
               schema:
@@ -995,6 +1013,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '429':
           description: Request was rate limited
           content:
@@ -1038,6 +1062,12 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '403':
           description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
           content:
             application/json:
               schema:
@@ -1169,6 +1199,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '405':
           description: Invalid request received.  Malformed JSON, malformed HTTP request.
           content:
@@ -1219,6 +1255,12 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '403':
           description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
           content:
             application/json:
               schema:
@@ -1280,6 +1322,12 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '403':
           description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
           content:
             application/json:
               schema:
@@ -1366,6 +1414,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '405':
           description: Invalid request received.  Malformed JSON, malformed HTTP request.
           content:
@@ -1414,6 +1468,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '429':
           description: Request was rate limited
           content:
@@ -1458,6 +1518,12 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '403':
           description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
           content:
             application/json:
               schema:
@@ -1548,6 +1614,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '429':
           description: Request was rate limited
           content:
@@ -1591,6 +1663,12 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '403':
           description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
           content:
             application/json:
               schema:
