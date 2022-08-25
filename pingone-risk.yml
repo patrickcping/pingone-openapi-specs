@@ -831,6 +831,12 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
           description: Request failed due to authorization issue.
           content:
@@ -885,6 +891,12 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
           description: Request failed due to authorization issue.
           content:
@@ -1054,6 +1066,12 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
           description: Request failed due to authorization issue.
           content:
@@ -1247,6 +1265,12 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
           description: Request failed due to authorization issue.
           content:
@@ -1456,6 +1480,12 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
           description: Request failed due to authorization issue.
           content:
@@ -1510,6 +1540,12 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
           description: Request failed due to authorization issue.
           content:
@@ -1655,6 +1691,12 @@ paths:
             type: string
           required: true
       responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
         '401':
           description: Request failed due to authorization issue.
           content:
