@@ -1340,16 +1340,10 @@ components:
     IdentityProvider:
       oneOf:
         - $ref: '#/components/schemas/IdentityProviderFacebook'
-        - $ref: '#/components/schemas/IdentityProviderGoogle'
-        - $ref: '#/components/schemas/IdentityProviderLinkedIn'
-        - $ref: '#/components/schemas/IdentityProviderYahoo'
+        - $ref: '#/components/schemas/IdentityProviderClientIDClientSecret'
         - $ref: '#/components/schemas/IdentityProviderOIDC'
-        - $ref: '#/components/schemas/IdentityProviderAmazon'
-        - $ref: '#/components/schemas/IdentityProviderTwitter'
         - $ref: '#/components/schemas/IdentityProviderApple'
         - $ref: '#/components/schemas/IdentityProviderPaypal'
-        - $ref: '#/components/schemas/IdentityProviderMicrosoft'
-        - $ref: '#/components/schemas/IdentityProviderGithub'
         - $ref: '#/components/schemas/IdentityProviderSAML'
     IdentityProviderAttribute:
       type: object
@@ -1363,7 +1357,7 @@ components:
           type: string
           description: A placeholder referring to the attribute (or attributes) from the provider. Placeholders must be valid for the attributes returned by the IdP type and use the ${} syntax (for example, username="${email}"). For SAML, any placeholder is acceptable, and it is mapped against the attributes available in the SAML assertion after authentication. The ${samlAssertion.subject} placeholder is a special reserved placeholder used to refer to the subject name ID in the SAML assertion response.
         update:
-          $ref: '#/components/schemas/EnumIdentityProviderAttributeMappingType'
+          $ref: '#/components/schemas/EnumIdentityProviderAttributeMappingUpdate'
         id:
           type: string
           readOnly: true
@@ -1391,11 +1385,14 @@ components:
     IdentityProviderCommon:
       type: object
       properties:
+        _links:
+          type: object
         description:
           type: string
           description: The description of the IdP.
         enabled:
-          $ref: '#/components/schemas/EnumEnabledStatus'
+          type: boolean
+          description: The current enabled state of the IdP.
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
         icon:
@@ -1434,6 +1431,14 @@ components:
                   description: An external IdP to use as authoritative. Setting this attribute gives management of linked users to the IdP and also triggers just-in-time provisioning of new users. These users are created in the population indicated with registration.population.id.
         type:
           $ref: '#/components/schemas/EnumIdentityProviderExt'
+        createdAt:
+          type: string
+          description: The time the resource was created.
+          readOnly: true
+        updatedAt:
+          type: string
+          description: The time the resource was last updated.
+          readOnly: true
       required:
         - enabled
         - name
@@ -1452,45 +1457,17 @@ components:
           required:
             - appId
             - appSecret
-    IdentityProviderGoogle:
+    IdentityProviderClientIDClientSecret:
       allOf:
         - $ref: '#/components/schemas/IdentityProviderCommon'
         - type: object
           properties:
             clientId:
               type: string
-              description: A string that specifies the application ID from Google. This is a required property.
+              description: A string that specifies the application ID from the provider. This is a required property.
             clientSecret:
               type: string
-              description: A string that specifies the application secret from Google. This is a required property.
-          required:
-            - clientId
-            - clientSecret
-    IdentityProviderLinkedIn:
-      allOf:
-        - $ref: '#/components/schemas/IdentityProviderCommon'
-        - type: object
-          properties:
-            clientId:
-              type: string
-              description: A string that specifies the application ID from LinkedIn. This is a required property.
-            clientSecret:
-              type: string
-              description: A string that specifies the application secret from LinkedIn. This is a required property.
-          required:
-            - clientId
-            - clientSecret
-    IdentityProviderYahoo:
-      allOf:
-        - $ref: '#/components/schemas/IdentityProviderCommon'
-        - type: object
-          properties:
-            clientId:
-              type: string
-              description: A string that specifies the application ID from Yahoo. This is a required property.
-            clientSecret:
-              type: string
-              description: A string that specifies the application secret from Yahoo. This is a required property.
+              description: A string that specifies the application secret from the provider. This is a required property.
           required:
             - clientId
             - clientSecret
@@ -1539,34 +1516,6 @@ components:
             - scopes
             - tokenEndpoint
             - tokenEndpointAuthMethod
-    IdentityProviderAmazon:
-      allOf:
-        - $ref: '#/components/schemas/IdentityProviderCommon'
-        - type: object
-          properties:
-            clientId:
-              type: string
-              description: A string that specifies the application ID from Amazon. This is a required property.
-            clientSecret:
-              type: string
-              description: A string that specifies the application secret from Amazon. This is a required property.
-          required:
-            - clientId
-            - clientSecret
-    IdentityProviderTwitter:
-      allOf:
-        - $ref: '#/components/schemas/IdentityProviderCommon'
-        - type: object
-          properties:
-            clientId:
-              type: string
-              description: A string that specifies the application ID from Twitter. This is a required property.
-            clientSecret:
-              type: string
-              description: A string that specifies the application secret from Twitter. This is a required property.
-          required:
-            - clientId
-            - clientSecret
     IdentityProviderApple:
       allOf:
         - $ref: '#/components/schemas/IdentityProviderCommon'
@@ -1607,34 +1556,6 @@ components:
             - clientId
             - clientSecret
             - clientEnvironment
-    IdentityProviderMicrosoft:
-      allOf:
-        - $ref: '#/components/schemas/IdentityProviderCommon'
-        - type: object
-          properties:
-            clientId:
-              type: string
-              description: A string that specifies the application ID from Microsoft. This is a required property.
-            clientSecret:
-              type: string
-              description: A string that specifies the application secret from Microsoft. This is a required property.
-          required:
-            - clientId
-            - clientSecret
-    IdentityProviderGithub:
-      allOf:
-        - $ref: '#/components/schemas/IdentityProviderCommon'
-        - type: object
-          properties:
-            clientId:
-              type: string
-              description: A string that specifies the application ID from Github. This is a required property.
-            clientSecret:
-              type: string
-              description: A string that specifies the application secret from Github. This is a required property.
-          required:
-            - clientId
-            - clientSecret
     IdentityProviderSAML:
       allOf:
         - $ref: '#/components/schemas/IdentityProviderCommon'
@@ -3063,93 +2984,88 @@ tags:
   - name: Accounting for Latency
   - name: Active Identity Counts
   - name: Agreement Management
-  - name: Agreement Management > Agreements Resources
-  - name: Agreement Management > Agreement Languages Resources
-  - name: Agreement Management > Agreement Revisions Resources
+  - name: Agreements Resources
+  - name: Agreement Languages Resources
+  - name: Agreement Revisions Resources
   - name: Alerting
   - name: Applications
-  - name: Applications > Applications
-  - name: Applications > Application Secret
-  - name: Applications > Application Resource Grants
-  - name: Applications > Application Sign-On Policy Assignments
-  - name: Applications > Application Role Assignments
-  - name: Applications > Application Attribute Mapping
-  - name: Applications > Application MFA Push Credentials
+  - name: Application Secret
+  - name: Application Resource Grants
+  - name: Application Sign-On Policy Assignments
+  - name: Application Role Assignments
+  - name: Application Attribute Mapping
+  - name: Application MFA Push Credentials
   - name: Audit Activities
   - name: Authentications per Application
   - name: Bill of Materials (BOM)
-  - name: Branding
-  - name: Branding > Branding Settings
-  - name: Branding > Branding Themes
+  - name: Branding Settings
+  - name: Branding Themes
   - name: Capabilities
   - name: Certificate Management
   - name: Custom Domains
   - name: Device Authentication Policy
   - name: Environments
   - name: Gateway Management
-  - name: Gateway Management > Gateways
-  - name: Gateway Management > Gateway Credentials
-  - name: Gateway Management > Gateway Instances
-  - name: Gateway Management > Gateway Role Assignments
+  - name: Gateways
+  - name: Gateway Credentials
+  - name: Gateway Instances
+  - name: Gateway Role Assignments
   - name: Groups
   - name: Identity Propagation (Provisioning)
   - name: >-
-      Identity Propagation (Provisioning) > Propagation
+      Propagation
       Revisions
-  - name: Identity Propagation (Provisioning) > Propagation Plans
-  - name: Identity Propagation (Provisioning) > Propagation Stores
+  - name: Propagation Plans
+  - name: Propagation Stores
   - name: >-
-      Identity Propagation (Provisioning) > Propagation Store
+      Propagation Store
       Metadata
-  - name: Identity Propagation (Provisioning) > Propagation Rules
+  - name: Propagation Rules
   - name: >-
-      Identity Propagation (Provisioning) > Propagation
+      Propagation
       Mappings
   - name: Identity Provider Management
-  - name: Identity Provider Management > Identity Providers
+  - name: Identity Providers
   - name: >-
-      Identity Provider Management > Identity Provider
+      Identity Provider
       Attributes
   - name: Images
   - name: Integration Catalog
   - name: Language Management
-  - name: Language Management > Languages
-  - name: Language Management > Language Localization Status
+  - name: Languages
+  - name: Language Localization Status
   - name: Licenses
   - name: Notifications
-  - name: Notifications > Notifications Templates
-  - name: Notifications > Notifications Settings
-  - name: Notifications > Notifications Settings (SMTP)
-  - name: Notifications > Phone Delivery Settings
-  - name: Notifications > Trusted Email Domains
-  - name: Notifications > Trusted Email Addresses
+  - name: Notifications Templates
+  - name: Notifications Settings
+  - name: Notifications Settings (SMTP)
+  - name: Phone Delivery Settings
+  - name: Trusted Email Domains
+  - name: Trusted Email Addresses
   - name: Organizations
   - name: Password Policies
   - name: Populations
   - name: Resources
-  - name: Resources > Resources
-  - name: Resources > Resource Scopes
-  - name: Resources > Resource Attributes
+  - name: Resource Scopes
+  - name: Resource Attributes
   - name: Roles
   - name: Schemas
   - name: Sign-On Policies
-  - name: Sign-On Policies > Sign-On Policies
-  - name: Sign-On Policies > Sign-On Policy Actions
+  - name: Sign-On Policy Actions
   - name: Subscriptions (webhooks)
   - name: Total Identities
   - name: User Activities
   - name: Users
-  - name: Users > Users
-  - name: Users > Group Membership
-  - name: Users > Enable Users
-  - name: Users > Linked Accounts
-  - name: Users > User Populations
-  - name: Users > User Passwords
-  - name: Users > User Role Assignments
-  - name: Users > User ID Verification
-  - name: Users > User Agreement Consents
-  - name: Users > User Accounts
-  - name: Users > Sessions
+  - name: Group Membership
+  - name: Enable Users
+  - name: Linked Accounts
+  - name: User Populations
+  - name: User Passwords
+  - name: User Role Assignments
+  - name: User ID Verification
+  - name: User Agreement Consents
+  - name: User Accounts
+  - name: Sessions
 paths:
   /v1/environments:
     get:
@@ -3577,7 +3493,7 @@ paths:
   /v1/environments/{environmentID}/agreements:
     post:
       tags:
-        - Agreement Management > Agreements Resources
+        - Agreements Resources
       summary: CREATE Agreement
       operationId: createAgreement
       requestBody:
@@ -3647,7 +3563,7 @@ paths:
                 $ref: '#/components/schemas/Agreement'
     get:
       tags:
-        - Agreement Management > Agreements Resources
+        - Agreements Resources
       summary: READ All Agreements
       operationId: readAllAgreements
       parameters:
@@ -3702,7 +3618,7 @@ paths:
   /v1/environments/{environmentID}/agreements/{agreementID}:
     get:
       tags:
-        - Agreement Management > Agreements Resources
+        - Agreements Resources
       summary: READ One Agreement
       operationId: readOneAgreement
       parameters:
@@ -3761,7 +3677,7 @@ paths:
                 $ref: '#/components/schemas/Agreement'
     put:
       tags:
-        - Agreement Management > Agreements Resources
+        - Agreements Resources
       summary: UPDATE Agreement
       operationId: updateAgreement
       requestBody:
@@ -3828,7 +3744,7 @@ paths:
                 $ref: '#/components/schemas/Agreement'
     delete:
       tags:
-        - Agreement Management > Agreements Resources
+        - Agreements Resources
       summary: DELETE Agreement
       operationId: deleteAgreement
       parameters:
@@ -3884,7 +3800,7 @@ paths:
   /v1/environments/{environmentID}/agreements/{agreementID}/languages:
     post:
       tags:
-        - Agreement Management > Agreement Languages Resources
+        - Agreement Languages Resources
       summary: CREATE Language
       operationId: createAgreementLanguage
       requestBody:
@@ -3958,7 +3874,7 @@ paths:
                 $ref: '#/components/schemas/AgreementLanguage'
     get:
       tags:
-        - Agreement Management > Agreement Languages Resources
+        - Agreement Languages Resources
       summary: READ All Languages
       operationId: readAllAgreementLanguages
       parameters:
@@ -4018,7 +3934,7 @@ paths:
   /v1/environments/{environmentID}/agreements/{agreementID}/languages/{languageID}:
     get:
       tags:
-        - Agreement Management > Agreement Languages Resources
+        - Agreement Languages Resources
       summary: READ One Language
       operationId: readOneAgreementLanguage
       parameters:
@@ -4082,7 +3998,7 @@ paths:
                 $ref: '#/components/schemas/AgreementLanguage'
     put:
       tags:
-        - Agreement Management > Agreement Languages Resources
+        - Agreement Languages Resources
       summary: UPDATE Language
       operationId: updateAgreementLanguage
       requestBody:
@@ -4154,7 +4070,7 @@ paths:
                 $ref: '#/components/schemas/AgreementLanguage'
     delete:
       tags:
-        - Agreement Management > Agreement Languages Resources
+        - Agreement Languages Resources
       summary: DELETE Language
       operationId: deleteAgreementLanguage
       parameters:
@@ -4215,7 +4131,7 @@ paths:
   /v1/environments/{environmentID}/agreements/{agreementID}/languages/{languageID}/revisions:
     post:
       tags:
-        - Agreement Management > Agreement Revisions Resources
+        - Agreement Revisions Resources
       summary: CREATE Revision
       operationId: createAgreementLanguageRevision
       requestBody:
@@ -4294,7 +4210,7 @@ paths:
                 $ref: '#/components/schemas/AgreementLanguageRevision'
     get:
       tags:
-        - Agreement Management > Agreement Revisions Resources
+        - Agreement Revisions Resources
       summary: READ All Revisions
       operationId: readAllAgreementLanguageRevisions
       parameters:
@@ -4359,7 +4275,7 @@ paths:
   /v1/environments/{environmentID}/agreements/{agreementID}/languages/{languageID}/revisions/{revisionID}:
     get:
       tags:
-        - Agreement Management > Agreement Revisions Resources
+        - Agreement Revisions Resources
       summary: READ One Revision
       operationId: readOneAgreementLanguageRevision
       parameters:
@@ -4428,7 +4344,7 @@ paths:
                 $ref: '#/components/schemas/AgreementLanguageRevision'
     delete:
       tags:
-        - Agreement Management > Agreement Revisions Resources
+        - Agreement Revisions Resources
       summary: DELETE Revision
       operationId: deleteAgreementLanguageRevision
       parameters:
@@ -4742,7 +4658,7 @@ paths:
   /v1/environments/{environmentID}/applications:
     get:
       tags:
-        - Applications > Applications
+        - Applications
       summary: READ All Applications
       operationId: readAllApplications
       parameters:
@@ -4796,7 +4712,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Applications > Applications
+        - Applications
       summary: CREATE Application
       operationId: createApplication
       requestBody:
@@ -4882,7 +4798,7 @@ paths:
   /v1/environments/{environmentID}/applications/{applicationID}:
     get:
       tags:
-        - Applications > Applications
+        - Applications
       summary: READ One Application
       operationId: readOneApplication
       parameters:
@@ -4943,7 +4859,7 @@ paths:
                   - $ref: '#/components/schemas/ApplicationOIDC'
     put:
       tags:
-        - Applications > Applications
+        - Applications
       summary: UPDATE Application
       operationId: updateApplication
       requestBody:
@@ -5022,7 +4938,7 @@ paths:
                   - $ref: '#/components/schemas/ApplicationOIDC'
     delete:
       tags:
-        - Applications > Applications
+        - Applications
       summary: DELETE Application
       operationId: deleteApplication
       parameters:
@@ -5078,7 +4994,7 @@ paths:
   /v1/environments/{environmentID}/applications/{applicationID}/secret:
     get:
       tags:
-        - Applications > Application Secret
+        - Application Secret
       summary: READ Application Secret
       operationId: readApplicationSecret
       parameters:
@@ -5137,7 +5053,7 @@ paths:
                 $ref: '#/components/schemas/ApplicationSecret'
     post:
       tags:
-        - Applications > Application Secret
+        - Application Secret
       summary: UPDATE Application Secret
       operationId: updateApplicationSecret
       parameters:
@@ -5201,7 +5117,7 @@ paths:
   /v1/environments/{environmentID}/applications/{applicationID}/grants:
     post:
       tags:
-        - Applications > Application Resource Grants
+        - Application Resource Grants
       summary: CREATE Grant
       operationId: createApplicationGrant
       requestBody:
@@ -5276,7 +5192,7 @@ paths:
                 $ref: '#/components/schemas/ApplicationResourceGrant'
     get:
       tags:
-        - Applications > Application Resource Grants
+        - Application Resource Grants
       summary: READ All Grants for an Application
       operationId: readAllApplicationGrants
       parameters:
@@ -5336,7 +5252,7 @@ paths:
   /v1/environments/{environmentID}/applications/{applicationID}/grants/{grantID}:
     get:
       tags:
-        - Applications > Application Resource Grants
+        - Application Resource Grants
       summary: READ One Grant for an Application
       operationId: readOneApplicationGrant
       parameters:
@@ -5400,7 +5316,7 @@ paths:
                 $ref: '#/components/schemas/ApplicationResourceGrant'
     put:
       tags:
-        - Applications > Application Resource Grants
+        - Application Resource Grants
       summary: UPDATE Grant
       operationId: updateApplicationGrant
       requestBody:
@@ -5475,7 +5391,7 @@ paths:
                 $ref: '#/components/schemas/ApplicationResourceGrant'
     delete:
       tags:
-        - Applications > Application Resource Grants
+        - Application Resource Grants
       summary: DELETE Grant
       operationId: deleteApplicationGrant
       parameters:
@@ -5537,7 +5453,7 @@ paths:
     get:
       tags:
         - >-
-          Applications > Application Sign-On Policy
+          Application Sign-On Policy
           Assignments
       summary: READ All SOP Assignments
       operationId: readAllSignOnPolicyAssignments
@@ -5598,7 +5514,7 @@ paths:
     post:
       tags:
         - >-
-          Applications > Application Sign-On Policy
+          Application Sign-On Policy
           Assignments
       summary: CREATE SOP Assignment
       operationId: createSignOnPolicyAssignment
@@ -5671,7 +5587,7 @@ paths:
     get:
       tags:
         - >-
-          Applications > Application Sign-On Policy
+          Application Sign-On Policy
           Assignments
       summary: READ One SOP Assignment
       operationId: readOneSignOnPolicyAssignment
@@ -5737,7 +5653,7 @@ paths:
     put:
       tags:
         - >-
-          Applications > Application Sign-On Policy
+          Application Sign-On Policy
           Assignments
       summary: UPDATE SOP Assignment
       operationId: updateSignOnPolicyAssignment
@@ -5808,7 +5724,7 @@ paths:
     delete:
       tags:
         - >-
-          Applications > Application Sign-On Policy
+          Application Sign-On Policy
           Assignments
       summary: DELETE SOP Assignment
       operationId: deleteSignOnPolicyAssignment
@@ -5870,7 +5786,7 @@ paths:
   /v1/environments/{environmentID}/applications/{applicationID}/roleAssignments:
     get:
       tags:
-        - Applications > Application Role Assignments
+        - Application Role Assignments
       summary: READ Application Role Assignments
       operationId: readApplicationRoleAssignments
       parameters:
@@ -5929,7 +5845,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Applications > Application Role Assignments
+        - Application Role Assignments
       summary: CREATE Application Role Assignments
       operationId: createApplicationRoleAssignment
       requestBody:
@@ -6006,7 +5922,7 @@ paths:
   /v1/environments/{environmentID}/applications/{applicationID}/roleAssignments/{roleAssignmentID}:
     get:
       tags:
-        - Applications > Application Role Assignments
+        - Application Role Assignments
       summary: READ One Application Role Assignment
       operationId: readOneApplicationRoleAssignment
       parameters:
@@ -6070,7 +5986,7 @@ paths:
                 $ref: '#/components/schemas/RoleAssignment'
     delete:
       tags:
-        - Applications > Application Role Assignments
+        - Application Role Assignments
       summary: DELETE Application Role Assignment
       operationId: deleteApplicationRoleAssignment
       parameters:
@@ -6131,7 +6047,7 @@ paths:
   /v1/environments/{environmentID}/applications/{applicationID}/attributes:
     get:
       tags:
-        - Applications > Application Attribute Mapping
+        - Application Attribute Mapping
       summary: READ All Application Attribute Mappings
       operationId: readAllApplicationAttributeMappings
       parameters:
@@ -6190,7 +6106,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Applications > Application Attribute Mapping
+        - Application Attribute Mapping
       summary: CREATE Application Attribute Mapping
       operationId: createApplicationAttributeMapping
       requestBody:
@@ -6265,7 +6181,7 @@ paths:
   /v1/environments/{environmentID}/applications/{applicationID}/attributes/{attrMappingID}:
     get:
       tags:
-        - Applications > Application Attribute Mapping
+        - Application Attribute Mapping
       summary: READ One Application Attribute Mapping
       operationId: readOneApplicationAttributeMapping
       parameters:
@@ -6329,7 +6245,7 @@ paths:
                 $ref: '#/components/schemas/ApplicationAttributeMapping'
     put:
       tags:
-        - Applications > Application Attribute Mapping
+        - Application Attribute Mapping
       summary: UPDATE Application Attribute Mapping
       operationId: updateApplicationAttributeMapping
       requestBody:
@@ -6402,7 +6318,7 @@ paths:
                 $ref: '#/components/schemas/ApplicationAttributeMapping'
     delete:
       tags:
-        - Applications > Application Attribute Mapping
+        - Application Attribute Mapping
       summary: DELETE Application Attribute Mapping
       operationId: deleteApplicationAttributeMapping
       parameters:
@@ -6841,7 +6757,7 @@ paths:
   /v1/environments/{environmentID}/brandingSettings:
     get:
       tags:
-        - Branding > Branding Settings
+        - Branding Settings
       summary: READ Branding Settings
       parameters:
         - name: Authorization
@@ -6897,7 +6813,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Branding > Branding Settings
+        - Branding Settings
       summary: UPDATE Branding Settings
       requestBody:
         content:
@@ -6964,7 +6880,7 @@ paths:
   /v1/environments/{environmentID}/themes:
     get:
       tags:
-        - Branding > Branding Themes
+        - Branding Themes
       summary: READ Branding Themes
       parameters:
         - name: Authorization
@@ -7020,7 +6936,7 @@ paths:
             application/json: {}
     post:
       tags:
-        - Branding > Branding Themes
+        - Branding Themes
       summary: CREATE Branding Theme
       requestBody:
         content:
@@ -7113,7 +7029,7 @@ paths:
   /v1/environments/{environmentID}/themes/{themeID}:
     get:
       tags:
-        - Branding > Branding Themes
+        - Branding Themes
       summary: READ One Branding Theme
       parameters:
         - name: Authorization
@@ -7174,7 +7090,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Branding > Branding Themes
+        - Branding Themes
       summary: UPDATE Branding Theme
       requestBody:
         content:
@@ -7265,7 +7181,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Branding > Branding Themes
+        - Branding Themes
       summary: DELETE Branding Theme
       parameters:
         - name: Authorization
@@ -7325,7 +7241,7 @@ paths:
   /v1/environments/{environmentID}/themes/{themeID}/default:
     get:
       tags:
-        - Branding > Branding Themes
+        - Branding Themes
       summary: READ Branding Theme Default
       parameters:
         - name: Authorization
@@ -7386,7 +7302,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Branding > Branding Themes
+        - Branding Themes
       summary: UPDATE Branding Theme Default
       requestBody:
         content:
@@ -9149,7 +9065,7 @@ paths:
   /v1/environments/{environmentID}/gateways:
     get:
       tags:
-        - Gateway Management > Gateways
+        - Gateways
       summary: READ All Gateways
       operationId: readAllGateways
       parameters:
@@ -9203,7 +9119,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Gateway Management > Gateways
+        - Gateways
       summary: CREATE Gateway
       operationId: createGateway
       requestBody:
@@ -9277,7 +9193,7 @@ paths:
   /v1/environments/{environmentID}/gateways/{gatewayID}:
     get:
       tags:
-        - Gateway Management > Gateways
+        - Gateways
       summary: READ One Gateway
       operationId: readOneGateway
       parameters:
@@ -9338,7 +9254,7 @@ paths:
                   - $ref: '#/components/schemas/GatewayLDAP'
     put:
       tags:
-        - Gateway Management > Gateways
+        - Gateways
       summary: UPDATE Gateway
       operationId: updateGateway
       requestBody:
@@ -9410,7 +9326,7 @@ paths:
                   - $ref: '#/components/schemas/GatewayLDAP'
     delete:
       tags:
-        - Gateway Management > Gateways
+        - Gateways
       summary: DELETE Gateway
       operationId: deleteGateway
       parameters:
@@ -9466,7 +9382,7 @@ paths:
   /v1/environments/{environmentID}/gateways/{gatewayID}/credentials:
     post:
       tags:
-        - Gateway Management > Gateway Credentials
+        - Gateway Credentials
       summary: CREATE Gateway Credentials
       operationId: createGatewayCredential
       parameters:
@@ -9532,7 +9448,7 @@ paths:
   /v1/environments/{environmentID}/gateways/{gatewayID}/credentials/{credentialID}:
     delete:
       tags:
-        - Gateway Management > Gateway Credentials
+        - Gateway Credentials
       summary: DELETE Gateway Credentials
       operationId: deleteGatewayCredential
       parameters:
@@ -9593,7 +9509,7 @@ paths:
   /v1/environments/{environmentID}/gateways/{gatewayID}/instances:
     get:
       tags:
-        - Gateway Management > Gateway Instances
+        - Gateway Instances
       summary: READ All Gateway Instances
       operationId: readAllGatewayInstances
       parameters:
@@ -9653,7 +9569,7 @@ paths:
   /v1/environments/{environmentID}/gateways/{gatewayID}/instances/{instanceID}:
     get:
       tags:
-        - Gateway Management > Gateway Instances
+        - Gateway Instances
       summary: READ One Gateway Instance
       operationId: readOneGatewayInstance
       parameters:
@@ -9718,7 +9634,7 @@ paths:
   /v1/environments/{environmentID}/gateways/{gatewayID}/roleAssignments:
     get:
       tags:
-        - Gateway Management > Gateway Role Assignments
+        - Gateway Role Assignments
       summary: READ Gateway Role Assignments
       operationId: readGatewayRoleAssignments
       parameters:
@@ -9777,7 +9693,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Gateway Management > Gateway Role Assignments
+        - Gateway Role Assignments
       summary: CREATE Gateway Role Assignments
       operationId: createGatewayRoleAssignment
       requestBody:
@@ -9854,7 +9770,7 @@ paths:
   /v1/environments/{environmentID}/gateways/{gatewayID}/roleAssignments/{gatewayRoleAssignmentID}:
     get:
       tags:
-        - Gateway Management > Gateway Role Assignments
+        - Gateway Role Assignments
       summary: READ One Gateway Role Assignment
       operationId: readOneGatewayRoleAssignment
       parameters:
@@ -9918,7 +9834,7 @@ paths:
                 $ref: '#/components/schemas/RoleAssignment'
     put:
       tags:
-        - Gateway Management > Gateway Role Assignments
+        - Gateway Role Assignments
       summary: UPDATE Gateway Role Assignments
       operationId: updateGatewayRoleAssignment
       requestBody:
@@ -9993,7 +9909,7 @@ paths:
                 $ref: '#/components/schemas/RoleAssignment'
     delete:
       tags:
-        - Gateway Management > Gateway Role Assignments
+        - Gateway Role Assignments
       summary: DELETE Gateway Role Assignment
       operationId: deleteGatewayRoleAssignment
       parameters:
@@ -10576,7 +10492,7 @@ paths:
     post:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Revisions
       summary: CREATE Revision
       parameters:
@@ -10636,7 +10552,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Revisions
       summary: READ Latest Revision
       parameters:
@@ -10695,7 +10611,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Revisions
       summary: READ Previous Revision
       parameters:
@@ -10759,7 +10675,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Plans
       summary: READ All Plans
       parameters:
@@ -10817,7 +10733,7 @@ paths:
     post:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Plans
       summary: CREATE Plan
       requestBody:
@@ -10884,7 +10800,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Plans
       summary: READ One Plan
       parameters:
@@ -10947,7 +10863,7 @@ paths:
     put:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Plans
       summary: UPDATE Plan
       requestBody:
@@ -11012,7 +10928,7 @@ paths:
     delete:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Plans
       summary: DELETE Plan
       parameters:
@@ -11074,7 +10990,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Stores
       summary: READ All Stores
       parameters:
@@ -11132,7 +11048,7 @@ paths:
     post:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Stores
       summary: CREATE Store (Aquera)
       requestBody:
@@ -11217,7 +11133,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Stores
       summary: READ One Store
       parameters:
@@ -11280,7 +11196,7 @@ paths:
     put:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Stores
       summary: UPDATE Store
       requestBody:
@@ -11358,7 +11274,7 @@ paths:
     delete:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Stores
       summary: DELETE Store
       parameters:
@@ -11420,7 +11336,7 @@ paths:
     post:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Stores
       summary: TEST Connection Configuration
       requestBody:
@@ -11504,7 +11420,7 @@ paths:
     post:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Store Metadata
       summary: Identity Propagation Store Metadata (SCIM)
       requestBody:
@@ -11582,7 +11498,7 @@ paths:
     post:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Store Metadata
       summary: Identity Propagation Store Metadata (Salesforce)
       requestBody:
@@ -11655,7 +11571,7 @@ paths:
     post:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Store Metadata
       summary: Identity Propagation Store Metadata (SalesforceContacts)
       requestBody:
@@ -11728,7 +11644,7 @@ paths:
     post:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Store Metadata
       summary: Identity Propagation Store Metadata (Aquera)
       requestBody:
@@ -11806,7 +11722,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Rules
       summary: READ All Rules
       parameters:
@@ -11868,7 +11784,7 @@ paths:
     post:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Rules
       summary: CREATE Rule
       requestBody:
@@ -11945,7 +11861,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Rules
       summary: READ One Rule
       parameters:
@@ -12008,7 +11924,7 @@ paths:
     delete:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Rules
       summary: DELETE Rule
       parameters:
@@ -12070,7 +11986,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Rules
       summary: READ One Plan's Rules
       parameters:
@@ -12139,7 +12055,7 @@ paths:
     put:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Rules
       summary: UPDATE Rule
       requestBody:
@@ -12216,7 +12132,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Mappings
       summary: READ One Mapping
       parameters:
@@ -12279,7 +12195,7 @@ paths:
     put:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Mappings
       summary: UPDATE Mapping
       requestBody:
@@ -12348,7 +12264,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Mappings
       summary: READ One Rule  Mapping
       parameters:
@@ -12416,7 +12332,7 @@ paths:
     post:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Mappings
       summary: CREATE Rule Mapping
       requestBody:
@@ -12489,7 +12405,7 @@ paths:
     delete:
       tags:
         - >-
-          Identity Propagation (Provisioning) > Propagation
+          Propagation
           Mappings
       summary: DELETE Mapping
       parameters:
@@ -12550,7 +12466,7 @@ paths:
   /v1/environments/{environmentID}/identityProviders:
     get:
       tags:
-        - Identity Provider Management > Identity Providers
+        - Identity Providers
       summary: READ All Identity Providers
       operationId: readAllIdentityProviders
       parameters:
@@ -12604,7 +12520,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Identity Provider Management > Identity Providers
+        - Identity Providers
       summary: CREATE Identity Provider
       operationId: createIdentityProvider
       requestBody:
@@ -12670,7 +12586,7 @@ paths:
   /v1/environments/{environmentID}/identityProviders/{providerID}:
     get:
       tags:
-        - Identity Provider Management > Identity Providers
+        - Identity Providers
       summary: READ One Identity Provider
       operationId: readOneIdentityProvider
       parameters:
@@ -12729,7 +12645,7 @@ paths:
                 $ref: '#/components/schemas/IdentityProvider'
     put:
       tags:
-        - Identity Provider Management > Identity Providers
+        - Identity Providers
       summary: UPDATE Identity Provider
       operationId: updateIdentityProvider
       requestBody:
@@ -12811,7 +12727,7 @@ paths:
                 $ref: '#/components/schemas/IdentityProvider'
     delete:
       tags:
-        - Identity Provider Management > Identity Providers
+        - Identity Providers
       summary: DELETE Identity Provider
       operationId: deleteIdentityProvider
       parameters:
@@ -12868,7 +12784,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Provider Management > Identity Provider
+          Identity Provider
           Attributes
       summary: READ All Identity Provider Attributes
       operationId: readAllIdentityProviderAttributes
@@ -12929,7 +12845,7 @@ paths:
     post:
       tags:
         - >-
-          Identity Provider Management > Identity Provider
+          Identity Provider
           Attributes
       summary: CREATE Identity Provider Attribute
       operationId: createIdentityProviderAttribute
@@ -13006,7 +12922,7 @@ paths:
     get:
       tags:
         - >-
-          Identity Provider Management > Identity Provider
+          Identity Provider
           Attributes
       summary: READ One Identity Provider Attribute
       operationId: readOneIdentityProviderAttribute
@@ -13072,7 +12988,7 @@ paths:
     put:
       tags:
         - >-
-          Identity Provider Management > Identity Provider
+          Identity Provider
           Attributes
       summary: UPDATE Identity Provider Attribute
       operationId: updateIdentityProviderAttribute
@@ -13147,7 +13063,7 @@ paths:
     delete:
       tags:
         - >-
-          Identity Provider Management > Identity Provider
+          Identity Provider
           Attributes
       summary: DELETE Identity Provider Attribute
       operationId: deleteIdentityProviderAttribute
@@ -13691,7 +13607,7 @@ paths:
   /v1/environments/{environmentID}/languages:
     get:
       tags:
-        - Language Management > Languages
+        - Languages
       summary: READ Languages
       parameters:
         - name: environmentID
@@ -13743,7 +13659,7 @@ paths:
   /v1/environments/{environmentID}/languages/{languageID}:
     get:
       tags:
-        - Language Management > Languages
+        - Languages
       summary: READ One Language
       parameters:
         - name: environmentID
@@ -13799,7 +13715,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Language Management > Languages
+        - Languages
       summary: 'UPDATE Language '
       requestBody:
         content:
@@ -13862,7 +13778,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Language Management > Languages
+        - Languages
       summary: DELETE Language
       parameters:
         - name: environmentID
@@ -13917,7 +13833,7 @@ paths:
   /v1/environments/{environmentID}/languages/:
     post:
       tags:
-        - Language Management > Languages
+        - Languages
       summary: CREATE Language
       requestBody:
         content:
@@ -13982,7 +13898,7 @@ paths:
   /v1/environments/{environmentID}/languages/{languageID}/status:
     get:
       tags:
-        - Language Management > Language Localization Status
+        - Language Localization Status
       summary: READ Language Localization Status
       parameters:
         - name: environmentID
@@ -14038,7 +13954,7 @@ paths:
             application/json: {}
     post:
       tags:
-        - Language Management > Language Localization Status
+        - Language Localization Status
       summary: CREATE Language Localization Status
       requestBody:
         content:
@@ -14110,7 +14026,7 @@ paths:
   /v1/environments/{environmentID}/languages/{languageID}/status/{l10nStatusID}:
     get:
       tags:
-        - Language Management > Language Localization Status
+        - Language Localization Status
       summary: READ One Language Localization Status
       parameters:
         - name: environmentID
@@ -14171,7 +14087,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Language Management > Language Localization Status
+        - Language Localization Status
       summary: CREATE Language Localization Status
       requestBody:
         content:
@@ -14241,7 +14157,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Language Management > Language Localization Status
+        - Language Localization Status
       summary: DELETE Language Localization Status
       parameters:
         - name: environmentID
@@ -14301,7 +14217,7 @@ paths:
   /v1/environments/{environmentID}/templates:
     get:
       tags:
-        - Notifications > Notifications Templates
+        - Notifications Templates
       summary: READ All Templates
       parameters:
         - name: environmentID
@@ -14353,7 +14269,7 @@ paths:
   /v1/environments/{environmentID}/templates/{templateName}:
     get:
       tags:
-        - Notifications > Notifications Templates
+        - Notifications Templates
       summary: READ One Template
       parameters:
         - name: environmentID
@@ -14410,7 +14326,7 @@ paths:
   /v1/environments/{environmentID}/templates/{templateName}/contents:
     get:
       tags:
-        - Notifications > Notifications Templates
+        - Notifications Templates
       summary: READ All Contents
       parameters:
         - name: environmentID
@@ -14466,7 +14382,7 @@ paths:
             application/json: {}
     post:
       tags:
-        - Notifications > Notifications Templates
+        - Notifications Templates
       summary: CREATE Push Content
       requestBody:
         content:
@@ -14539,7 +14455,7 @@ paths:
             application/json: {}
     patch:
       tags:
-        - Notifications > Notifications Templates
+        - Notifications Templates
       summary: PATCH Bulk Variant Contents
       requestBody:
         content:
@@ -14607,7 +14523,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Notifications > Notifications Templates
+        - Notifications Templates
       summary: DELETE Bulk Variant Contents
       parameters:
         - name: filter
@@ -14667,7 +14583,7 @@ paths:
   /v1/environments/{environmentID}/templates/{templateName}/contents/{contentID}:
     get:
       tags:
-        - Notifications > Notifications Templates
+        - Notifications Templates
       summary: READ One Content
       parameters:
         - name: environmentID
@@ -14728,7 +14644,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Notifications > Notifications Templates
+        - Notifications Templates
       summary: UPDATE Push Content
       requestBody:
         content:
@@ -14799,7 +14715,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Notifications > Notifications Templates
+        - Notifications Templates
       summary: DELETE Content
       parameters:
         - name: environmentID
@@ -14859,7 +14775,7 @@ paths:
   /v1/environments/{environmentID}/notificationsSettings:
     get:
       tags:
-        - Notifications > Notifications Settings
+        - Notifications Settings
       summary: READ Notifications Settings
       parameters:
         - name: environmentID
@@ -14910,7 +14826,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Notifications > Notifications Settings
+        - Notifications Settings
       summary: UPDATE Notifications Settings
       parameters:
         - name: environmentID
@@ -14961,7 +14877,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Notifications > Notifications Settings
+        - Notifications Settings
       summary: DELETE Notifications Settings
       parameters:
         - name: environmentID
@@ -15011,7 +14927,7 @@ paths:
   /v1/environments/{environmentID}/notificationsSettings/emailDeliverySettings:
     get:
       tags:
-        - Notifications > Notifications Settings (SMTP)
+        - Notifications Settings (SMTP)
       summary: READ Notifications Settings (SMTP)
       parameters:
         - name: environmentID
@@ -15062,7 +14978,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Notifications > Notifications Settings (SMTP)
+        - Notifications Settings (SMTP)
       summary: UPDATE Notifications Settings (SMTP)
       requestBody:
         content:
@@ -15129,7 +15045,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Notifications > Phone Delivery Settings
+        - Phone Delivery Settings
       summary: DELETE Phone Delivery Settings
       parameters:
         - name: environmentID
@@ -15179,7 +15095,7 @@ paths:
   /v1/environments/{environmentID}/notificationsSettings/phoneDeliverySettings:
     get:
       tags:
-        - Notifications > Phone Delivery Settings
+        - Phone Delivery Settings
       summary: READ All Phone Delivery Settings
       parameters:
         - name: environmentID
@@ -15230,7 +15146,7 @@ paths:
             application/json: {}
     post:
       tags:
-        - Notifications > Phone Delivery Settings
+        - Phone Delivery Settings
       summary: CREATE Phone Delivery Settings (Syniverse)
       requestBody:
         content:
@@ -15296,7 +15212,7 @@ paths:
   /v1/environments/{environmentID}/notificationsSettings/phoneDeliverySettings/{phoneDeliverySettingsId}:
     get:
       tags:
-        - Notifications > Phone Delivery Settings
+        - Phone Delivery Settings
       summary: READ One Phone Delivery Settings
       parameters:
         - name: environmentID
@@ -15352,7 +15268,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Notifications > Phone Delivery Settings
+        - Phone Delivery Settings
       summary: UPDATE Phone Delivery Settings
       requestBody:
         content:
@@ -15457,7 +15373,7 @@ paths:
   /v1/environments/{environmentID}/emailDomains:
     get:
       tags:
-        - Notifications > Trusted Email Domains
+        - Trusted Email Domains
       summary: READ All Trusted Email Domains
       parameters:
         - name: environmentID
@@ -15508,7 +15424,7 @@ paths:
             application/json: {}
     post:
       tags:
-        - Notifications > Trusted Email Domains
+        - Trusted Email Domains
       summary: CREATE Trusted Email Domain
       requestBody:
         content:
@@ -15573,7 +15489,7 @@ paths:
   /v1/environments/{environmentID}/emailDomains/{emailDomainID}:
     get:
       tags:
-        - Notifications > Trusted Email Domains
+        - Trusted Email Domains
       summary: READ One Trusted Email Domain
       parameters:
         - name: environmentID
@@ -15629,7 +15545,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Notifications > Trusted Email Domains
+        - Trusted Email Domains
       summary: DELETE Trusted Email Domain
       parameters:
         - name: environmentID
@@ -15684,7 +15600,7 @@ paths:
   /v1/environments/{environmentID}/emailDomains/{emailDomainID}/ownership:
     get:
       tags:
-        - Notifications > Trusted Email Domains
+        - Trusted Email Domains
       summary: READ Trusted Email Domain Ownership Status
       parameters:
         - name: environmentID
@@ -15741,7 +15657,7 @@ paths:
   /v1/environments/{environmentID}/emailDomains/{emailDomainID}/dkim:
     get:
       tags:
-        - Notifications > Trusted Email Domains
+        - Trusted Email Domains
       summary: READ Trusted Email Domain DKIM Status
       parameters:
         - name: environmentID
@@ -15798,7 +15714,7 @@ paths:
   /v1/environments/{environmentID}/emailDomains/{emailDomainID}/spf:
     get:
       tags:
-        - Notifications > Trusted Email Domains
+        - Trusted Email Domains
       summary: READ Trusted Email Domain SPF Status
       parameters:
         - name: environmentID
@@ -15855,7 +15771,7 @@ paths:
   /v1/environments/{environmentID}/emailDomains/{emailDomainID}/trustedEmails/{trustedEmailId}:
     get:
       tags:
-        - Notifications > Trusted Email Addresses
+        - Trusted Email Addresses
       summary: READ One Trusted Email Address
       parameters:
         - name: environmentID
@@ -15916,7 +15832,7 @@ paths:
             application/json: {}
     post:
       tags:
-        - Notifications > Trusted Email Addresses
+        - Trusted Email Addresses
       summary: Resend Verification Code To Email
       parameters:
         - name: Content-Type
@@ -15988,7 +15904,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Notifications > Trusted Email Addresses
+        - Trusted Email Addresses
       summary: DELETE Trusted Email Address
       parameters:
         - name: environmentID
@@ -16048,7 +15964,7 @@ paths:
   /v1/environments/{environmentID}/emailDomains/{emailDomainID}/trustedEmails:
     get:
       tags:
-        - Notifications > Trusted Email Addresses
+        - Trusted Email Addresses
       summary: READ All Trusted Email Addresses
       parameters:
         - name: environmentID
@@ -16104,7 +16020,7 @@ paths:
             application/json: {}
     post:
       tags:
-        - Notifications > Trusted Email Addresses
+        - Trusted Email Addresses
       summary: CREATE Trusted Email Address
       requestBody:
         content:
@@ -16785,7 +16701,7 @@ paths:
   /v1/environments/{environmentID}/resources:
     get:
       tags:
-        - Resources > Resources
+        - Resources
       summary: READ All Resources
       operationId: readAllResources
       parameters:
@@ -16839,7 +16755,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Resources > Resources
+        - Resources
       summary: CREATE Resource
       operationId: createResource
       requestBody:
@@ -16910,7 +16826,7 @@ paths:
   /v1/environments/{environmentID}/resources/{resourceID}:
     get:
       tags:
-        - Resources > Resources
+        - Resources
       summary: READ One Resource
       operationId: readOneResource
       parameters:
@@ -16969,7 +16885,7 @@ paths:
                 $ref: '#/components/schemas/Resource'
     put:
       tags:
-        - Resources > Resources
+        - Resources
       summary: UPDATE Resource
       operationId: updateResource
       requestBody:
@@ -17036,7 +16952,7 @@ paths:
                 $ref: '#/components/schemas/Resource'
     delete:
       tags:
-        - Resources > Resources
+        - Resources
       summary: DELETE Resource
       operationId: deleteResource
       parameters:
@@ -17092,7 +17008,7 @@ paths:
   /v1/environments/{environmentID}/resources/{resourceID}/scopes:
     get:
       tags:
-        - Resources > Resource Scopes
+        - Resource Scopes
       summary: READ All Scopes (Resource)
       operationId: readAllResourceScopes
       parameters:
@@ -17151,7 +17067,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Resources > Resource Scopes
+        - Resource Scopes
       summary: CREATE PingOne access control scope
       operationId: createResourceScope
       requestBody:
@@ -17222,7 +17138,7 @@ paths:
   /v1/environments/{environmentID}/resources/{resourceID}/scopes/{scopeID}:
     get:
       tags:
-        - Resources > Resource Scopes
+        - Resource Scopes
       summary: READ One Scope
       operationId: readOneResourceScope
       parameters:
@@ -17286,7 +17202,7 @@ paths:
                 $ref: '#/components/schemas/ResourceScope'
     put:
       tags:
-        - Resources > Resource Scopes
+        - Resource Scopes
       summary: UPDATE PingOne access control scope
       operationId: updateResourceScope
       requestBody:
@@ -17371,7 +17287,7 @@ paths:
                 $ref: '#/components/schemas/ResourceScope'
     delete:
       tags:
-        - Resources > Resource Scopes
+        - Resource Scopes
       summary: DELETE Scope
       operationId: deleteResourceScope
       parameters:
@@ -17432,7 +17348,7 @@ paths:
   /v1/environments/{environmentID}/resources/{resourceID}/attributes:
     get:
       tags:
-        - Resources > Resource Attributes
+        - Resource Attributes
       summary: READ All Resource Attributes
       operationId: readAllResourceAttributes
       parameters:
@@ -17491,7 +17407,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Resources > Resource Attributes
+        - Resource Attributes
       summary: CREATE Resource Attribute
       operationId: createResourceAttribute
       requestBody:
@@ -17565,7 +17481,7 @@ paths:
   /v1/environments/{environmentID}/resources/{resourceID}/attributes/{resourceAttrID}:
     get:
       tags:
-        - Resources > Resource Attributes
+        - Resource Attributes
       summary: READ One Resource Attribute
       operationId: readOneResourceAttribute
       parameters:
@@ -17629,7 +17545,7 @@ paths:
                 $ref: '#/components/schemas/ResourceAttribute'
     put:
       tags:
-        - Resources > Resource Attributes
+        - Resource Attributes
       summary: UPDATE Resource Attribute
       operationId: updateResourceAttribute
       requestBody:
@@ -17701,7 +17617,7 @@ paths:
                 $ref: '#/components/schemas/ResourceAttribute'
     delete:
       tags:
-        - Resources > Resource Attributes
+        - Resource Attributes
       summary: DELETE Resource Attribute
       operationId: deleteResourceAttribute
       parameters:
@@ -18293,7 +18209,7 @@ paths:
   /v1/environments/{environmentID}/signOnPolicies:
     get:
       tags:
-        - Sign-On Policies > Sign-On Policies
+        - Sign-On Policies
       summary: READ All Sign On Policies
       operationId: readAllSignOnPolicies
       parameters:
@@ -18347,7 +18263,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Sign-On Policies > Sign-On Policies
+        - Sign-On Policies
       summary: CREATE Sign On Policy
       operationId: createSignOnPolicy
       requestBody:
@@ -18413,7 +18329,7 @@ paths:
   /v1/environments/{environmentID}/signOnPolicies/{policyID}:
     get:
       tags:
-        - Sign-On Policies > Sign-On Policies
+        - Sign-On Policies
       summary: READ One Sign On Policy
       operationId: readOneSignOnPolicy
       parameters:
@@ -18472,7 +18388,7 @@ paths:
                 $ref: '#/components/schemas/SignOnPolicy'
     put:
       tags:
-        - Sign-On Policies > Sign-On Policies
+        - Sign-On Policies
       summary: UPDATE Sign On Policy
       operationId: updateSignOnPolicy
       requestBody:
@@ -18536,7 +18452,7 @@ paths:
                 $ref: '#/components/schemas/SignOnPolicy'
     delete:
       tags:
-        - Sign-On Policies > Sign-On Policies
+        - Sign-On Policies
       summary: DELETE Sign On Policy
       operationId: deleteSignOnPolicy
       parameters:
@@ -18592,7 +18508,7 @@ paths:
   /v1/environments/{environmentID}/signOnPolicies/{policyID}/actions:
     get:
       tags:
-        - Sign-On Policies > Sign-On Policy Actions
+        - Sign-On Policy Actions
       summary: READ All Sign-On Policy Actions
       operationId: readAllSignOnPolicyActions
       parameters:
@@ -18651,7 +18567,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Sign-On Policies > Sign-On Policy Actions
+        - Sign-On Policy Actions
       summary: CREATE Sign-On Policy Action
       operationId: createSignOnPolicyAction
       requestBody:
@@ -18722,7 +18638,7 @@ paths:
   /v1/environments/{environmentID}/signOnPolicies/{policyID}/actions/{actionID}:
     get:
       tags:
-        - Sign-On Policies > Sign-On Policy Actions
+        - Sign-On Policy Actions
       summary: READ One Sign-On Policy Action
       operationId: readOneSignOnPolicyAction
       parameters:
@@ -18786,7 +18702,7 @@ paths:
                 $ref: '#/components/schemas/SignOnPolicyAction'
     put:
       tags:
-        - Sign-On Policies > Sign-On Policy Actions
+        - Sign-On Policy Actions
       summary: UPDATE Sign-On Policy Action
       operationId: updateSignOnPolicyAction
       requestBody:
@@ -18855,7 +18771,7 @@ paths:
                 $ref: '#/components/schemas/SignOnPolicyAction'
     delete:
       tags:
-        - Sign-On Policies > Sign-On Policy Actions
+        - Sign-On Policy Actions
       summary: DELETE Sign-On Policy Action
       operationId: deleteSignOnPolicyAction
       parameters:
@@ -19354,7 +19270,7 @@ paths:
   /v1/environments/{environmentID}/users:
     get:
       tags:
-        - Users > Users
+        - Users
       summary: READ All Users
       operationId: readAllUsers
       parameters:
@@ -19418,7 +19334,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Users > Users
+        - Users
       summary: CREATE User
       operationId: createUser
       requestBody:
@@ -19500,7 +19416,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}:
     get:
       tags:
-        - Users > Users
+        - Users
       summary: READ User
       operationId: readUser
       parameters:
@@ -19564,7 +19480,7 @@ paths:
                 $ref: '#/components/schemas/User'
     post:
       tags:
-        - Users > User Accounts
+        - User Accounts
       summary: User Account Unlock
       parameters:
         - name: content-type
@@ -19633,7 +19549,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     put:
       tags:
-        - Users > Users
+        - Users
       summary: UPDATE User (Put)
       operationId: updateUserPut
       requestBody:
@@ -19724,7 +19640,7 @@ paths:
                 $ref: '#/components/schemas/User'
     patch:
       tags:
-        - Users > Users
+        - Users
       summary: UPDATE User (Patch)
       operationId: updateUserPatch
       requestBody:
@@ -19790,7 +19706,7 @@ paths:
                 $ref: '#/components/schemas/User'
     delete:
       tags:
-        - Users > Users
+        - Users
       summary: DELETE User
       operationId: deleteUser
       parameters:
@@ -19846,7 +19762,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/identityProvider:
     get:
       tags:
-        - Users > Users
+        - Users
       summary: READ User Identity Provider
       parameters:
         - name: environmentID
@@ -19902,7 +19818,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Users > Users
+        - Users
       summary: UPDATE User Identity Provider
       requestBody:
         content:
@@ -19967,7 +19883,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/verifyStatus:
     get:
       tags:
-        - Users > Users
+        - Users
       summary: READ user verification status
       parameters:
         - name: environmentID
@@ -20023,7 +19939,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Users > Users
+        - Users
       summary: UPDATE user verification status
       requestBody:
         content:
@@ -20087,7 +20003,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/memberOfGroups:
     post:
       tags:
-        - Users > Group Membership
+        - Group Membership
       summary: ADD User to Group
       operationId: addUserToGroup
       requestBody:
@@ -20163,7 +20079,7 @@ paths:
                 $ref: '#/components/schemas/Group'
     get:
       tags:
-        - Users > Group Membership
+        - Group Membership
       summary: READ All Group Memberships for User
       operationId: readAllGroupMembershipsForUser
       parameters:
@@ -20238,7 +20154,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/memberOfGroups/{groupID}:
     delete:
       tags:
-        - Users > Group Membership
+        - Group Membership
       summary: REMOVE User from Group
       operationId: removeUserFromGroup
       parameters:
@@ -20298,7 +20214,7 @@ paths:
           description: Successful response
     get:
       tags:
-        - Users > Group Membership
+        - Group Membership
       summary: READ One Group Membership for User
       operationId: readOneGroupMembershipForUser
       parameters:
@@ -20368,7 +20284,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/enabled:
     get:
       tags:
-        - Users > Enable Users
+        - Enable Users
       summary: READ User Enabled
       operationId: readUserEnabled
       parameters:
@@ -20427,7 +20343,7 @@ paths:
                 $ref: '#/components/schemas/UserEnabled'
     put:
       tags:
-        - Users > Enable Users
+        - Enable Users
       summary: UPDATE User Enabled
       operationId: updateUserEnabled
       requestBody:
@@ -20492,7 +20408,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/linkedAccounts:
     get:
       tags:
-        - Users > Linked Accounts
+        - Linked Accounts
       summary: READ Linked Accounts
       parameters:
         - name: environmentID
@@ -20549,7 +20465,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/linkedAccounts/{linkedAccountID}:
     get:
       tags:
-        - Users > Linked Accounts
+        - Linked Accounts
       summary: READ One Linked Account
       parameters:
         - name: environmentID
@@ -20610,7 +20526,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Users > Linked Accounts
+        - Linked Accounts
       summary: DELETE Linked Account
       parameters:
         - name: environmentID
@@ -20670,7 +20586,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/pairingKeys/{pairingKeyID}:
     get:
       tags:
-        - Users > MFA Pairing Keys
+        - MFA Pairing Keys
       summary: READ One MFA Pairing Key
       parameters:
         - name: environmentID
@@ -20731,7 +20647,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Users > MFA Pairing Keys
+        - MFA Pairing Keys
       summary: DELETE MFA Pairing Key
       parameters:
         - name: environmentID
@@ -20791,7 +20707,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/pairingKeys:
     post:
       tags:
-        - Users > MFA Pairing Keys
+        - MFA Pairing Keys
       summary: CREATE MFA Pairing Key
       requestBody:
         content:
@@ -20862,7 +20778,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/population:
     get:
       tags:
-        - Users > User Populations
+        - User Populations
       summary: READ User Population
       operationId: readUserPopulation
       parameters:
@@ -20921,7 +20837,7 @@ paths:
                 $ref: '#/components/schemas/UserPopulation'
     put:
       tags:
-        - Users > User Populations
+        - User Populations
       summary: UPDATE User Population
       operationId: updateUserPopulation
       requestBody:
@@ -20986,7 +20902,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/password:
     get:
       tags:
-        - Users > User Passwords
+        - User Passwords
       summary: READ Password State
       parameters:
         - name: environmentID
@@ -21042,7 +20958,7 @@ paths:
             application/json: {}
     post:
       tags:
-        - Users > User Passwords
+        - User Passwords
       summary: Password Locked Out
       requestBody:
         content:
@@ -21117,7 +21033,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Users > User Passwords
+        - User Passwords
       summary: UPDATE Password (Set)
       requestBody:
         content:
@@ -21188,7 +21104,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/roleAssignments:
     get:
       tags:
-        - Users > User Role Assignments
+        - User Role Assignments
       summary: READ Role Assignments
       operationId: readUserRoleAssignments
       parameters:
@@ -21247,7 +21163,7 @@ paths:
                 $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - Users > User Role Assignments
+        - User Role Assignments
       summary: CREATE User Role Assignment
       operationId: createUserRoleAssignment
       requestBody:
@@ -21324,7 +21240,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/roleAssignments/{roleAssignmentID}:
     get:
       tags:
-        - Users > User Role Assignments
+        - User Role Assignments
       summary: READ One Role Assignment
       operationId: readOneUserRoleAssignment
       parameters:
@@ -21388,7 +21304,7 @@ paths:
                 $ref: '#/components/schemas/RoleAssignment'
     delete:
       tags:
-        - Users > User Role Assignments
+        - User Role Assignments
       summary: DELETE User's Role Assignment
       operationId: deleteUserRoleAssignment
       parameters:
@@ -21449,7 +21365,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/verifyTransactions:
     get:
       tags:
-        - Users > User ID Verification
+        - User ID Verification
       summary: READ All ID Verification Transaction Records for a User
       parameters:
         - name: environmentID
@@ -21505,7 +21421,7 @@ paths:
             application/json: {}
     post:
       tags:
-        - Users > User ID Verification
+        - User ID Verification
       summary: CREATE ID Verification Transaction Record for a User
       parameters:
         - name: environmentID
@@ -21568,7 +21484,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/verifyTransactions/{transactionID}:
     get:
       tags:
-        - Users > User ID Verification
+        - User ID Verification
       summary: READ ID Verification Transaction Record for a User
       parameters:
         - name: environmentID
@@ -21629,7 +21545,7 @@ paths:
             application/json: {}
     put:
       tags:
-        - Users > User ID Verification
+        - User ID Verification
       summary: UPDATE ID Verification Transaction Record for a User
       requestBody:
         content:
@@ -21698,7 +21614,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Users > User ID Verification
+        - User ID Verification
       summary: DELETE ID Verification Transaction Record for a User
       parameters:
         - name: environmentID
@@ -21758,7 +21674,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/agreementConsents:
     get:
       tags:
-        - Users > User Agreement Consents
+        - User Agreement Consents
       summary: READ All User Agreement Consents
       parameters:
         - name: environmentID
@@ -21815,7 +21731,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/agreementConsents/{agreementID}:
     get:
       tags:
-        - Users > User Agreement Consents
+        - User Agreement Consents
       summary: READ One User Agreement Consent
       parameters:
         - name: environmentID
@@ -21876,7 +21792,7 @@ paths:
             application/json: {}
     post:
       tags:
-        - Users > User Agreement Consents
+        - User Agreement Consents
       summary: Revoke Agreement
       parameters:
         - name: Content-Type
@@ -21949,7 +21865,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/sessions:
     get:
       tags:
-        - Users > Sessions
+        - Sessions
       summary: READ All Sessions
       parameters:
         - name: environmentID
@@ -22006,7 +21922,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/sessions/{sessionID}:
     get:
       tags:
-        - Users > Sessions
+        - Sessions
       summary: READ One Session
       parameters:
         - name: environmentID
@@ -22067,7 +21983,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Users > Sessions
+        - Sessions
       summary: DELETE Session
       parameters:
         - name: environmentID
