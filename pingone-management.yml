@@ -1580,6 +1580,8 @@ components:
                         type: string
                     required:
                       - id
+              required:
+                - certificates
             spEntityId:
               type: string
               description: A string that specifies the service provider's entity ID, used to look up the application.
@@ -1601,6 +1603,12 @@ components:
             ssoEndpoint:
               type: string
               description: A string that specifies the SSO endpoint for the authentication request.
+          required:
+            - idpEntityId
+            - spEntityId
+            - idpVerification
+            - ssoBinding
+            - ssoEndpoint
     Image:
       type: object
       properties:
