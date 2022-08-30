@@ -101,11 +101,19 @@ components:
     EnumGatewayLDAPSecurity:
       type: string
       enum: [None, TLS, StartTLS]
-      description: (Optional) A string that specifies the connection security type. Options are None, TLS, and StartTLS. The default value is None.
+      description: A string that specifies the connection security type. Options are None, TLS, and StartTLS. The default value is None.
     EnumGatewayType:
       type: string
-      enum: [LDAP, PING_FEDERATE, PING_INTELLIGENCE]
-      description: A string that specifies the type of gateway resource. Options are LDAP, PING_FEDERATE and PING_INTELLIGENCE. This is a required property.
+      enum: [LDAP, PING_FEDERATE, PING_INTELLIGENCE, API_GATEWAY_INTEGRATION]
+      description: A string that specifies the type of gateway resource. Options are LDAP, PING_FEDERATE, API_GATEWAY_INTEGRATION and PING_INTELLIGENCE. This is a required property.
+    EnumGatewayPasswordAuthority:
+      type: string
+      enum: [PINGONE, LDAP]
+      description: This can be either `PINGONE` or `LDAP`. If set to `PINGONE`, PingOne authenticates with the external directory initially, then PingOne authenticates all subsequent sign-ons.
+    EnumGatewayVendor:
+      type: string
+      enum: [PingDirectory, Microsoft Active Directory, Oracle Directory Server Enterprise Edition, Oracle Unified Directory, CA Directory, OpenDJ Directory, IBM (Tivoli) Security Directory Server, LDAP v3 compliant Directory Server]
+      description: A string that specifies the LDAP vendor. Options are `PingDirectory`, `Microsoft Active Directory`, `Oracle Directory Server Enterprise Edition`, `Oracle Unified Directory`, `CA Directory`, `OpenDJ Directory`, `IBM (Tivoli) Security Directory Server`, and `LDAP v3 compliant Directory Server`.
     EnumGetKeyAcceptHeader:
       type: string
       enum: [application/json, application/x-pkcs7-certificates, application/x-x509-ca-cert]
@@ -1077,7 +1085,7 @@ components:
           description: A string that specifies the resource name, which must be provided and must be unique within an environment. Valid characters are any Unicode letter, mark, numeric character, forward slash, dot, apostrophe, underscore, space, or hyphen.
         description:
           type: string
-          description: (Optional) A string that specifies the description of the resource.
+          description: A string that specifies the description of the resource.
         type:
           $ref: '#/components/schemas/EnumGatewayType'
         enabled:
@@ -1116,6 +1124,21 @@ components:
               description: A string that specifies the bind password for the LDAP database. This is a required property.
             connectionSecurity:
               $ref: '#/components/schemas/EnumGatewayLDAPSecurity'
+            kerberos:
+              type: object
+              description: Contains the Kerberos authentication settings. Set this to null to disable Kerberos authentication.
+              properties:
+                serviceAccountPassword:
+                  type: string
+                  description: The password for the Kerberos service account.
+                serviceAccountUserPrincipalName:
+                  type: string
+                  description: The Kerberos service account user principal name (for example, "username@domain.com").
+                minutesToRetainPreviousCredentials:
+                  type: integer
+                  description: The number of minutes for which the previous credentials are persisted.
+              required:
+                - serviceAccountUserPrincipalName
             serversHostAndPort:
               type: array
               items:
@@ -1123,19 +1146,22 @@ components:
               description: An array of strings that specifies the LDAP server host name and port number (for example, ["ds1.example.com:389", "ds2.example.com:389"]).
             userTypes:
               type: array
-              description: (Optional) An array of the userTypes properties for the users to be provisioned in PingOne. userTypes specifies which user properties in PingOne correspond to the user properties in an external LDAP directory. You can use an LDAP browser to view the user properties in the external LDAP directory.
+              description: An array of the userTypes properties for the users to be provisioned in PingOne. userTypes specifies which user properties in PingOne correspond to the user properties in an external LDAP directory. You can use an LDAP browser to view the user properties in the external LDAP directory.
               items:
                 type: object
                 properties:
                   allowPasswordChanges:
                     type: boolean
-                    description: (Optional) Defaults to false if this property isn't specified in the request. If false, the user cannot change the password in the remote LDAP directory. In this case, operations for forgotten passwords or resetting of passwords are not available to a user referencing this gateway.
+                    description: Defaults to false if this property isn't specified in the request. If false, the user cannot change the password in the remote LDAP directory. In this case, operations for forgotten passwords or resetting of passwords are not available to a user referencing this gateway.
                   id:
                     type: string
-                    description: (Optional) The UUID of the user type. This correlates to the password.external.gateway.userType.id User property.
+                    description: The UUID of the user type. This correlates to the password.external.gateway.userType.id User property.
+                  name:
+                    type: string
+                    description: The name of the user type.
                   newUserLookup:
                     type: object
-                    description: (Optional) The configurations for initially authenticating new users who will be migrated to PingOne. Note If there are multiple users having the same user name, only the first user processed is provisioned.
+                    description: The configurations for initially authenticating new users who will be migrated to PingOne. Note If there are multiple users having the same user name, only the first user processed is provisioned.
                     properties:
                       attributeMappings:
                         type: array
@@ -1154,26 +1180,38 @@ components:
                             - value
                       ldapFilterPattern:
                         type: string
-                        description: (Optional) The LDAP user search filter to use to match users against the entered user identifier at login. For example, (((uid=${identifier})(mail=${identifier})). Alternatively, this can be a search against the user directory.
+                        description: The LDAP user search filter to use to match users against the entered user identifier at login. For example, (((uid=${identifier})(mail=${identifier})). Alternatively, this can be a search against the user directory.
                       population:
                         type: object
-                        description: (Optional) The PingOne population to use to create user entries during lookup.
+                        description: The PingOne population to use to create user entries during lookup.
                         properties:
                           id:
                             type: string
-                            description: (Optional) The ID of the population to use to create user entries during lookup.
+                            description: The ID of the population to use to create user entries during lookup.
                         required:
                           - id
+                      orderedCorrelationAttributes:
+                        type: array
+                        description: A map of key/value entries used to persist the external LDAP directory attributes.
+                        items:
+                          type: object
+                      passwordAuthority:
+                        $ref: '#/components/schemas/EnumGatewayPasswordAuthority'
+                      searchBaseDn:
+                        type: string
+                        description: The LDAP base domain name (DN) for this user type.
                     required:
                       - attributeMappings
                 required:
                   - newUserLookup
+                  - id
+                  - name
+                  - passwordAuthority
             validateTlsCertificates:
               type: boolean
-              description: (Optional) A boolean that specifies whether or not to trust all SSL certificates (defaults to true). If this value is false, TLS certificates are not validated. When the value is set to true, only certificates that are signed by the default JVM CAs, or the CA certs that the customer has uploaded to the certificate service are trusted.
+              description: A boolean that specifies whether or not to trust all SSL certificates (defaults to true). If this value is false, TLS certificates are not validated. When the value is set to true, only certificates that are signed by the default JVM CAs, or the CA certs that the customer has uploaded to the certificate service are trusted.
             vendor:
-              type: string
-              description: A string that specifies the LDAP vendor. Options are PingDirectory, Microsoft Active Directory, Oracle Directory Server Enterprise Edition, Oracle Unified Directory, CA Directory, OpenDJ Directory, IBM (Tivoli) Security Directory Server, and LDAP v3 compliant Directory Server.
+              $ref: '#/components/schemas/EnumGatewayVendor'
           required:
             - bindDN
             - bindPassword
@@ -1190,22 +1228,10 @@ components:
           type: string
           readOnly: true
           description: A date that specifies the date the credential was created in Coordinated Universal Time (UTC). This is a required property.
-        gatewayType:
-          $ref: '#/components/schemas/EnumGatewayType'
-          readOnly: true
         lastUsedAt:
           type: string
           readOnly: true
           description: A date that specifies the date the credential was last used in UTC. This is a required property.
-        consoleUrl:
-          type: string
-          readOnly: true
-        apiUrl:
-          type: string
-          readOnly: true
-        authUrl:
-          type: string
-          readOnly: true
         credential:
           type: string
           readOnly: true
@@ -2890,17 +2916,17 @@ components:
           properties:
             forceChange:
               type: boolean
-              description: (Optional) A boolean that specifies whether the user is forced to change the password on the next log in. If not provided, the property is set to false.
+              description: A boolean that specifies whether the user is forced to change the password on the next log in. If not provided, the property is set to false.
             value:
               type: string
               description: A string that specifies the user's password value. The string is either in cleartext or pre-encoded format.
             external:
               type: object
-              description: (Optional) An object that maps the information relevant to the user’s password, and its association to external directories.
+              description: An object that maps the information relevant to the user’s password, and its association to external directories.
               properties:
                 gateway:
                   type: object
-                  description: (Optional) An object containing the gateway properties. When this is value is specified, the user’s password is managed in an external directory. You can set the user password using Create User (Import) or Update Password (Set).
+                  description: An object containing the gateway properties. When this is value is specified, the user’s password is managed in an external directory. You can set the user password using Create User (Import) or Update Password (Set).
                   properties:
                     id:
                       type: string
