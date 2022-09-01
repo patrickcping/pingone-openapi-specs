@@ -485,7 +485,7 @@ components:
             assertionSigned:
               type: boolean
               description: A boolean that specifies whether the SAML assertion itself should be signed. The default value is true.
-            idpSigningtype:
+            idpSigning:
               type: object
               properties:
                 key:
