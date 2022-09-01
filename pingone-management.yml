@@ -496,6 +496,10 @@ components:
                       description: A string that specifies the certificate to be used by the identity provider to sign assertions and responses. If this property is omitted, the default signing certificate for the environment is used.
                   required:
                     - id
+                algorithm:
+                  type: string
+                  description: A string that specifies the IdP Signing key algorithm.
+                  readOnly: true
               required:
                 - key
             nameIdFormat:
