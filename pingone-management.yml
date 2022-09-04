@@ -84,7 +84,7 @@ components:
       enum: [application/x-pkcs7-certificates]
     EnumCSRExportHeader:
       type: string
-      enum: [application/pkcs10]
+      enum: [application/pkcs10, application/x-pem-file]
     EnumCSRResponseImportHeader:
       type: string
       enum: [application/x-pem-file]
@@ -7922,6 +7922,10 @@ paths:
           description: Successful response
           content:
             application/pkcs10:
+              schema:
+                type: string
+                format: byte
+            application/x-pem-file:
               schema:
                 type: string
                 format: byte
