@@ -1685,6 +1685,14 @@ components:
               type: integer
               readOnly: true
               description: The height of the image (in pixels).
+    PKICAResponseFileUpload:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+        - file
     PKIFileUpload:
       type: object
       properties:
@@ -7866,7 +7874,7 @@ paths:
       summary: Export a certificate signing request (CSR)
       operationId: exportCSR
       parameters:
-        - name: Content-Type
+        - name: Accept
           in: header
           schema:
             $ref: '#/components/schemas/EnumCSRExportHeader'
@@ -7929,17 +7937,17 @@ paths:
               schema:
                 type: string
                 format: byte
-    put:
+    post:
       tags:
         - Certificate Management
       summary: Import Certificate Authority (CA) Response to a CSR
       operationId: importCSRResponse
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PKICAResponseFileUpload'
       parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            $ref: '#/components/schemas/EnumCSRResponseImportHeader'
-          example: application/x-pem-file
         - name: environmentID
           in: path
           schema:
@@ -7990,7 +7998,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
   /v1/environments/{environmentID}/certificates:
     get:
       tags:
