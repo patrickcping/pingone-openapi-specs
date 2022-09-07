@@ -183,6 +183,7 @@ components:
           deprecated: true
         updatedAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was last updated.
     EntityArray:
@@ -209,6 +210,14 @@ components:
       type: string
       enum: [APNS, FCM]
       description: A string that specifies the type of the push credentials. Mandatory. Valid values APNS, FCM
+    EnumMFASettingsDeviceSelection:
+      type: string
+      enum: [DEFAULT_TO_FIRST, PROMPT_TO_SELECT]
+      description: A string that defines the device selection method. Options are DEFAULT_TO_FIRST (this is the default setting) and PROMPT_TO_SELECT.
+    EnumMFASettingsPairingKeyFormat:
+      type: string
+      enum: [NUMERIC, ALPHANUMERIC]
+      description: String that controls the type of pairing key issued. The valid values are NUMERIC (12-digit key) and ALPHANUMERIC (16-character alphanumeric key).
     EnumTimeUnit:
       type: string
       enum: [MINUTES, SECONDS]
@@ -240,6 +249,41 @@ components:
             - token
     MFAPushCredentialFCM:
       $ref: '#/components/schemas/MFAPushCredential'
+    MFASettings:
+      type: object
+      properties:
+        authentication:
+          type: object
+          description: An object that contains the device selection settings.
+          properties:
+            deviceSelection:
+              $ref: '#/components/schemas/EnumMFASettingsDeviceSelection'
+        lockout:
+          type: object
+          description: An object that contains lockout settings.
+          properties:
+            failureCount:
+              type: integer
+              description: An integer that defines the maximum number of incorrect authentication attempts before the account is locked.
+            durationSeconds:
+              type: integer
+              description: An integer that defines the number of seconds to keep the account in a locked state.
+        pairing:
+          type: object
+          description: An object that contains pairing settings.
+          properties:
+            maxAllowedDevices:
+              type: integer
+              description: An integer that defines the maximum number of MFA devices each user can have. This can be any number up to 15. The default value is 5.
+              default: 5
+              maximum: 15
+            pairingKeyFormat:
+              $ref: '#/components/schemas/EnumMFASettingsPairingKeyFormat'
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was last updated.
     ObjectEnvironment:
       type: object
       readOnly: true
@@ -300,32 +344,12 @@ security:
   - bearer: []
 tags:
   - name: MFA Settings
-    description: >-
-      By design, PingOne requests solely comprise this collection. For complete
-      documentation, direct a browser to <a
-      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
   - name: Users > MFA Devices
-    description: >-
-      By design, PingOne requests solely comprise this collection. For complete
-      documentation, direct a browser to <a
-      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
   - name: Users > MFA Devices > FIDO2 Biometrics Devices
-    description: >-
-      By design, PingOne requests solely comprise this collection. For complete
-      documentation, direct a browser to <a
-      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
   - name: Users > Enable Users MFA
-    description: >-
-      By design, PingOne requests solely comprise this collection. For complete
-      documentation, direct a browser to <a
-      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
   - name: Users > MFA Pairing Keys
-    description: >-
-      By design, PingOne requests solely comprise this collection. For complete
-      documentation, direct a browser to <a
-      href='https://apidocs.pingidentity.com/pingone/platform/v1/api/'>apidocs.pingidentity.com</a>.
 paths:
-  /v1/environments/{environmentID}/applications/{appID}/pushCredentials:
+  /v1/environments/{environmentID}/applications/{applicationID}/pushCredentials:
     get:
       tags:
         - Applications > Application MFA Push Credentials
@@ -337,7 +361,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: appID
+        - name: applicationID
           in: path
           schema:
             type: string
@@ -406,7 +430,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: appID
+        - name: applicationID
           in: path
           schema:
             type: string
@@ -462,7 +486,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/MFAPushCredentialAPNS'
                   - $ref: '#/components/schemas/MFAPushCredentialFCM'
-  /v1/environments/{environmentID}/applications/{appID}/pushCredentials/{pushCredID}:
+  /v1/environments/{environmentID}/applications/{applicationID}/pushCredentials/{pushCredentialID}:
     get:
       tags:
         - Applications > Application MFA Push Credentials
@@ -474,12 +498,12 @@ paths:
           schema:
             type: string
           required: true
-        - name: appID
+        - name: applicationID
           in: path
           schema:
             type: string
           required: true
-        - name: pushCredID
+        - name: pushCredentialID
           in: path
           schema:
             type: string
@@ -555,12 +579,12 @@ paths:
           schema:
             type: string
           required: true
-        - name: appID
+        - name: applicationID
           in: path
           schema:
             type: string
           required: true
-        - name: pushCredID
+        - name: pushCredentialID
           in: path
           schema:
             type: string
@@ -626,12 +650,12 @@ paths:
           schema:
             type: string
           required: true
-        - name: appID
+        - name: applicationID
           in: path
           schema:
             type: string
           required: true
-        - name: pushCredID
+        - name: pushCredentialID
           in: path
           schema:
             type: string
@@ -795,7 +819,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceAuthenticationPolicy'
-  /v1/environments/{environmentID}/deviceAuthenticationPolicy/{deviceAuthPolicyID}:
+  /v1/environments/{environmentID}/deviceAuthenticationPolicy/{deviceAuthenticationPolicyID}:
     get:
       tags:
         - Device Authentication Policy
@@ -807,7 +831,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: deviceAuthPolicyID
+        - name: deviceAuthenticationPolicyID
           in: path
           schema:
             type: string
@@ -931,7 +955,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: deviceAuthPolicyID
+        - name: deviceAuthenticationPolicyID
           in: path
           schema:
             type: string
@@ -988,7 +1012,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: deviceAuthPolicyID
+        - name: deviceAuthenticationPolicyID
           in: path
           schema:
             type: string
@@ -1037,6 +1061,7 @@ paths:
       tags:
         - MFA Settings
       summary: READ MFA Settings
+      operationId: readMFASettings
       parameters:
         - name: environmentID
           in: path
@@ -1083,24 +1108,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MFASettings'
     put:
       tags:
         - MFA Settings
       summary: UPDATE MFA Settings
+      operationId: updateMFASettings
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                pairing:
-                  maxAllowedDevices: 10
-                lockout:
-                  failureCount: 8
-                  durationSeconds: 600
-                authentication:
-                  deviceSelection: DEFAULT_TO_FIRST
+              $ref: '#/components/schemas/MFASettings'
       parameters:
         - name: environmentID
           in: path
@@ -1147,11 +1167,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MFASettings'
     delete:
       tags:
         - MFA Settings
       summary: RESET MFA Settings
+      operationId: resetMFASettings
       parameters:
         - name: environmentID
           in: path
@@ -1197,6 +1220,10 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MFASettings'
   /v1/environments/{environmentID}/users/{userID}/devices:
     post:
       tags:
@@ -1983,7 +2010,7 @@ paths:
               type: object
               example:
                 applications:
-                  - id: '{{appID}}'
+                  - id: '{{applicationID}}'
       parameters:
         - name: environmentID
           in: path
