@@ -223,6 +223,14 @@ components:
       type: string
       enum: [WORKFORCE, CUSTOMER]
       description: The solution set of the environment
+    EnumSubscriptionFilterIncludedTags:
+      type: string
+      enum: [adminIdentityEvent]
+      description: A tags that events must have to be monitored by a subscription. Currently, the available tags are `adminIdentityEvent`. Identifies the event as the action of an administrator on other administrators.
+    EnumSubscriptionFormat:
+      type: string
+      enum: [ACTIVITY, SPLUNK, NEWRELIC]
+      description: A string that specifies one of the supported subscription formats. Options are ACTIVITY, SPLUNK, and NEWRELIC. This is a required property.
     EnumEnabledStatus:
       type: string
       enum: [ENABLED, DISABLED]
@@ -417,6 +425,7 @@ components:
           description: A boolean that specifies whether the permissions service should assign default roles to the application. This property is set only on the POST request. The property is ignored when included in a PUT request.
         createdAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was created.
         description:
@@ -459,6 +468,7 @@ components:
           $ref: '#/components/schemas/EnumApplicationType'
         updatedAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was last updated.
         supportUnsignedRequestObject:
@@ -632,6 +642,7 @@ components:
           description: A string that specifies the application ID.
         createdAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was created.
         mappingType:
@@ -644,6 +655,7 @@ components:
           description: A boolean to specify whether a mapping value is required for this attribute. If true, a value must be set and a non-empty value must be available in the SAML assertion or ID token.
         updatedAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was updated.
         value:
@@ -666,6 +678,7 @@ components:
               description: A string that specifies the application resource ID.
         createdAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was created.
         id:
@@ -692,6 +705,7 @@ components:
               - id
         updatedAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was last updated.
       required:
@@ -776,6 +790,7 @@ components:
           $ref: '#/components/schemas/EnumCertificateKeyAlgorithm'
         createdAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was created.
         default:
@@ -1005,6 +1020,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/SignOnPolicyAssignment'
+            subscriptions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Subscription'
             roleAssignments:
               type: array
               items:
@@ -1245,6 +1264,7 @@ components:
           description: A string that specifies the auto-generated ID for this credential. This is the JWT's jti claim. This is a required property.
         createdAt:
           type: string
+          format: date-time
           readOnly: true
           description: A date that specifies the date the credential was created in Coordinated Universal Time (UTC). This is a required property.
         lastUsedAt:
@@ -1993,6 +2013,7 @@ components:
           description: A string that specifies a URL without a fragment or `@ObjectName` and must not contain `pingone` or `pingidentity` (for example, https://api.myresource.com). If a URL is not specified, the resource name is used.
         createdAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was created.
         description:
@@ -2017,6 +2038,7 @@ components:
           $ref: '#/components/schemas/EnumResourceType'
         updatedAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was last updated.
       required:
@@ -2069,10 +2091,12 @@ components:
             type: string
         createdAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was created.
         updatedAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was last updated.
       required:
@@ -2778,6 +2802,94 @@ components:
       required:
         - signOnPolicy
         - priority
+    Subscription:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the key resource expires.The date and time at which the subscription resource was created (ISO 8601 format).
+        enabled:
+          type: boolean
+          description: A boolean that specifies whether a created or updated subscription should be active or suspended. A suspended state (`"enabled":false`) accumulates all matched events, but these events are not delivered until the subscription becomes active again (`"enabled":true`). For suspended subscriptions, events accumulate for a maximum of two weeks. Events older than two weeks are deleted. Restarted subscriptions receive the saved events (up to two weeks from the restart date). This is a required property.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        filterOptions:
+          type: object
+          properties:
+            includedActionTypes:
+              type: array
+              description: A non-empty array that specifies the list of action types that should be matched for the subscription. This is a required property.
+              items:
+                type: string
+            includedApplications:
+              type: array
+              description: An array that specifies the list of applications (by ID) whose events are monitored by the subscription (maximum of 10 IDs in the array). This is an optional property. If a list of applications is not provided, events are monitored for all applications in the environment.
+              items:
+                type: object
+                maxItems: 10
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+            includedPopulations:
+              type: array
+              description: An array that specifies the list of populations (by ID) whose events are monitored by the subscription (maximum of 10 IDs in the array). This property matches events for users in the specified populations, as opposed to events generated in which the user in one of the populations is the actor. This is an optional property.
+              items:
+                type: object
+                maxItems: 10
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+            includedTags:
+              type: array
+              description: An array of tags that events must have to be monitored by the subscription. If tags are not specified, all events are monitored. Currently, the available tags are `adminIdentityEvent`. Identifies the event as the action of an administrator on other administrators.
+              items:
+                $ref: '#/components/schemas/EnumSubscriptionFilterIncludedTags'
+          required:
+            - includedActionTypes
+        format:
+          $ref: '#/components/schemas/EnumSubscriptionFormat'
+        id:
+          type: string
+          description: A string that specifies the user resource’s unique identifier.
+          readOnly: true
+        httpEndpoint:
+          type: object
+          properties:
+            url:
+              type: string
+              description: A string that specifies a valid HTTPS URL to which event messages are sent. This is a required property.
+            headers:
+              type: array
+              description: An array that specifies the headers applied to the outbound request (for example, `Authorization` `Basic usernamepassword`. The purpose of these headers is for the HTTPS endpoint to authenticate the PingOne service, ensuring that the information from PingOne is from a trusted source.
+              items:
+                type: object
+                additionalProperties: true
+          required:
+            - url
+        name:
+          type: string
+          description: A string that specifies the subscription name. This is a required property.
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The date and time at which the subscription resource was last updated (ISO 8601 format).
+        verifyTlsCertificates:
+          type: boolean
+          description: A boolean that specifies whether a certificates should be verified. If this property's value is set to false, then all certificates are trusted. (Setting this property's value to false introduces a security risk.) This is a required property.
+      required:
+        - enabled
+        - filterOptions
+        - format
+        - httpEndpoint
+        - name
+        - verifyTlsCertificates
     User:
       type: object
       properties:
@@ -2830,15 +2942,15 @@ components:
               maxLength: 256
               description: A string that specifies the full street address component, which may include house number, street name, P.O. box, and multi-line extended street address information. This attribute may contain newlines (regex `^[\p{L}\p{M}\p{N}\p{Zs}\p{P}\n\r]*$`). It can have a length of no more than 256 characters (min/max=1/256).
         createdAt:
-              type: string
-              description: The time the resource was created.
+          type: string
+          description: The time the resource was created.
         email:
-              type: string
-              description: A string that specifies the user’s email address, which must be provided and valid. For more information about email address formatting, see section 3.4 of RFC 2822, Internet Message Format.
+          type: string
+          description: A string that specifies the user’s email address, which must be provided and valid. For more information about email address formatting, see section 3.4 of RFC 2822, Internet Message Format.
         enabled:
-              type: boolean
-              readOnly: true
-              description: A read-only boolean attribute that specifies whether the user is enabled. This attribute is set to ‘true’ by default when the user is created.
+          type: boolean
+          readOnly: true
+          description: A read-only boolean attribute that specifies whether the user is enabled. This attribute is set to ‘true’ by default when the user is created.
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
         externalId:
@@ -19023,29 +19135,13 @@ paths:
     post:
       tags:
         - Subscriptions (webhooks)
-      summary: CREATE Subscriptions
+      summary: CREATE Subscription
+      operationId: createSubscription
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                name: SubscriptionName1
-                filterOptions:
-                  includedActionTypes:
-                    - USER.CREATED
-                    - USER.UPDATED
-                  includedPopulations:
-                    - id: '{{populationID}}'
-                  includedApplications:
-                    - id: '{{applicationID}}'
-                httpEndpoint:
-                  url: https://subscriptionendpoint.com
-                  headers:
-                    some-header: some-value
-                format: ACTIVITY
-                verifyTlsCertificates: false
-                enabled: true
+              $ref: '#/components/schemas/Subscription'
       parameters:
         - name: environmentID
           in: path
@@ -19098,11 +19194,14 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
     get:
       tags:
         - Subscriptions (webhooks)
       summary: READ All Subscriptions
+      operationId: readAllSubscriptions
       parameters:
         - name: environmentID
           in: path
@@ -19149,12 +19248,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/environments/{environmentID}/subscriptions/{subscriptionID}:
     get:
       tags:
         - Subscriptions (webhooks)
       summary: READ One Subscription
+      operationId: readOneSubscription
       parameters:
         - name: environmentID
           in: path
@@ -19206,33 +19308,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
     put:
       tags:
         - Subscriptions (webhooks)
       summary: UPDATE Subscription
+      operationId: updateSubscription
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                name: UpdatedSubscription
-                filterOptions:
-                  includedActionTypes:
-                    - USER.CREATED
-                    - USER.MODIFIED
-                  includedPopulations:
-                    - id: '{populationID}'
-                  includedApplications:
-                    - id: '{applicationID}'
-                httpEndpoint:
-                  url: https://subscriptionendpoint.com
-                  headers:
-                    some-header: some-value
-                format: ACTIVITY
-                enabled: true
-                verifyTlsCertificates: true
+              $ref: '#/components/schemas/Subscription'
       parameters:
         - name: environmentID
           in: path
@@ -19284,11 +19372,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
     delete:
       tags:
         - Subscriptions (webhooks)
       summary: DELETE Subscription
+      operationId: deleteSubscription
       parameters:
         - name: environmentID
           in: path
