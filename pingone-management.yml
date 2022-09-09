@@ -8931,7 +8931,9 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDomain'
   /v1/environments/{environmentID}/customDomains/{customDomainID}:
     get:
       tags:
@@ -9067,9 +9069,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/CustomDomainCertificate'
-                  - $ref: '#/components/schemas/CustomDomain'
+                $ref: '#/components/schemas/CustomDomain'
     delete:
       tags:
         - Custom Domains
@@ -9125,181 +9125,6 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/deviceAuthenticationPolicy:
-    get:
-      tags:
-        - Device Authentication Policy
-      summary: READ Device Authentication Policy
-      parameters:
-        - name: environmentID
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '400':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '401':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '403':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '404':
-          description: Not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '429':
-          description: Request was rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '500':
-          description: Uncaught error occurred.  Platform outage
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-  /v1/environments/{environmentID}/deviceAuthenticationPolicy/{deviceAuthPolicyID}:
-    put:
-      tags:
-        - Device Authentication Policy
-      summary: UPDATE Device Authentication Policy
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                name: Environment Policy
-                sms:
-                  enabled: true
-                  otp:
-                    failure:
-                      count: 3
-                      coolDown:
-                        duration: 0
-                        timeUnit: MINUTES
-                    lifeTime:
-                      duration: 30
-                      timeUnit: MINUTES
-                email:
-                  enabled: true
-                  otp:
-                    failure:
-                      count: 3
-                      coolDown:
-                        duration: 0
-                        timeUnit: MINUTES
-                    lifeTime:
-                      duration: 30
-                      timeUnit: MINUTES
-                mobile:
-                  enabled: true
-                  otp:
-                    failure:
-                      count: 3
-                      coolDown:
-                        duration: 2
-                        timeUnit: MINUTES
-                    window:
-                      stepSize:
-                        duration: 30
-                        timeUnit: SECONDS
-                totp:
-                  enabled: true
-                  otp:
-                    failure:
-                      count: 3
-                      coolDown:
-                        duration: 2
-                        timeUnit: MINUTES
-                voice:
-                  enabled: true
-                  otp:
-                    failure:
-                      count: 3
-                      coolDown:
-                        duration: 0
-                        timeUnit: MINUTES
-                    lifeTime:
-                      duration: 30
-                      timeUnit: MINUTES
-                securityKey:
-                  enabled: true
-                forSignOnPolicy: true
-                platform:
-                  enabled: true
-                default: false
-      parameters:
-        - name: environmentID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: deviceAuthPolicyID
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '400':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '401':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '403':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '404':
-          description: Not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '429':
-          description: Request was rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '500':
-          description: Uncaught error occurred.  Platform outage
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{environmentID}/emailDomains:
     get:
       tags:
