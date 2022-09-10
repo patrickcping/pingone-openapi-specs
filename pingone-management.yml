@@ -113,8 +113,8 @@ components:
       description: A string that specifies the type of gateway resource. Options are LDAP, PING_FEDERATE, API_GATEWAY_INTEGRATION and PING_INTELLIGENCE. This is a required property.
     EnumGatewayPasswordAuthority:
       type: string
-      enum: [PINGONE, LDAP]
-      description: This can be either `PINGONE` or `LDAP`. If set to `PINGONE`, PingOne authenticates with the external directory initially, then PingOne authenticates all subsequent sign-ons.
+      enum: [PING_ONE, LDAP]
+      description: This can be either `PING_ONE` or `LDAP`. If set to `PING_ONE`, PingOne authenticates with the external directory initially, then PingOne authenticates all subsequent sign-ons.
     EnumGatewayVendor:
       type: string
       enum: [PingDirectory, Microsoft Active Directory, Oracle Directory Server Enterprise Edition, Oracle Unified Directory, CA Directory, OpenDJ Directory, IBM (Tivoli) Security Directory Server, LDAP v3 compliant Directory Server]
@@ -1240,6 +1240,7 @@ components:
           $ref: '#/components/schemas/ObjectEnvironment'
         credentials:
           type: array
+          readOnly: true
           items:
             $ref: '#/components/schemas/GatewayCredential'
         name:
@@ -1254,21 +1255,34 @@ components:
           type: boolean
           description: A boolean that specifies whether the gateway is enabled. This is a required property.
         supportedVersions:
-          type: object
+          type: array
           description: An array that lists the LDAP gateway versions associated with this gateway resource. This information is returned on a GET {{apiPath}}/environments/{{environmentID}}/gateways request, and it is used to trigger alerts if the gateway tries to connect with an unsupported version (or a version that is not the latest or recommended version).
-          properties:
-             version:
-              type: string
-              description: A string that specifies the gateway version number.
-             image:
-              type: string
-              description: A string that identifies the gateway image path.
-             recommended:
-              type: boolean
-              description: A boolean that specifies whether this is the recommended LDAP gateway version.
-             latest:
-              type: boolean
-              description: A boolean that specifies whether this is the latest LDAP gateway version.
+          readOnly: true
+          items:
+            type: object
+            properties:
+              version:
+                type: string
+                description: A string that specifies the gateway version number.
+              image:
+                type: string
+                description: A string that identifies the gateway image path.
+              recommended:
+                type: boolean
+                description: A boolean that specifies whether this is the recommended LDAP gateway version.
+              latest:
+                type: boolean
+                description: A boolean that specifies whether this is the latest LDAP gateway version.
+              supportEndsOn:
+                type: string
+                format: date-time
+              daysUntilSupportEnds:
+                type: integer
+        currentAlerts:
+          type: array
+          readOnly: true
+          items:
+            type: object
       required:
         - name
         - type
@@ -1352,18 +1366,18 @@ components:
                             description: The ID of the population to use to create user entries during lookup.
                         required:
                           - id
-                      orderedCorrelationAttributes:
-                        type: array
-                        description: A map of key/value entries used to persist the external LDAP directory attributes.
-                        items:
-                          type: object
-                      passwordAuthority:
-                        $ref: '#/components/schemas/EnumGatewayPasswordAuthority'
-                      searchBaseDn:
-                        type: string
-                        description: The LDAP base domain name (DN) for this user type.
                     required:
                       - attributeMappings
+                  orderedCorrelationAttributes:
+                    type: array
+                    description: A map of key/value entries used to persist the external LDAP directory attributes.
+                    items:
+                      type: string
+                  passwordAuthority:
+                    $ref: '#/components/schemas/EnumGatewayPasswordAuthority'
+                  searchBaseDn:
+                    type: string
+                    description: The LDAP base domain name (DN) for this user type.
                 required:
                   - newUserLookup
                   - id
@@ -1374,6 +1388,9 @@ components:
               description: A boolean that specifies whether or not to trust all SSL certificates (defaults to true). If this value is false, TLS certificates are not validated. When the value is set to true, only certificates that are signed by the default JVM CAs, or the CA certs that the customer has uploaded to the certificate service are trusted.
             vendor:
               $ref: '#/components/schemas/EnumGatewayVendor'
+            followReferrals:
+              type: boolean
+              readOnly: true
           required:
             - bindDN
             - bindPassword
