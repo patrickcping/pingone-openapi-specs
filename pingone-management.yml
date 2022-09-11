@@ -1368,6 +1368,8 @@ components:
                           - id
                     required:
                       - attributeMappings
+                      - ldapFilterPattern
+                      - population
                   orderedCorrelationAttributes:
                     type: array
                     description: A map of key/value entries used to persist the external LDAP directory attributes.
@@ -1379,10 +1381,10 @@ components:
                     type: string
                     description: The LDAP base domain name (DN) for this user type.
                 required:
-                  - newUserLookup
-                  - id
                   - name
                   - passwordAuthority
+                  - searchBaseDn
+                  - orderedCorrelationAttributes
             validateTlsCertificates:
               type: boolean
               description: A boolean that specifies whether or not to trust all SSL certificates (defaults to true). If this value is false, TLS certificates are not validated. When the value is set to true, only certificates that are signed by the default JVM CAs, or the CA certs that the customer has uploaded to the certificate service are trusted.
@@ -1394,8 +1396,8 @@ components:
           required:
             - bindDN
             - bindPassword
-            - userTypes
             - vendor
+            - serversHostAndPort
     GatewayCredential:
       type: object
       properties:
