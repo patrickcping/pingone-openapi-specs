@@ -221,8 +221,8 @@ components:
       description: A string that specifies the device mode for the MFA flow. Options are `BYPASS` to allow MFA without a specified device, or `BLOCK` to block the MFA flow if no device is specified. To use this configuration option, the authorize request must include a signed `login_hint_token` property. For more information, see Authorize (Browserless and MFA Only Flows)
     EnumSignOnPolicyType:
       type: string
-      description: A string that specifies the type of action. Options are `LOGIN`, `MULTI_FACTOR_AUTHENTICATION`, `IDENTIFIER_FIRST`, `IDENTITY_PROVIDER` `AGREEMENT` and `PROGRESSIVE_PROFILING`.
-      enum: [LOGIN, MULTI_FACTOR_AUTHENTICATION, IDENTIFIER_FIRST, IDENTITY_PROVIDER, PROGRESSIVE_PROFILING, AGREEMENT]
+      description: A string that specifies the type of action. Options are `LOGIN`, `MULTI_FACTOR_AUTHENTICATION`, `IDENTIFIER_FIRST`, `IDENTITY_PROVIDER` `AGREEMENT` and `PROGRESSIVE_PROFILING`.  Workforce environments also include `PINGID_WINLOGIN_PASSWORDLESS_AUTHENTICATION` and `PINGID_AUTHENTICATION`
+      enum: [LOGIN, MULTI_FACTOR_AUTHENTICATION, IDENTIFIER_FIRST, IDENTITY_PROVIDER, PROGRESSIVE_PROFILING, AGREEMENT, PINGID_WINLOGIN_PASSWORDLESS_AUTHENTICATION, PINGID_AUTHENTICATION]
     EnumSolutionType:
       type: string
       enum: [WORKFORCE, CUSTOMER]
@@ -2919,6 +2919,32 @@ components:
             - preventMultiplePromptsPerFlow
             - promptIntervalSeconds
             - promptText
+    SignOnPolicyActionPingID:
+      $ref: '#/components/schemas/SignOnPolicyActionCommon'
+    SignOnPolicyActionPingIDWinLoginPasswordless:
+      allOf:
+        - $ref: '#/components/schemas/SignOnPolicyActionCommon'
+        - type: object
+          properties:
+            uniqueUserAttribute:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Schema attributes to match against the provided identifier when searching for a user in the directory. Only unique attributes may be included.
+              required:
+                - name
+            offlineMode:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  description: Select this option to allow users to log in when PingOne and or PingID are not available.
+              required:
+                - enabled
+          required:
+            - uniqueUserAttribute
+            - offlineMode
     SignOnPolicyAssignment:
       type: object
       properties:
