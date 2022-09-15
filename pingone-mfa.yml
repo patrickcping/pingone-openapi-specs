@@ -252,12 +252,16 @@ components:
     MFASettings:
       type: object
       properties:
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
         authentication:
           type: object
           description: An object that contains the device selection settings.
           properties:
             deviceSelection:
               $ref: '#/components/schemas/EnumMFASettingsDeviceSelection'
+          required:
+            - deviceSelection
         lockout:
           type: object
           description: An object that contains lockout settings.
@@ -268,6 +272,9 @@ components:
             durationSeconds:
               type: integer
               description: An integer that defines the number of seconds to keep the account in a locked state.
+          required:
+            - failureCount
+            - durationSeconds
         pairing:
           type: object
           description: An object that contains pairing settings.
@@ -279,11 +286,18 @@ components:
               maximum: 15
             pairingKeyFormat:
               $ref: '#/components/schemas/EnumMFASettingsPairingKeyFormat'
+          required:
+            - maxAllowedDevices
+            - pairingKeyFormat
         updatedAt:
           type: string
           format: date-time
           readOnly: true
           description: The time the resource was last updated.
+      required:
+        - authentication
+        - lockout
+        - pairing
     ObjectEnvironment:
       type: object
       readOnly: true
