@@ -45,7 +45,7 @@ components:
       description: A string that specifies the client authentication methods supported by the token endpoint.
     EnumApplicationProtocol:
       type: string
-      enum: [OPENID_CONNECT, SAML]
+      enum: [OPENID_CONNECT, SAML, EXTERNAL_LINK]
       description: A string that specifies the protocol for the Application.
     EnumApplicationSAMLSloBinding:
       type: string
@@ -56,8 +56,8 @@ components:
       enum: [PING_FED_CONNECTION_INTEGRATION]
     EnumApplicationType:
       type: string
-      enum: [WEB_APP, NATIVE_APP, SINGLE_PAGE_APP, WORKER, SERVICE, CUSTOM_APP]
-      description: A string that specifies the type associated with the application. This is a required property. Options are WEB_APP, NATIVE_APP, SINGLE_PAGE_APP, and WORKER.
+      enum: [WEB_APP, NATIVE_APP, SINGLE_PAGE_APP, WORKER, SERVICE, CUSTOM_APP, PING_ONE_SELF_SERVICE, PING_ONE_ADMIN_CONSOLE, PING_ONE_PORTAL, TEMPLATE_APP, PORTAL_LINK_APP]
+      description: A string that specifies the type associated with the application. This is a required property.
     EnumAttributeMappingType:
       type: string
       enum: [CORE, SCOPE, CUSTOM]
@@ -487,6 +487,16 @@ components:
         - name
         - type
         - protocol
+    ApplicationExternalLink:
+      allOf:
+        - $ref: '#/components/schemas/Application'
+        - type: object
+          properties:
+            homePageUrl:
+              type: string
+              description: A string that specifies the custom home page URL for the application.
+          required:
+            - homePageUrl
     ApplicationSAML:
       allOf:
         - $ref: '#/components/schemas/Application'
@@ -605,6 +615,21 @@ components:
             packageName:
               type: string
               description: A string that specifies the package name associated with the application, for push notifications in native apps. The value of the mobile.packageName property is unique per environment, and once defined, is immutable.
+            kerberos:
+              type: object
+              description: Object containing Kerberos settings
+              properties:
+                key:
+                  type: object
+                  description: A Relationship object containing the certificate issuer (root CA).
+                  properties:
+                    id:
+                      type: string
+                      description: The unique identifier for the Kerberos key.
+                  required:
+                    - id
+              required:
+                - key
             grantTypes:
               type: array
               description: A string that specifies the grant type for the authorization request. This is a required property. Options are AUTHORIZATION_CODE, IMPLICIT, REFRESH_TOKEN, CLIENT_CREDENTIALS.
@@ -641,6 +666,40 @@ components:
           required:
             - grantTypes
             - tokenEndpointAuthMethod
+    ApplicationOIDCInternal:
+      allOf:
+        - $ref: '#/components/schemas/Application'
+        - type: object
+          properties:
+            pkceEnforcement:
+              $ref: '#/components/schemas/EnumApplicationOIDCPKCEOption'
+            tokenEndpointAuthMethod:
+              $ref: '#/components/schemas/EnumApplicationOIDCTokenAuthMethod'
+          required:
+            - tokenEndpointAuthMethod
+    ApplicationPingOnePortal:
+      allOf:
+        - $ref: '#/components/schemas/ApplicationOIDCInternal'
+        - type: object
+          properties:
+            applyDefaultTheme:
+              type: boolean
+              description: If `true`, applies the default theme to the app portal application.
+          required:
+            - applyDefaultTheme
+    ApplicationPingOneSelfService:
+      allOf:
+        - $ref: '#/components/schemas/ApplicationOIDCInternal'
+        - type: object
+          properties:
+            enableDefaultThemeFooter:
+              type: boolean
+              description: If `true`, shows the default theme footer on the self service application. Applies only if `applyDefaultTheme` is also `true`.
+            applyDefaultTheme:
+              type: boolean
+              description: If `true`, applies the default theme to the self service application.
+          required:
+            - applyDefaultTheme
     ApplicationAttributeMapping:
       type: object
       properties:
@@ -648,6 +707,13 @@ components:
           type: string
           readOnly: true
           description: A string that specifies the application ID.
+        application:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: A string that specifies the application associated with the application mapping resource.
         createdAt:
           type: string
           format: date-time
@@ -1051,9 +1117,12 @@ components:
             applications:
               type: array
               items:
-                anyOf:
+                oneOf:
                   - $ref: '#/components/schemas/ApplicationSAML'
                   - $ref: '#/components/schemas/ApplicationOIDC'
+                  - $ref: '#/components/schemas/ApplicationExternalLink'
+                  - $ref: '#/components/schemas/ApplicationPingOnePortal'
+                  - $ref: '#/components/schemas/ApplicationPingOneSelfService'
             certificates:
               type: array
               items:
@@ -5065,6 +5134,7 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/ApplicationSAML'
                 - $ref: '#/components/schemas/ApplicationOIDC'
+                - $ref: '#/components/schemas/ApplicationExternalLink'
               example:
                 name: app_{{$timestamp}}
                 description: this is my application
@@ -5138,6 +5208,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/ApplicationSAML'
                   - $ref: '#/components/schemas/ApplicationOIDC'
+                  - $ref: '#/components/schemas/ApplicationExternalLink'
   /v1/environments/{environmentID}/applications/{applicationID}:
     get:
       tags:
@@ -5200,6 +5271,9 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/ApplicationSAML'
                   - $ref: '#/components/schemas/ApplicationOIDC'
+                  - $ref: '#/components/schemas/ApplicationExternalLink'
+                  - $ref: '#/components/schemas/ApplicationPingOnePortal'
+                  - $ref: '#/components/schemas/ApplicationPingOneSelfService'
     put:
       tags:
         - Applications
@@ -5212,6 +5286,9 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/ApplicationSAML'
                 - $ref: '#/components/schemas/ApplicationOIDC'
+                - $ref: '#/components/schemas/ApplicationExternalLink'
+                - $ref: '#/components/schemas/ApplicationPingOnePortal'
+                - $ref: '#/components/schemas/ApplicationPingOneSelfService'
               example:
                 name: UPDATED_{{$timestamp}}
                 description: this is my UPDATED client
@@ -5279,6 +5356,9 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/ApplicationSAML'
                   - $ref: '#/components/schemas/ApplicationOIDC'
+                  - $ref: '#/components/schemas/ApplicationExternalLink'
+                  - $ref: '#/components/schemas/ApplicationPingOnePortal'
+                  - $ref: '#/components/schemas/ApplicationPingOneSelfService'
     delete:
       tags:
         - Applications
