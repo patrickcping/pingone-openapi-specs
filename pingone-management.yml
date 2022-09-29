@@ -167,6 +167,14 @@ components:
       type: string
       enum: [PNG, JPG, GIF]
       description: A string that specifies the type of format used for the image. Options are jpg, png, and gif.
+    EnumLicensePackage:
+      type: string
+      enum: [TRIAL, STANDARD, PREMIUM, MFA, RISK, MFARISK, GLOBAL]
+      description: A string that specifies the license template on which this license is based. This is a required property. Options are `TRIAL`, `STANDARD`, `PREMIUM`, `MFA`, `RISK`, `MFARISK`, and `GLOBAL`.
+    EnumLicenseStatus:
+      type: string
+      enum: [ACTIVE, EXPIRED, FUTURE]
+      description: A string that specifies the status of the license. Options are `ACTIVE`, `EXPIRED`, and `FUTURE`.
     EnumOrganizationType:
       type: string
       enum: [PAID, TRIAL]
@@ -183,7 +191,7 @@ components:
     EnumRegionCode:
       type: string
       enum: [AP, CA, EU, NA]
-      description: A string that specifies the region in which this environment will be used. The value is set when the environment is created and cannot be updated.
+      description: A string that specifies the environment region code. The value is set when the environment is created and cannot be updated.
     EnumResourceAttributeType:
       type: string
       enum: [CORE, CUSTOM]
@@ -1228,6 +1236,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/AgreementLanguage'
+            licenses:
+              type: array
+              items:
+                $ref: '#/components/schemas/License'
             organizations:
               type: array
               items:
@@ -1973,6 +1985,189 @@ components:
               type: integer
               readOnly: true
               description: The height of the image (in pixels).
+    License:
+      type: object
+      properties:
+        assignedEnvironmentsCount:
+          type: integer
+          description: A read-only integer that specifies the total number of environments associated with this license.
+          readOnly: true
+        authorize:
+          type: object
+          readOnly: true
+          properties:
+            allowApiAccessManagement:
+              type: boolean
+              description: A read-only boolean that specifies whether to enable the PingOne Authorize API access management feature.
+            allowDynamicAuthorization:
+              type: boolean
+              description: A read-only boolean that specifies whether to enable the PingOne Authorize dynamic authorization feature.
+        beginsAt:
+          type: string
+          format: datetime
+          description: The date and time this license begins.
+          readOnly: true
+        environments:
+          type: object
+          readOnly: true
+          properties:
+            allowConnections:
+              type: boolean
+              description: A boolean that specifies whether the license supports creation of application connections in the specified environment.
+            allowCustomDomain:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports creation of a custom domain in the specified environment.
+            allowCustomSchema:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports using custom schema attributes in the specified environment.
+            allowProduction:
+              type: boolean
+              description: A read-only boolean that specifies whether production environments are allowed.
+            max:
+              type: integer
+              description: A read-only integer that specifies the maximum number of environments allowed.
+            regions:
+              $ref: '#/components/schemas/EnumRegionCode'
+        expiresAt:
+          type: string
+          format: datetime
+          readOnly: true
+          description: The date and time this license expires. TRIAL licenses stop access to PingOne services at expiration. All other licenses trigger an event to send a notification when the license expires but do not block services.
+        id:
+          type: string
+          description: A read-only string that specifies the license resource’s unique identifier.
+          readOnly: true
+        intelligence:
+          type: object
+          readOnly: true
+          properties:
+            allowGeoVelocity:
+              type: boolean
+              description: A read-only boolean that specifies whether to use the intelligence geo-velocity feature. For `TRIAL` (unpaid) licenses, the default value is true. For `ADMIN`, `GLOBAL`, `RISK`, and `MFARISK`, the default value is true.
+            allowAnonymousNetworkDetection:
+              type: boolean
+              description: A read-only boolean that specifies whether to use the intelligence anonymous network detection feature. For `TRIAL` (unpaid) licenses, the default value is true. For `ADMIN`, `GLOBAL`, `RISK`, and `MFARISK`, the default value is true.
+            allowReputation:
+              type: boolean
+              description: A read-only boolean that specifies whether to use the intelligence IP reputation feature. For `TRIAL` (unpaid) licenses, the default value is true. For `ADMIN`, `GLOBAL`, `RISK`, and `MFARISK`, the default value is true.
+            allowDataConsent:
+              type: boolean
+              description: A read-only boolean that specifies whether the customer has opted in to allow user and event behavior analytics (UEBA) data collection.
+            allowRisk:
+              type: boolean
+              description: A read-only boolean that specifies whether your license permits you to configure risk features such as sign-on policies that include rules to detect anomalous changes to your locations (such as impossible travel). This capability is supported for TRIAL, RISK, and MFARISK license packages. Note, The sharing of user data to enable our machine-learning engine, which is integral to PingOne Risk, is captured in the license property license.intelligence.allowDataConsent, but it is not set to true by default in any license package. This license capability always requires active consent by the customer before it can be enabled, and if consent is given, then it allows the full scope of intelligence features included in PingOne Risk (and PingOne Risk plus MFA).
+        mfa:
+          type: object
+          readOnly: true
+          properties:
+            allowPushNotification:
+              type: boolean
+              description: A read-only boolean that specifies whether push notifications are allowed. For TRIAL (unpaid) licenses, the default value is true. For other license package types, adoption of the feature determines the default value.
+            allowMfaNotificationsOutsideWhitelist:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports sending notifications outside of the environment's whitelist.
+            allowFido2Devices:
+              type: boolean
+              description: A read-only boolean that specifies whether FIDO2 devices are allowed. For TRIAL (unpaid) licenses, the default value is true. For other license package types, adoption of the feature determines the default value.
+        name:
+          type: string
+          description: A string that specifies a descriptive name for the license. This is a required property in a license name update request. Valid characters consists of any Unicode letter, mark, numeric character, forward slash, dot, apostrophe, underscore, space, or hyphen. The maximum length of a name is 255 characters.
+        organization:
+          $ref: '#/components/schemas/ObjectOrganization'
+        package:
+          $ref: '#/components/schemas/EnumLicensePackage'
+        replacesLicense:
+          type: object
+          description: A read-only object that specifies the license ID of the license that is replaced by this license.
+          properties:
+            id:
+              type: string
+              description: A read-only string that specifies the license ID of the license that is replaced by this license.
+        replacedByLicense:
+          type: object
+          description: A read-only object that specifies the license ID of the license that replaces this license.
+          properties:
+            id:
+              type: string
+              description: A read-only string that specifies the license ID of the license that replaces this license.
+        status:
+          $ref: '#/components/schemas/EnumLicenseStatus'
+        terminatesAt:
+          type: string
+          format: datetime
+          description: An optional attribute that designates the exact date and time when this license terminates access to PingOne services. This attribute can be added to any licensing package.
+        users:
+          type: object
+          readOnly: true
+          properties:
+            allowPasswordManagementNotifications:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports sending password management notifications.
+            allowIdentityProviders:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports using external identity providers in the specified environment.
+            allowMyAccount:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports using My Account capabilities in the specified environment.
+            allowPasswordManagement:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports using password management capabilities in the specified environment.
+            allowPasswordOnlyAuthentication:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports using password only login capabilities in the specified environment.
+            allowPasswordPolicy:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports using password policies in the specified environment.
+            allowProvisioning:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports using provisioning capabilities in the specified environment.
+            allowRoleAssignment:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports role assignments in the specified environment.
+            allowVerificationFlow:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports using verification flows in the specified environment.
+            allowUpdateSelf:
+              type: boolean
+              description: A read-only boolean that specifies whether the license supports allowing users to update their own profile.
+            entitledToSupport:
+              type: boolean
+              description: A read-only boolean that specifies whether the license allows PingOne support.
+            max:
+              type: integer
+              description: An read-only integer that specifies the maximum number of users allowed per environment.
+            annualActiveIncluded:
+              type: integer
+              description: A read-only integer that specifies a soft limit on the number of active identities across all environments on the license per year. This property is not visible if a value is not provided at the time the license is created.
+            monthlyActiveIncluded:
+              type: integer
+              description: A read-only integer that specifies a soft limit on the number of active identities across all environments on the license per month. This property is not visible if a value is not provided at the time the license is created.
+        verify:
+          type: object
+          readOnly: true
+          properties:
+            allowPushNotifications:
+              type: boolean
+              description: A read-only boolean that specifies whether to enable the PingOne Verify push notifications feature.
+            allowDocumentMatch:
+              type: boolean
+              description: A read-only boolean that specifies whether to enable the PingOne Verify document matching feature.
+            allowFaceMatch:
+              type: boolean
+              description: A read-only boolean that specifies whether to enable the PingOne Verify face matching feature.
+            allowManualIdInspection:
+              type: boolean
+              description: A read-only boolean that specifies whether to enable the PingOne Verify manual ID inspection feature.
+      required:
+        - name
+    LicenseName:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The license name
+      required:
+        - name
     PKICAResponseFileUpload:
       type: object
       properties:
@@ -22773,12 +22968,24 @@ paths:
       tags:
         - Licenses
       summary: READ All Licenses
+      operationId: readAllLicenses
       parameters:
         - name: organizationID
           in: path
           schema:
             type: string
           required: true
+        - name: filter
+          in: query
+          schema:
+            type: string
+          description: For organizations with more than one license, you can use a filter to return the list of licenses in descending order.
+          example: filter=beginsAt lt "{{now}}"
+        - name: order
+          in: query
+          schema:
+            type: string
+          example: order=-beginsAt
       responses:
         '400':
           description: Invalid request received.  Malformed JSON, malformed HTTP request.
@@ -22819,12 +23026,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /v1/organizations/{organizationID}/licenses/{licenseID}:
     get:
       tags:
         - Licenses
       summary: READ One License
+      operationId: readOneLicense
       parameters:
         - name: organizationID
           in: path
@@ -22876,12 +23086,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/License'
   /v1/organizations/{organizationID}/licenses/{licenseID}/name:
     get:
       tags:
         - Licenses
       summary: READ One License Name
+      operationId: readOneLicenseName
       parameters:
         - name: organizationID
           in: path
@@ -22933,18 +23146,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseName'
     put:
       tags:
         - Licenses
       summary: Update One License Name
+      operationId: updateOneLicenseName
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                name: Internal Test License
+              $ref: '#/components/schemas/LicenseName'
       parameters:
         - name: organizationID
           in: path
@@ -22996,12 +23210,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseName'
   /v1/organizations/{organizationID}/licenses/{licenseID}/metrics/activeIdentityCounts:
     get:
       tags:
         - Active Identity Counts
       summary: READ Active Identity Counts by License
+      operationId: readActiveIdentityCount
       parameters:
         - name: aggregatedBy
           in: query
