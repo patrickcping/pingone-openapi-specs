@@ -137,6 +137,8 @@ components:
                       enabled:
                         type: boolean
                         description: Set to true if you want the application to allow Auto Enrollment. Auto Enrollment means that the user can authenticate for the first time from an unpaired device, and the successful authentication will result in the pairing of the device for MFA.
+                  integrityDetection:
+                    $ref: '#/components/schemas/EnumMFADevicePolicyMobileIntegrityDetection'
         totp:
           type: object
           description: TOTP device authentication policy settings.
@@ -168,6 +170,9 @@ components:
             enabled:
               type: boolean
               description: Enabled or disabled in the policy.
+            fidoPolicyId:
+              type: string
+              description: Specifies the FIDO policy UUID. This property can be null. When null, the environment's default FIDO Policy is used.
         platform:
           type: object
           description: FIDO2 biometrics
@@ -175,6 +180,9 @@ components:
             enabled:
               type: boolean
               description: Enabled or disabled in the policy.
+            fidoPolicyId:
+              type: string
+              description: Specifies the FIDO policy UUID. This property can be null. When null, the environment's default FIDO Policy is used.
         default:
           type: boolean
           description: The default policy for Flow Manager.
@@ -206,6 +214,10 @@ components:
           type: number
         size:
           type: number
+    EnumMFADevicePolicyMobileIntegrityDetection:
+      type: string
+      enum: [permissive, restrictive]
+      description: Controls how authentication or registration attempts should proceed if a device integrity check does not receive a response. Set the value to `permissive` if you want to allow the process to continue. Set the value to `restrictive` if you want to block the user in such situations.
     EnumMFAPushCredentialAttrType:
       type: string
       enum: [APNS, FCM]
@@ -833,7 +845,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceAuthenticationPolicy'
-  /v1/environments/{environmentID}/deviceAuthenticationPolicy/{deviceAuthenticationPolicyID}:
+  /v1/environments/{environmentID}/deviceAuthenticationPolicies/{deviceAuthenticationPolicyID}:
     get:
       tags:
         - Device Authentication Policy
