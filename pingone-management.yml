@@ -169,7 +169,7 @@ components:
       description: A string that specifies the type of format used for the image. Options are jpg, png, and gif.
     EnumLicensePackage:
       type: string
-      enum: [TRIAL, STANDARD, PREMIUM, MFA, RISK, MFARISK, GLOBAL]
+      enum: [ADMIN, INTERNAL, TRIAL, STANDARD, PREMIUM, MFA, RISK, MFARISK, GLOBAL]
       description: A string that specifies the license template on which this license is based. This is a required property. Options are `TRIAL`, `STANDARD`, `PREMIUM`, `MFA`, `RISK`, `MFARISK`, and `GLOBAL`.
     EnumLicenseStatus:
       type: string
@@ -192,6 +192,9 @@ components:
       type: string
       enum: [AP, CA, EU, NA]
       description: A string that specifies the environment region code. The value is set when the environment is created and cannot be updated.
+    EnumRegionCodeLicense:
+      type: string
+      enum: [AP, CA, EU, NORTH_AMERICA]
     EnumResourceAttributeType:
       type: string
       enum: [CORE, CUSTOM]
@@ -2064,6 +2067,17 @@ components:
     License:
       type: object
       properties:
+        advancedServices:
+          type: object
+          readOnly: true
+          properties:
+            pingId:
+              type: object
+              properties:
+                included:
+                  type: boolean
+                type:
+                  type: string                
         assignedEnvironmentsCount:
           type: integer
           description: A read-only integer that specifies the total number of environments associated with this license.
@@ -2083,10 +2097,18 @@ components:
           format: datetime
           description: The date and time this license begins.
           readOnly: true
+        credentials:
+          type: object
+          readOnly: true
+          properties:
+            allowCredentials:
+              type: boolean
         environments:
           type: object
           readOnly: true
           properties:
+            allowAddResources:
+              type: boolean
             allowConnections:
               type: boolean
               description: A boolean that specifies whether the license supports creation of application connections in the specified environment.
@@ -2103,12 +2125,32 @@ components:
               type: integer
               description: A read-only integer that specifies the maximum number of environments allowed.
             regions:
-              $ref: '#/components/schemas/EnumRegionCode'
+              type: array
+              items:
+                $ref: '#/components/schemas/EnumRegionCodeLicense'
         expiresAt:
           type: string
           format: datetime
           readOnly: true
           description: The date and time this license expires. TRIAL licenses stop access to PingOne services at expiration. All other licenses trigger an event to send a notification when the license expires but do not block services.
+        fraud:
+          type: object
+          readOnly: true
+          properties:
+            allowBotMaliciousDeviceDetection:
+              type: boolean
+            allowAccountProtection:
+              type: boolean
+        gateways:
+          type: object
+          readOnly: true
+          properties:
+            allowLdapGateway:
+              type: boolean
+            allowKerberosGateway:
+              type: boolean
+            allowRadiusGateway:
+              type: boolean
         id:
           type: string
           description: A read-only string that specifies the license resource’s unique identifier.
@@ -2132,6 +2174,8 @@ components:
             allowRisk:
               type: boolean
               description: A read-only boolean that specifies whether your license permits you to configure risk features such as sign-on policies that include rules to detect anomalous changes to your locations (such as impossible travel). This capability is supported for TRIAL, RISK, and MFARISK license packages. Note, The sharing of user data to enable our machine-learning engine, which is integral to PingOne Risk, is captured in the license property license.intelligence.allowDataConsent, but it is not set to true by default in any license package. This license capability always requires active consent by the customer before it can be enabled, and if consent is given, then it allows the full scope of intelligence features included in PingOne Risk (and PingOne Risk plus MFA).
+            allowAdvancedPredictors:
+              type: boolean
         mfa:
           type: object
           readOnly: true
@@ -2139,15 +2183,28 @@ components:
             allowPushNotification:
               type: boolean
               description: A read-only boolean that specifies whether push notifications are allowed. For TRIAL (unpaid) licenses, the default value is true. For other license package types, adoption of the feature determines the default value.
-            allowMfaNotificationsOutsideWhitelist:
+            allowNotificationOutsideWhitelist:
               type: boolean
               description: A read-only boolean that specifies whether the license supports sending notifications outside of the environment's whitelist.
             allowFido2Devices:
               type: boolean
               description: A read-only boolean that specifies whether FIDO2 devices are allowed. For TRIAL (unpaid) licenses, the default value is true. For other license package types, adoption of the feature determines the default value.
+            allowVoiceOtp:
+              type: boolean
+            allowEmailOtp:
+              type: boolean
+            allowSmsOtp:
+              type: boolean
+            allowTotp:
+              type: boolean
         name:
           type: string
           description: A string that specifies a descriptive name for the license. This is a required property in a license name update request. Valid characters consists of any Unicode letter, mark, numeric character, forward slash, dot, apostrophe, underscore, space, or hyphen. The maximum length of a name is 255 characters.
+        orchestrate:
+          type: object
+          properties:
+            allowOrchestration:
+              type: boolean
         organization:
           $ref: '#/components/schemas/ObjectOrganization'
         package:
@@ -2197,6 +2254,8 @@ components:
             allowProvisioning:
               type: boolean
               description: A read-only boolean that specifies whether the license supports using provisioning capabilities in the specified environment.
+            allowInboundProvisioning:
+              type: boolean
             allowRoleAssignment:
               type: boolean
               description: A read-only boolean that specifies whether the license supports role assignments in the specified environment.
@@ -2212,6 +2271,8 @@ components:
             max:
               type: integer
               description: An read-only integer that specifies the maximum number of users allowed per environment.
+            hardLimitMax:
+              type: integer
             annualActiveIncluded:
               type: integer
               description: A read-only integer that specifies a soft limit on the number of active identities across all environments on the license per year. This property is not visible if a value is not provided at the time the license is created.
