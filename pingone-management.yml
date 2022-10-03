@@ -1235,7 +1235,9 @@ components:
             languages:
               type: array
               items:
-                $ref: '#/components/schemas/AgreementLanguage'
+                oneOf:
+                  - $ref: '#/components/schemas/AgreementLanguage'
+                  - $ref: '#/components/schemas/Language'
             licenses:
               type: array
               items:
@@ -1985,6 +1987,80 @@ components:
               type: integer
               readOnly: true
               description: The height of the image (in pixels).
+    Language:
+      type: object
+      properties:
+        default:
+          type: boolean
+          description: Specifies whether this language is the default for the environment. This property value must be set to false when creating a language resource. It can be set to true only after the language is enabled and after the localization of an agreement resource is complete when agreements are used for the environment.
+        enabled:
+          type: boolean
+          description: Specifies whether this language is enabled for the environment. This property value must be set to false when creating a language.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        id:
+          type: string
+          description: The resource’s unique identifier.
+          readOnly: true
+        locale:
+          type: string
+          description: An ISO standard language code. For more information about standard language codes, see ISO Language Code Table.
+        name:
+          type: string
+          description: The language name. If omitted, the ISO standard name is used.
+        createdAt:
+          type: string
+          format: datetime
+          description: The time the language resource was created.
+          readOnly: true
+        customerAdded:
+          type: boolean
+          description: Specifies whether this language was added by a customer administrator.
+          readOnly: true
+        updatedAt:
+          type: string
+          format: datetime
+          description: The time the language resource was last updated.
+          readOnly: true
+      required:
+        - locale
+        - default
+        - enabled
+    LanguageLocalizationStatus:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: datetime
+          description: The time the language localization status resource was created.
+          readOnly: true
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        id:
+          type: string
+          description: The resource’s unique identifier.
+          readOnly: true
+        locale:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: The locale ID.
+        service:
+          type: string
+          description: The name of the service associated with this resource.
+        localizationComplete:
+          type: boolean
+        statusDetails:
+          type: string
+        updatedAt:
+          type: string
+          format: datetime
+          description: The time the language localization status resource was last updated.
+          readOnly: true
+      required:
+        - service
     License:
       type: object
       properties:
@@ -15114,6 +15190,7 @@ paths:
       tags:
         - Languages
       summary: READ Languages
+      operationId: readLanguages
       parameters:
         - name: environmentID
           in: path
@@ -15160,12 +15237,80 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Languages
+      summary: CREATE Language
+      operationId: createLanguage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Language'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '405':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Language'
   /v1/environments/{environmentID}/languages/{languageID}:
     get:
       tags:
         - Languages
       summary: READ One Language
+      operationId: readOneLanguage
       parameters:
         - name: environmentID
           in: path
@@ -15217,18 +15362,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Language'
     put:
       tags:
         - Languages
-      summary: 'UPDATE Language '
+      summary: UPDATE Language
+      operationId: updateLanguage
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                enabled: true
+              $ref: '#/components/schemas/Language'
       parameters:
         - name: environmentID
           in: path
@@ -15280,11 +15426,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Language'
     delete:
       tags:
         - Languages
       summary: DELETE Language
+      operationId: deleteLanguage
       parameters:
         - name: environmentID
           in: path
@@ -15335,76 +15484,12 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/languages/:
-    post:
-      tags:
-        - Languages
-      summary: CREATE Language
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                locale: fr
-      parameters:
-        - name: environmentID
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '400':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '401':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '403':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '404':
-          description: Not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '405':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '429':
-          description: Request was rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '500':
-          description: Uncaught error occurred.  Platform outage
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '201':
-          description: Successful response
-          content:
-            application/json: {}
   /v1/environments/{environmentID}/languages/{languageID}/status:
     get:
       tags:
         - Language Localization Status
       summary: READ Language Localization Status
+      operationId: readLanguageLocalizationStatus
       parameters:
         - name: environmentID
           in: path
@@ -15456,20 +15541,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LanguageLocalizationStatus'
     post:
       tags:
         - Language Localization Status
       summary: CREATE Language Localization Status
+      operationId: createLanguageLocalizationStatus
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                service: Service_Name2
-                localizationComplete: true
-                statusDetails: Status details here
+              $ref: '#/components/schemas/LanguageLocalizationStatus'
       parameters:
         - name: environmentID
           in: path
@@ -15527,12 +15611,15 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LanguageLocalizationStatus'
   /v1/environments/{environmentID}/languages/{languageID}/status/{l10nStatusID}:
     get:
       tags:
         - Language Localization Status
       summary: READ One Language Localization Status
+      operationId: readOneLanguageLocalizationStatus
       parameters:
         - name: environmentID
           in: path
@@ -15589,20 +15676,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LanguageLocalizationStatus'
     put:
       tags:
         - Language Localization Status
-      summary: CREATE Language Localization Status
+      summary: UPDATE Language Localization Status
+      operationId: updateLanguageLocalizationStatus
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                service: Service_Name1
-                localizationComplete: true
-                statusDetails: Status Details - add updated status details here
+              $ref: '#/components/schemas/LanguageLocalizationStatus'
       parameters:
         - name: environmentID
           in: path
@@ -15659,11 +15745,14 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LanguageLocalizationStatus'
     delete:
       tags:
         - Language Localization Status
       summary: DELETE Language Localization Status
+      operationId: deleteLanguageLocalizationStatus
       parameters:
         - name: environmentID
           in: path
