@@ -25,6 +25,17 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
+    DeviceAuthenticationPolicyFIDODevice:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Enabled or disabled in the policy.
+        fidoPolicyId:
+          type: string
+          description: Specifies the FIDO policy UUID. This property can be null. When null, the environment's default FIDO Policy is used.
+      required:
+        - enabled
     DeviceAuthenticationPolicyOfflineDevice:
       type: object
       properties:
@@ -42,6 +53,9 @@ components:
                   description: The duration (number of time units) that the passcode is valid before it expires.
                 timeUnit:
                   $ref: '#/components/schemas/EnumTimeUnit'
+              required:
+                - duration
+                - timeUnit
             failure:
               type: object
               properties:
@@ -56,6 +70,18 @@ components:
                       description: The duration (number of time units) the user is blocked after reaching the maximum number of passcode failures.
                     timeUnit:
                       $ref: '#/components/schemas/EnumTimeUnit'
+                  required:
+                    - duration
+                    - timeUnit
+              required:
+                - count
+                - coolDown
+          required:
+            - lifetime
+            - failure
+      required:
+        - enabled
+        - otp
     DeviceAuthenticationPolicy:
       type: object
       properties:
@@ -84,23 +110,39 @@ components:
             otp:
               type: object
               properties:
+                failure:
+                  type: object
+                  properties:
+                    count:
+                      type: integer
+                      description: The maximum number of times that the OTP entry can fail for a user, before they are blocked.
+                    coolDown:
+                      type: object
+                      properties:
+                        duration:
+                          type: integer
+                          description: The duration (number of time units) the user is blocked after reaching the maximum number of passcode failures.
+                        timeUnit:
+                          $ref: '#/components/schemas/EnumTimeUnit'
+                      required:
+                        - duration
+                        - timeUnit
+                  required:
+                    - count
+                    - coolDown
                 window:
                   type: object
                   properties:
-                    failure:
+                    stepSize:
                       type: object
                       properties:
-                        count:
+                        duration:
                           type: integer
-                          description: The maximum number of times that the OTP entry can fail for a user, before they are blocked.
-                        coolDown:
-                          type: object
-                          properties:
-                            duration:
-                              type: integer
-                              description: The duration (number of time units) the user is blocked after reaching the maximum number of passcode failures.
-                            timeUnit:
-                              $ref: '#/components/schemas/EnumTimeUnit'
+                        timeUnit:
+                          $ref: '#/components/schemas/EnumTimeUnit'
+              required:
+                - failure
+                - window
             applications:
               type: array
               items:
@@ -139,6 +181,9 @@ components:
                         description: Set to true if you want the application to allow Auto Enrollment. Auto Enrollment means that the user can authenticate for the first time from an unpaired device, and the successful authentication will result in the pairing of the device for MFA.
                   integrityDetection:
                     $ref: '#/components/schemas/EnumMFADevicePolicyMobileIntegrityDetection'
+          required:
+            - enabled
+            - otp
         totp:
           type: object
           description: TOTP device authentication policy settings.
@@ -163,26 +208,21 @@ components:
                           description: The duration (number of time units) the user is blocked after reaching the maximum number of passcode failures.
                         timeUnit:
                           $ref: '#/components/schemas/EnumTimeUnit'
+                      required:
+                        - duration
+                        - timeUnit
+                  required:
+                    - count
+                    - coolDown
+              required:
+                - failure
+          required:
+            - enabled
+            - otp
         securityKey:
-          type: object
-          description: Security Key
-          properties:
-            enabled:
-              type: boolean
-              description: Enabled or disabled in the policy.
-            fidoPolicyId:
-              type: string
-              description: Specifies the FIDO policy UUID. This property can be null. When null, the environment's default FIDO Policy is used.
+          $ref: '#/components/schemas/DeviceAuthenticationPolicyFIDODevice'
         platform:
-          type: object
-          description: FIDO2 biometrics
-          properties:
-            enabled:
-              type: boolean
-              description: Enabled or disabled in the policy.
-            fidoPolicyId:
-              type: string
-              description: Specifies the FIDO policy UUID. This property can be null. When null, the environment's default FIDO Policy is used.
+          $ref: '#/components/schemas/DeviceAuthenticationPolicyFIDODevice'
         default:
           type: boolean
           description: The default policy for Flow Manager.
@@ -194,6 +234,17 @@ components:
           format: date-time
           readOnly: true
           description: The time the resource was last updated.
+      required:
+        - name
+        - sms
+        - email
+        - voice
+        - mobile
+        - totp
+        - securityKey
+        - platform
+        - default
+        - forSignOnPolicy
     EntityArray:
       type: object
       properties:
@@ -909,72 +960,12 @@ paths:
       tags:
         - Device Authentication Policy
       summary: UPDATE Device Authentication Policy
+      operationId: updateDeviceAuthenticationPolicy
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                name: Environment Policy
-                sms:
-                  enabled: true
-                  otp:
-                    failure:
-                      count: 3
-                      coolDown:
-                        duration: 0
-                        timeUnit: MINUTES
-                    lifeTime:
-                      duration: 30
-                      timeUnit: MINUTES
-                email:
-                  enabled: true
-                  otp:
-                    failure:
-                      count: 3
-                      coolDown:
-                        duration: 0
-                        timeUnit: MINUTES
-                    lifeTime:
-                      duration: 30
-                      timeUnit: MINUTES
-                mobile:
-                  enabled: true
-                  otp:
-                    failure:
-                      count: 3
-                      coolDown:
-                        duration: 2
-                        timeUnit: MINUTES
-                    window:
-                      stepSize:
-                        duration: 30
-                        timeUnit: SECONDS
-                totp:
-                  enabled: true
-                  otp:
-                    failure:
-                      count: 3
-                      coolDown:
-                        duration: 2
-                        timeUnit: MINUTES
-                voice:
-                  enabled: true
-                  otp:
-                    failure:
-                      count: 3
-                      coolDown:
-                        duration: 0
-                        timeUnit: MINUTES
-                    lifeTime:
-                      duration: 30
-                      timeUnit: MINUTES
-                securityKey:
-                  enabled: true
-                forSignOnPolicy: true
-                platform:
-                  enabled: true
-                default: false
+              $ref: '#/components/schemas/DeviceAuthenticationPolicy'
       parameters:
         - name: environmentID
           in: path
@@ -1026,7 +1017,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceAuthenticationPolicy'
     delete:
       tags:
         - Device Authentication Policy
