@@ -45,7 +45,7 @@ components:
         otp:
           type: object
           properties:
-            lifetime:
+            lifeTime:
               type: object
               properties:
                 duration:
@@ -77,7 +77,7 @@ components:
                 - count
                 - coolDown
           required:
-            - lifetime
+            - lifeTime
             - failure
       required:
         - enabled
@@ -140,6 +140,11 @@ components:
                           type: integer
                         timeUnit:
                           $ref: '#/components/schemas/EnumTimeUnit'
+                      required:
+                        - duration
+                        - timeUnit
+                  required:
+                    - stepSize
               required:
                 - failure
                 - window
@@ -157,12 +162,16 @@ components:
                       enabled:
                         type: boolean
                         description: Specifies whether push notification is enabled or disabled for the policy.
+                    required:
+                      - enabled
                   otp:
                     type: object
                     properties:
                       enabled:
                         type: boolean
                         description: Specifies whether OTP authentication is enabled or disabled for the policy.
+                    required:
+                      - enabled
                   deviceAuthorization:
                     type: object
                     properties:
@@ -170,17 +179,21 @@ components:
                         type: boolean
                         description: Specifies the enabled or disabled state of automatic MFA for native devices paired with the user, for the specified application.
                       extraVerification:
-                        type: string
-                        description: Specifies the level of further verification when deviceAuthorization is enabled. The PingOne platform performs an extra verification check by sending a “silent” push notification to the customer native application, and receives a confirmation in return.
-                        enum: [disabled,permissive,restrictive]
+                        $ref: '#/components/schemas/EnumMFADevicePolicyMobileExtraVerification'
+                    required:
+                      - enabled
                   autoEnrollment:
                     type: object
                     properties:
                       enabled:
                         type: boolean
                         description: Set to true if you want the application to allow Auto Enrollment. Auto Enrollment means that the user can authenticate for the first time from an unpaired device, and the successful authentication will result in the pairing of the device for MFA.
+                    required:
+                      - enabled
                   integrityDetection:
                     $ref: '#/components/schemas/EnumMFADevicePolicyMobileIntegrityDetection'
+                required:
+                  - id
           required:
             - enabled
             - otp
@@ -265,6 +278,10 @@ components:
           type: number
         size:
           type: number
+    EnumMFADevicePolicyMobileExtraVerification:
+      type: string
+      description: Specifies the level of further verification when deviceAuthorization is enabled. The PingOne platform performs an extra verification check by sending a “silent” push notification to the customer native application, and receives a confirmation in return.
+      enum: [permissive,restrictive]
     EnumMFADevicePolicyMobileIntegrityDetection:
       type: string
       enum: [permissive, restrictive]
