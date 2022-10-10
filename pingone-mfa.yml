@@ -329,6 +329,25 @@ components:
             - token
     MFAPushCredentialFCM:
       $ref: '#/components/schemas/MFAPushCredential'
+    MFAPushCredentialResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the push credential ID.
+        type:
+          $ref: '#/components/schemas/EnumMFAPushCredentialAttrType'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was created.
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was last updated.
     MFASettings:
       type: object
       properties:
@@ -354,7 +373,6 @@ components:
               description: An integer that defines the number of seconds to keep the account in a locked state.
           required:
             - failureCount
-            - durationSeconds
         pairing:
           type: object
           description: An object that contains pairing settings.
@@ -376,7 +394,6 @@ components:
           description: The time the resource was last updated.
       required:
         - authentication
-        - lockout
         - pairing
     ObjectEnvironment:
       type: object
@@ -577,9 +594,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
-                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
+                $ref: '#/components/schemas/MFAPushCredentialResponse'
   /v1/environments/{environmentID}/applications/{applicationID}/pushCredentials/{pushCredentialID}:
     get:
       tags:
@@ -644,9 +659,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
-                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
+                $ref: '#/components/schemas/MFAPushCredentialResponse'
     put:
       tags:
         - Applications > Application MFA Push Credentials
@@ -725,9 +738,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
-                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
+                $ref: '#/components/schemas/MFAPushCredentialResponse'
     delete:
       tags:
         - Applications > Application MFA Push Credentials
