@@ -175,6 +175,9 @@ components:
       type: string
       enum: [ACTIVE, EXPIRED, FUTURE]
       description: A string that specifies the status of the license. Options are `ACTIVE`, `EXPIRED`, and `FUTURE`.
+    EnumMobileIntegrityDetectionPlatform:
+      type: string
+      enum: [IOS, GOOGLE]
     EnumOrganizationType:
       type: string
       enum: [PAID, TRIAL]
@@ -655,6 +658,12 @@ components:
                 integrityDetection:
                   type: object
                   properties:
+                    excludedPlatforms:
+                      type: array
+                      description: You can enable device integrity checking separately for Android and iOS by setting `mobile.integrityDetection.mode` to `ENABLED` and then using `mobile.integrityDetection.excludedPlatforms` to specify the OS where you do not want to use device integrity checking. The values to use are `GOOGLE` and `IOS` (all upper case). Note that this is implemented as an array even though currently you can only include a single value.
+                      maxItems: 1
+                      items:
+                        $ref: '#/components/schemas/EnumMobileIntegrityDetectionPlatform'
                     mode:
                       $ref: '#/components/schemas/EnumEnabledStatus'
                       description: A string that specifies whether device integrity detection takes place on mobile devices, for the application's enrollment and authentication events ENABLED, DISABLED
@@ -667,6 +676,9 @@ components:
                         units:
                           $ref: '#/components/schemas/EnumDurationUnitMinsHours'
                           description: A string that specifies the time units of the mobile.integrityDetection.cacheDuration.amount :MINUTES, HOURS
+                uriPrefix:
+                  type: string
+                  description: A string that specifies a URI prefix that enables direct triggering of the mobile application when scanning a QR code. The URI prefix can be set to a universal link with a valid value (which can be a URL address that starts with `HTTP://` or `HTTPS://`, such as `https://www.acme.com`), or an app schema, which is just a string and requires no special validation.
             bundleId:
               type: string
               description: A string that specifies the bundle associated with the application, for push notifications in native apps. The value of the bundleId property is unique per environment, and once defined, is immutable.
