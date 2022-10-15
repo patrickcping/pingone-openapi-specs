@@ -165,7 +165,7 @@ components:
       enum: [HTTP_POST, HTTP_REDIRECT]
     EnumImageFormat:
       type: string
-      enum: [PNG, JPG, GIF]
+      enum: [png, jpg, gif]
       description: A string that specifies the type of format used for the image. Options are jpg, png, and gif.
     EnumLicensePackage:
       type: string
@@ -1980,28 +1980,38 @@ components:
           description: A string that specifies the resource’s unique identifier.
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
+        createdAt:
+          type: string
+          format: datetime
+          readOnly: true
+          description: The time the resource was created.
         targets:
           type: object
+          readOnly: true
           properties:
-            href:
-              type: string
+            original:
+              type: object
               readOnly: true
-              description: A string that specifies the URL or fully qualified path to the image source file.
-            id:
-              type: string
-              readOnly: true
-              description: A string that specifies the UUID of the target image.
-            type:
-              $ref: '#/components/schemas/EnumImageFormat'
-              readOnly: true
-            width:
-              type: integer
-              readOnly: true
-              description: The width of the image (in pixels).
-            height:
-              type: integer
-              readOnly: true
-              description: The height of the image (in pixels).
+              properties:
+                href:
+                  type: string
+                  readOnly: true
+                  description: A string that specifies the URL or fully qualified path to the image source file.
+                id:
+                  type: string
+                  readOnly: true
+                  description: A string that specifies the UUID of the target image.
+                type:
+                  $ref: '#/components/schemas/EnumImageFormat'
+                  readOnly: true
+                width:
+                  type: integer
+                  readOnly: true
+                  description: The width of the image (in pixels).
+                height:
+                  type: integer
+                  readOnly: true
+                  description: The height of the image (in pixels).
     Language:
       type: object
       properties:
