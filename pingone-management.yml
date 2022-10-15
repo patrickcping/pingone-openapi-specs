@@ -74,6 +74,18 @@ components:
       type: string
       enum: [CORE, SCOPE, CUSTOM]
       description: A string that specifies the mapping type of the attribute. Options are CORE, SCOPE, and CUSTOM. The CORE and SCOPE mapping types are for reserved attributes managed by the API and cannot be removed. Attribute values for these mapping types can be updated. The CUSTOM mapping type is for user-defined attributes. Attributes of this type can be updated and deleted.
+    EnumBrandingLogoType:
+      type: string
+      enum: [IMAGE, NONE]
+      description: The type of format used for the image. Options are IMAGE and NONE.
+    EnumBrandingThemeBackgroundType:
+      type: string
+      enum: [NONE, COLOR, IMAGE, DEFAULT]
+      description: The background type for the theme. Options are `NONE`, `COLOR`, `IMAGE`, `DEFAULT`.
+    EnumBrandingThemeTemplate:
+      type: string
+      enum: [default, focus, mural, slate, split]
+      description: The template name of the branding theme associated with the environment. Options are default, focus, mural, slate, and split.
     EnumCertificateKeyAlgorithm:
       type: string
       enum: [RSA, EC, UNKNOWN]
@@ -927,6 +939,118 @@ components:
               - type
       required:
         - products
+    BrandingSettings:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Specifies the resource’s unique identifier.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        companyName:
+          type: string
+          description: The company name associated with the specified environment.
+        logo:
+          type: object
+          properties:
+            href:
+              type: string
+              description: The URL or fully qualified path to the logo file used for branding.
+            id:
+              type: string
+              description: The ID of the logo image.
+          required:
+            - id
+            - href
+    BrandingTheme:
+      type: object
+      properties:
+        configuration:
+          type: object
+          properties:
+            backgroundColor:
+              type: string
+              description: The background color for the theme. It must be a valid hexadecimal color code, and it is a required property when configuration.backgroundType is set to COLOR.
+            backgroundType:
+              $ref: '#/components/schemas/EnumBrandingThemeBackgroundType'
+            backgroundImage:
+              type: object
+              properties:
+                href:
+                  type: string
+                  description: The URL or fully qualified path to the background image file used for branding. This is a required property when configuration.backgroundType is set to IMAGE.
+                id:
+                  type: string
+                  description: The ID of the background image.
+              required:
+                - href
+                - id
+            bodyTextColor:
+              type: string
+              description: The body text color for the theme. It must be a valid hexadecimal color code.
+            buttonColor:
+              type: string
+              description: The button color for the theme. It must be a valid hexadecimal color code.
+            buttonTextColor:
+              type: string
+              description: The button text color for the branding theme. It must be a valid hexadecimal color code.
+            cardColor:
+              type: string
+              description: The card color for the branding theme. It must be a valid hexadecimal color code.
+            footer:
+              type: string
+              description: The footer of the branding theme.
+            headingTextColor:
+              type: string
+              description: The heading text color for the branding theme. It must be a valid hexadecimal color code.
+            linkTextColor:
+              type: string
+              description: The hyperlink text color for the branding theme. It must be a valid hexadecimal color code.
+            logo:
+              type: object
+              properties:
+                href:
+                  type: string
+                  description: The URL or fully qualified path to the logo file used for branding. This is a required property when configuration.logoType is set to IMAGE.
+                id:
+                  type: string
+                  description: The ID of the logo image.
+              required:
+                - href
+                - id
+            logoType:
+              $ref: '#/components/schemas/EnumBrandingLogoType'
+            name:
+              type: string
+              description: The name of the branding theme.
+          required:
+            - backgroundColor
+            - backgroundType
+            - logoType
+        default:
+          type: boolean
+          description: Specifies whether this theme is the environment's default branding configuration.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        id:
+          type: string
+          readOnly: true
+          description: Specifies the resource’s unique identifier.
+        template:
+          $ref: '#/components/schemas/EnumBrandingThemeTemplate'
+      required:
+        - configuration
+        - default
+        - template
+    BrandingThemeDefault:
+      type: object
+      properties:
+        default:
+          type: boolean
+          description: A boolean to specify whether the theme is the default in the environment
+      required:
+        - default
     Certificate:
       type: object
       properties:
@@ -1293,6 +1417,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Subscription'
+            themes:
+              type: array
+              items:
+                $ref: '#/components/schemas/BrandingTheme'
             trustedEmails:
               type: array
               items:
@@ -7660,12 +7788,8 @@ paths:
       tags:
         - Branding Settings
       summary: READ Branding Settings
+      operationId: readBrandingSettings
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{jwtToken}}'
         - name: environmentID
           in: path
           schema:
@@ -7711,27 +7835,20 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingSettings'
     put:
       tags:
         - Branding Settings
       summary: UPDATE Branding Settings
+      operationId: updateBrandingSettings
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                companyName: Ping
-                logo:
-                  href: '{{imageURL}}'
-                  id: '{{imageID}}'
+              $ref: '#/components/schemas/BrandingSettings'
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{jwtToken}}'
         - name: environmentID
           in: path
           schema:
@@ -7777,18 +7894,16 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingSettings'
   /v1/environments/{environmentID}/themes:
     get:
       tags:
         - Branding Themes
       summary: READ Branding Themes
+      operationId: readBrandingThemes
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{jwtToken}}'
         - name: environmentID
           in: path
           schema:
@@ -7834,47 +7949,20 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Branding Themes
       summary: CREATE Branding Theme
+      operationId: createBrandingTheme
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                template: default
-                configuration:
-                  logoType: IMAGE
-                  logo:
-                    href: https://logo.com
-                    id: '{{logoID}}'
-                  backgroundColor: '#333333'
-                  backgroundType: COLOR
-                  backgroundImage:
-                    href: https://bg.com
-                    id: '{{imageID}}'
-                  cardColor: '#333333'
-                  headingTextColor: '#333333'
-                  linkTextColor: '#333333'
-                  bodyTextColor: '#444444'
-                  buttonTextColor: '#333333'
-                  buttonColor: '#333333'
-                  name: ACME test theme
-                  footer: some footer
+              $ref: '#/components/schemas/BrandingTheme'
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{jwtToken}}'
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: environmentID
           in: path
           schema:
@@ -7926,18 +8014,16 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingTheme'
   /v1/environments/{environmentID}/themes/{themeID}:
     get:
       tags:
         - Branding Themes
       summary: READ One Branding Theme
+      operationId: readOneBrandingTheme
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{jwtToken}}'
         - name: environmentID
           in: path
           schema:
@@ -7988,47 +8074,20 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingTheme'
     put:
       tags:
         - Branding Themes
       summary: UPDATE Branding Theme
+      operationId: updateBrandingTheme
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                template: default
-                configuration:
-                  logoType: IMAGE
-                  logo:
-                    href: https://logo.com
-                    id: '{{logoID}}'
-                  backgroundColor: '#333333'
-                  backgroundType: COLOR
-                  backgroundImage:
-                    href: https://bg.com
-                    id: '{{imageID}}'
-                  cardColor: '#333333'
-                  headingTextColor: '#333333'
-                  linkTextColor: '#333333'
-                  bodyTextColor: '#444444'
-                  buttonTextColor: '#333333'
-                  buttonColor: '#333333'
-                  name: test theme
-                  footer: Good for Copyright information.
+              $ref: '#/components/schemas/BrandingTheme'
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{jwtToken}}'
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: environmentID
           in: path
           schema:
@@ -8079,17 +8138,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingTheme'
     delete:
       tags:
         - Branding Themes
       summary: DELETE Branding Theme
+      operationId: deleteBrandingTheme
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{jwtToken}}'
         - name: environmentID
           in: path
           schema:
@@ -8144,12 +8201,8 @@ paths:
       tags:
         - Branding Themes
       summary: READ Branding Theme Default
+      operationId: readBrandingThemeDefault
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{jwtToken}}'
         - name: environmentID
           in: path
           schema:
@@ -8200,29 +8253,20 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingThemeDefault'
     put:
       tags:
         - Branding Themes
       summary: UPDATE Branding Theme Default
+      operationId: updateBrandingThemeDefault
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                default: true
+              $ref: '#/components/schemas/BrandingThemeDefault'
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{jwtToken}}'
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: environmentID
           in: path
           schema:
@@ -8273,7 +8317,9 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingThemeDefault'
   /v1/environments/{environmentID}/capabilities:
     get:
       tags:
