@@ -1025,9 +1025,14 @@ components:
               type: string
               description: The name of the branding theme.
           required:
-            - backgroundColor
             - backgroundType
             - logoType
+            - buttonColor
+            - buttonTextColor
+            - linkTextColor
+            - cardColor
+            - bodyTextColor
+            - headingTextColor
         default:
           type: boolean
           description: Specifies whether this theme is the environment's default branding configuration.
