@@ -274,10 +274,32 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/DeviceAuthenticationPolicy'
+            fidoDevicesMetadata:
+              type: array
+              items:
+                $ref: '#/components/schemas/FIDODevice'
+            fidoPolicies:
+              type: array
+              items:
+                $ref: '#/components/schemas/FIDOPolicy'
         count:
           type: number
         size:
           type: number
+    EnumFIDOAttestationRequirements:
+      type: string
+      enum: [NONE, AUDIT_ONLY, GLOBAL, CERTIFIED, SPECIFIC]
+      description:  |
+        Determines whether attestation is requested from the authenticator, and whether this information is used to restrict authenticator usage. Can take one of these values:
+        `NONE` - attestation is not requested
+        `AUDIT_ONLY` - Attestation is requested and the information is used for logging purposes, but the information is not used for filtering authenticators
+        `GLOBAL` - all entries in the MDS table can be used for authentication
+        `CERTIFIED` - only FIDO-certified authenticators can be used
+        `SPECIFIC` - only specific authenticators can be used. Used in conjunction with `allowedAuthenticators`.
+    EnumFIDOResidentKeyRequirement:
+      type: string
+      enum: [DISCOURAGED, REQUIRED]
+      description: Used to enable resident keys. Value can be `DISCOURAGED` or `REQUIRED`.
     EnumMFADevicePolicyMobileExtraVerification:
       type: string
       description: Specifies the level of further verification when deviceAuthorization is enabled. The PingOne platform performs an extra verification check by sending a “silent” push notification to the customer native application, and receives a confirmation in return.
@@ -302,6 +324,63 @@ components:
       type: string
       enum: [MINUTES, SECONDS]
       description: The type of time unit
+    FIDOCustomDeviceMetadata:
+      type: object
+    FIDODevice:
+      type: object
+    FIDOPolicy:
+      type: object
+      properties:
+        id:
+          type: string
+          description: FIDO policy's UUID.
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was created.
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was last updated.
+        _embedded:
+          type: object
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        name:
+          type: string
+          description: The name to use for the FIDO policy.
+        description:
+          type: string
+          description: Description of the FIDO policy.
+        attestationRequirements:
+          $ref: '#/components/schemas/EnumFIDOAttestationRequirements'
+        allowedAuthenticators:
+          type: array
+          description: If `attestationRequirements` is set to `SPECIFIC`, this array is used to specify the authenticators that you want to allow.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The identifier of the authenticator to allow.
+            required:
+              - id
+        enforceDuringAuthentication:
+          type: boolean
+          description: This parameter is relevant only if you have set `attestationRequirements` to `SPECIFIC` in order to restrict usage to only certain authenticators. If set to `true`, the policy will be applied both during registration and during each authentication attempt. If set to `false`, the policy is applied only during registration. Default is `false`.
+          default: false
+        default:
+          type: boolean
+          description: Whether this policy should serve as the default FIDO policy.
+        residentKeyRequirement:
+          $ref: '#/components/schemas/EnumFIDOResidentKeyRequirement'
+      required:
+        - name
+        - attestationRequirements
+        - residentKeyRequirement
     MFAPushCredential:
       type: object
       properties:
@@ -454,6 +533,9 @@ components:
 security:
   - bearer: []
 tags:
+  - name: FIDO Device
+  - name: Device Authentication Policy
+  - name: FIDO Policy
   - name: MFA Settings
   - name: Users > MFA Devices
   - name: Users > MFA Devices > FIDO2 Biometrics Devices
@@ -1060,6 +1142,540 @@ paths:
             type: string
           required: true
         - name: deviceAuthenticationPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
+  /v1/environments/{environmentID}/fidoDevicesMetadata:
+    get:
+      tags:
+        - FIDO Device
+      summary: READ All FIDO Devices
+      operationId: readFidoDevices
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - FIDO Device
+      summary: CREATE FIDO Device
+      operationId: createFidoDevice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FIDOCustomDeviceMetadata'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '405':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FIDODevice'
+  /v1/environments/{environmentID}/fidoDevicesMetadata/{fidoDeviceID}:
+    get:
+      tags:
+        - FIDO Device
+      summary: READ One FIDO Device
+      operationId: readOneFidoDevice
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: fidoDeviceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FIDODevice'
+    delete:
+      tags:
+        - FIDO Device
+      summary: DELETE FIDO Device
+      operationId: deleteFidoDevice
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: fidoDeviceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
+  /v1/environments/{environmentID}/fidoPolicies:
+    get:
+      tags:
+        - FIDO Policy
+      summary: READ FIDO Policies
+      operationId: readFidoPolicies
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - FIDO Policy
+      summary: CREATE FIDO Policy
+      operationId: createFidoPolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FIDOPolicy'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '405':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FIDOPolicy'
+  /v1/environments/{environmentID}/fidoPolicies/{fidoPolicyID}:
+    get:
+      tags:
+        - FIDO Policy
+      summary: READ One FIDO Policy
+      operationId: readOneFidoPolicy
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: fidoPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FIDOPolicy'
+    put:
+      tags:
+        - FIDO Policy
+      summary: UPDATE FIDO Policy
+      operationId: updateFIDOPolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FIDOPolicy'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: fidoPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FIDOPolicy'
+    delete:
+      tags:
+        - FIDO Policy
+      summary: DELETE FIDO Policy
+      operationId: deleteFidoPolicy
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: fidoPolicyID
           in: path
           schema:
             type: string
