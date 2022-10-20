@@ -212,12 +212,16 @@ components:
       enum: [AP, CA, EU, NORTH_AMERICA]
     EnumResourceAttributeType:
       type: string
-      enum: [CORE, CUSTOM]
-      description: A string that specifies the type of resource attribute. Options are CORE - The claim is required and cannot not be removed., CUSTOM - The claim is not a CORE attribute. All created attributes are of this type.
+      enum: [CORE, CUSTOM, PREDEFINED]
+      description: |
+        A string that specifies the type of resource attribute. Options are:
+        CORE: The claim is required and cannot not be removed.
+        CUSTOM: The claim is not a CORE attribute. All created attributes are of this type.
+        PREDEFINED: A designation for predefined OIDC resource attributes such as given_name. These attributes cannot be removed; however, they can be modified.
     EnumResourceType:
       type: string
       enum: [OPENID_CONNECT, PINGONE_API, CUSTOM]
-      description: A string that specifies the type of resource. Options are OPENID_CONNECT, PINGONE_API, and CUSTOM. Only the CUSTOM resource type can be created. OPENID_CONNECT specifies the built-in platform resource for OpenID Connect. PINGONE_API specifies the built-in platform resource for PingOne.
+      description: A string that specifies the type of resource. Options are `OPENID_CONNECT`, `PINGONE_API`, and `CUSTOM`. Only the `CUSTOM` resource type can be created. `OPENID_CONNECT` specifies the built-in platform resource for OpenID Connect. `PINGONE_API` specifies the built-in platform resource for PingOne.
     EnumRoleName:
       type: string
       description: The name of the role
@@ -2765,7 +2769,7 @@ components:
           description: An integer that specifies the number of seconds that the access token is valid. If a value is not specified, the default is 3600. The minimum value is 300 seconds (5 minutes); the maximum value is 2592000 seconds (30 days).
         audience:
           type: string
-          description: A string that specifies a URL without a fragment or `@ObjectName` and must not contain `pingone` or `pingidentity` (for example, https://api.myresource.com). If a URL is not specified, the resource name is used.
+          description: A string that specifies a URL without a fragment or `@ObjectName` and must not contain `pingone` or `pingidentity` (for example, `https://api.bxretail.org`). If a URL is not specified, the resource name is used.
         createdAt:
           type: string
           format: date-time
@@ -2789,6 +2793,9 @@ components:
         name:
           type: string
           description: A string that specifies the resource name, which must be provided and must be unique within an environment.
+        introspectEndpointAuthMethod:
+          type: string
+          description: The client authentication methods supported by the token endpoint. Options are `NONE`, `CLIENT_SECRET_BASIC`, and `CLIENT_SECRET_POST`.
         type:
           $ref: '#/components/schemas/EnumResourceType'
         updatedAt:
@@ -2807,7 +2814,23 @@ components:
           description: A string that specifies the resource’s unique identifier.
         name:
           type: string
-          description: A string that specifies the name of the custom resource attribute to be included in the access token
+          description: |
+            A string that specifies the name of the custom resource attribute to be included in the access token. The following are reserved names and cannot be used. Thesese reserved names are applicable only when the resource's type property is `OPENID_CONNECT`:
+            - `acr`
+            - `amr`
+            - `aud`
+            - `auth_time`
+            - `client_id`
+            - `env`
+            - `exp`
+            - `iat`
+            - `iss`
+            - `jti`
+            - `org`
+            - `p1.*` (any name starting with the p1. prefix)
+            - `scope`
+            - `sid`
+            - `sub`
         type:
           $ref: '#/components/schemas/EnumResourceAttributeType'
         value:
@@ -2821,6 +2844,12 @@ components:
           properties:
             id:
               type: string
+        idToken:
+          type: boolean
+          description: A boolean that specifies whether the attribute mapping should be available in the ID Token. This property is applicable only when the application's protocol property is `OPENID_CONNECT`. If omitted, the default is `true`. Note that the `idToken` and `userInfo` properties cannot both be set to `false`. At least one of these properties must have a value of `true`.
+        userInfo:
+          type: boolean
+          description: A boolean that specifies whether the attribute mapping should be available through the `/as/userinfo` endpoint. This property is applicable only when the application's protocol property is `OPENID_CONNECT`. If omitted, the default is `true`. Note that the `idToken` and `userInfo` properties cannot both be set to `false`. At least one of these properties must have a value of `true`.
       required:
         - name
         - value
@@ -2841,7 +2870,12 @@ components:
           $ref: '#/components/schemas/ObjectEnvironment'
         schemaAttributes:
           type: array
-          description: An array that specifies the user schema attributes that can be read or updated for the specified PingOne access control scope. The value is an array of schema attribute paths (such as username, name.given, shirtSize) that the scope controls. This property is supported only for the p1:read:user, p1:update:user and p1:read:user:{suffix} and p1:update:user:{suffix} scopes. No other PingOne platform scopes allow this behavior. Any attributes not listed in the attribute array are excluded from the read or update action. The wildcard path (*) in the array includes all attributes and cannot be used in conjunction with any other user schema attribute paths
+          description: An array that specifies the user schema attributes that can be read or updated for the specified PingOne access control scope. The value is an array of schema attribute paths (such as `username`, `name.given`, `shirtSize`) that the scope controls. This property is supported only for the `p1:read:user`, `p1:update:user` and `p1:read:user:{suffix}` and `p1:update:user:{suffix}` scopes. No other PingOne platform scopes allow this behavior. Any attributes not listed in the attribute array are excluded from the read or update action. The wildcard path (*) in the array includes all attributes and cannot be used in conjunction with any other user schema attribute paths
+          items:
+            type: string
+        mappedClaims:
+          type: array
+          description: A list of custom resource attribute IDs. This property applies only for the resource with its type property set to `OPENID_CONNECT`. Moreover, this property does not display predefined OpenID Connect (OIDC) mappings, such as the `email` claim in the OIDC `email` scope or the `name` claim in the `profile` scope. You can create custom attributes, and these custom attributes can be added to `mappedClaims` and will display in the response.
           items:
             type: string
         createdAt:
