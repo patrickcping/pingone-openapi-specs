@@ -218,6 +218,10 @@ components:
         CORE: The claim is required and cannot not be removed.
         CUSTOM: The claim is not a CORE attribute. All created attributes are of this type.
         PREDEFINED: A designation for predefined OIDC resource attributes such as given_name. These attributes cannot be removed; however, they can be modified.
+    EnumResourceIntrospectEndpointAuthMethod:
+      type: string
+      enum: [NONE, CLIENT_SECRET_BASIC, CLIENT_SECRET_POST]
+      description: The client authentication methods supported by the token endpoint. Options are `NONE`, `CLIENT_SECRET_BASIC`, and `CLIENT_SECRET_POST`.
     EnumResourceType:
       type: string
       enum: [OPENID_CONNECT, PINGONE_API, CUSTOM]
@@ -2794,8 +2798,7 @@ components:
           type: string
           description: A string that specifies the resource name, which must be provided and must be unique within an environment.
         introspectEndpointAuthMethod:
-          type: string
-          description: The client authentication methods supported by the token endpoint. Options are `NONE`, `CLIENT_SECRET_BASIC`, and `CLIENT_SECRET_POST`.
+          $ref: '#/components/schemas/EnumResourceIntrospectEndpointAuthMethod'
         type:
           $ref: '#/components/schemas/EnumResourceType'
         updatedAt:
@@ -2853,6 +2856,15 @@ components:
       required:
         - name
         - value
+    ResourceSecret:
+      type: object
+      properties:
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        secret:
+          type: string
+          readOnly: true
+          description: An auto-generated resource client secret. Possible characters are a-z, A-Z, 0-9, -, ., _, ~. The secret has a minimum length of 64 characters per SHA-512 requirements when using the HS512 algorithm to sign ID tokens using the secret as the key.
     ResourceScope:
       type: object
       properties:
@@ -18050,6 +18062,461 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
+  /v1/environments/{environmentID}/resources/{resourceID}/attributes:
+    get:
+      tags:
+        - Resource Attributes
+      summary: READ All Resource Attributes
+      operationId: readAllResourceAttributes
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: resourceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Resource Attributes
+      summary: CREATE Resource Attribute
+      operationId: createResourceAttribute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceAttribute'
+              example:
+                name: firstName
+                value: ${user.name.given}
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: resourceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '405':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceAttribute'
+  /v1/environments/{environmentID}/resources/{resourceID}/attributes/{resourceAttrID}:
+    get:
+      tags:
+        - Resource Attributes
+      summary: READ One Resource Attribute
+      operationId: readOneResourceAttribute
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: resourceID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: resourceAttrID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceAttribute'
+    put:
+      tags:
+        - Resource Attributes
+      summary: UPDATE Resource Attribute
+      operationId: updateResourceAttribute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceAttribute'
+              example:
+                name: nickname
+                value: ${user.nickname}
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: resourceID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: resourceAttrID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceAttribute'
+    delete:
+      tags:
+        - Resource Attributes
+      summary: DELETE Resource Attribute
+      operationId: deleteResourceAttribute
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: resourceID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: resourceAttrID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
+  /v1/environments/{environmentID}/resources/{resourceID}/secret:
+    get:
+      tags:
+        - Resource Client Secret
+      summary: READ Resource Client Secret
+      operationId: readResourceSecret
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: resourceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceSecret'
+    post:
+      tags:
+        - Resource Client Secret
+      summary: CREATE Resource Client Secret
+      operationId: createResourceSecret
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: resourceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '405':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceSecret'
   /v1/environments/{environmentID}/resources/{resourceID}/scopes:
     get:
       tags:
@@ -18347,336 +18814,6 @@ paths:
             type: string
           required: true
         - name: scopeID
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '400':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '401':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '403':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '404':
-          description: Not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '429':
-          description: Request was rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '500':
-          description: Uncaught error occurred.  Platform outage
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '204':
-          description: Successful response
-  /v1/environments/{environmentID}/resources/{resourceID}/attributes:
-    get:
-      tags:
-        - Resource Attributes
-      summary: READ All Resource Attributes
-      operationId: readAllResourceAttributes
-      parameters:
-        - name: environmentID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: resourceID
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '400':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '401':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '403':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '404':
-          description: Not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '429':
-          description: Request was rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '500':
-          description: Uncaught error occurred.  Platform outage
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EntityArray'
-    post:
-      tags:
-        - Resource Attributes
-      summary: CREATE Resource Attribute
-      operationId: createResourceAttribute
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResourceAttribute'
-              example:
-                name: firstName
-                value: ${user.name.given}
-      parameters:
-        - name: environmentID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: resourceID
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '400':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '401':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '403':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '404':
-          description: Not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '405':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '429':
-          description: Request was rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '500':
-          description: Uncaught error occurred.  Platform outage
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '201':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceAttribute'
-  /v1/environments/{environmentID}/resources/{resourceID}/attributes/{resourceAttrID}:
-    get:
-      tags:
-        - Resource Attributes
-      summary: READ One Resource Attribute
-      operationId: readOneResourceAttribute
-      parameters:
-        - name: environmentID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: resourceID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: resourceAttrID
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '400':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '401':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '403':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '404':
-          description: Not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '429':
-          description: Request was rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '500':
-          description: Uncaught error occurred.  Platform outage
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceAttribute'
-    put:
-      tags:
-        - Resource Attributes
-      summary: UPDATE Resource Attribute
-      operationId: updateResourceAttribute
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResourceAttribute'
-              example:
-                name: nickname
-                value: ${user.nickname}
-      parameters:
-        - name: environmentID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: resourceID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: resourceAttrID
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '400':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '401':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '403':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '404':
-          description: Not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '429':
-          description: Request was rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '500':
-          description: Uncaught error occurred.  Platform outage
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceAttribute'
-    delete:
-      tags:
-        - Resource Attributes
-      summary: DELETE Resource Attribute
-      operationId: deleteResourceAttribute
-      parameters:
-        - name: environmentID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: resourceID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: resourceAttrID
           in: path
           schema:
             type: string
