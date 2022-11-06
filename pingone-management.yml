@@ -179,14 +179,10 @@ components:
       type: string
       enum: [png, jpg, gif]
       description: A string that specifies the type of format used for the image. Options are jpg, png, and gif.
-    EnumLicensePackage:
-      type: string
-      enum: [ADMIN, INTERNAL, TRIAL, STANDARD, PREMIUM, MFA, RISK, MFARISK, GLOBAL]
-      description: A string that specifies the license template on which this license is based. This is a required property. Options are `TRIAL`, `STANDARD`, `PREMIUM`, `MFA`, `RISK`, `MFARISK`, and `GLOBAL`.
     EnumLicenseStatus:
       type: string
-      enum: [ACTIVE, EXPIRED, FUTURE]
-      description: A string that specifies the status of the license. Options are `ACTIVE`, `EXPIRED`, and `FUTURE`.
+      enum: [ACTIVE, EXPIRED, FUTURE, TERMINATED]
+      description: A string that specifies the status of the license. Options are `ACTIVE`, `EXPIRED`, `FUTURE` and `TERMINATED`.
     EnumMobileIntegrityDetectionPlatform:
       type: string
       enum: [IOS, GOOGLE]
@@ -2371,7 +2367,8 @@ components:
         organization:
           $ref: '#/components/schemas/ObjectOrganization'
         package:
-          $ref: '#/components/schemas/EnumLicensePackage'
+          type: string
+          description: A string that specifies the license template on which this license is based.
         replacesLicense:
           type: object
           description: A read-only object that specifies the license ID of the license that is replaced by this license.
