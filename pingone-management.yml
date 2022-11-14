@@ -186,6 +186,60 @@ components:
     EnumMobileIntegrityDetectionPlatform:
       type: string
       enum: [IOS, GOOGLE]
+    EnumNotificationsPolicyQuotaDeliveryMethods:
+      type: string
+      enum: [SMS, Voice]
+    EnumNotificationsPolicyQuotaItemType:
+      type: string
+      enum: [USER, ENVIRONMENT]
+      description: Specifies whether the limit defined is per-user or per environment. Value must be either `USER` or `ENVIRONMENT`.
+    EnumNotificationsSettingsPhoneDeliverySettingsCustomDeliveryMethod:
+      type: string
+      enum: [SMS, VOICE]
+      description: |
+        The notification's delivery method. Possible values:
+        `SMS`
+        `VOICE`
+    EnumNotificationsSettingsPhoneDeliverySettingsCustomRequestMethod:
+      type: string
+      enum: [GET, POST]
+      description: The type of HTTP request method. Possible values are `GET` and `POST`.
+    EnumNotificationsSettingsPhoneDeliverySettingsCustomNumberFormat:
+      type: string
+      enum: [FULL, NUMBER_ONLY]
+      default: FULL
+      description: |
+        The phone number format. Possible values:
+        `FULL` (default)
+        The phone number format with a leading `+` sign, in the E.164 standard format.
+        For example: `+14155552671`
+        `NUMBER_ONLY`
+        The phone number format without a leading `+` sign, in the E.164 standard format.
+        For example: `14155552671`
+    EnumNotificationsSettingsPhoneDeliverySettingsCustomAuthMethod:
+      type: string
+      enum: [BASIC, BEARER]
+      description: |
+        The custom provider account's authentication method. Possible values: `BASIC`, `BEARER`
+    EnumNotificationsSettingsPhoneDeliverySettingsTwilioSyniverseNumbersType:
+      type: string
+      enum: [SHORT_CODE, TOLL_FREE, PHONE_NUMBER]
+      description: |
+        The type of phone number. Possible values: `SHORT_CODE`, `TOLL_FREE`, `PHONE_NUMBER`
+    EnumNotificationsSettingsPhoneDeliverySettingsTwilioSyniverseNumbersCapability:
+      type: string
+      enum: [VOICE, SMS]
+      description: |
+        The type of phone delivery service capability. Possible values: `VOICE`, `SMS`
+    EnumNotificationsSettingsPhoneDeliverySettingsProvider:
+      type: string
+      enum: [PINGONE_TWILIO, CUSTOM_TWILIO, CUSTOM_SYNIVERSE, CUSTOM_PROVIDER]
+      description: |
+        The ID of the provider of phone delivery service. Possible values:
+        `PINGONE_TWILIO`: Specifies that Ping Identity's Twilio account is the SMS/voice provider.
+        `CUSTOM_TWILIO`: Specifies that your Twilio account is the SMS/voice provider.
+        `CUSTOM_SYNIVERSE`: Specifies that your Syniverse account is the SMS/voice provider.
+        `CUSTOM_PROVIDER`: Specifies a custom-defined SMS provider (excluding Twilio and Syniverse).
     EnumOrganizationType:
       type: string
       enum: [PAID, TRIAL]
@@ -1390,6 +1444,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/License'
+            notificationsPolicies:
+              type: array
+              items:
+                $ref: '#/components/schemas/NotificationsPolicy'
             organizations:
               type: array
               items:
@@ -2465,26 +2523,314 @@ components:
           description: The license name
       required:
         - name
-    PKICAResponseFileUpload:
+    NotificationsPolicy:
       type: object
       properties:
-        file:
+        createdAt:
           type: string
-          format: binary
+          format: date-time
+          readOnly: true
+          description: The time the resource was created.
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was last updated.
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        name:
+          type: string
+          description: The name to use for the notification policy. Must be unique among the notification policies in the environment.
+        default:
+          type: boolean
+          description: Indication of whether this policy is the default notification policy for the environment. If the parameter is not provided, the value used is `false`
+          default: false
+        quotas:
+          type: array
+          description: Collection of objects that define the SMS/Voice limits. Each object contain the following elements- `type`, `deliveryMethods`, `total`. Currently, a policy can contain ony one such object. Note that instead of `total`, you can use the pair of fields- `claimed` and `unclaimed`.
+          items:
+            type: object
+            properties:
+              type:
+                $ref: '#/components/schemas/EnumNotificationsPolicyQuotaItemType'
+              deliveryMethods:
+                type: array
+                description: The delivery methods for which the limit is being defined. Currently, the content of the array must be `SMS`, `Voice`. This means that the combined total of SMS and Voice notifications must be below the limit defined.
+                items:
+                  $ref: '#/components/schemas/EnumNotificationsPolicyQuotaDeliveryMethods'
+              total:
+                type: integer
+                description: The maximum number of notifications allowed per day.
+              claimed:
+                type: integer
+                description: The maximum number of notifications that can be received and responded to each day. Used in conjunction with unclaimed in place of the single field total.
+              unclaimed:
+                type: integer
+                description: The maximum number of notifications that can be received and not responded to each day. Used in conjunction with claimed in place of the single field total.
+            required:
+              - type
+              - deliveryMethods
       required:
-        - file
-    PKIFileUpload:
+        - name
+        - quotas
+    NotificationsSettings:
       type: object
       properties:
-        usageType:
+        updatedAt:
           type: string
-          example: ENCRYPTION
-        file:
+          format: date-time
+          readOnly: true
+          description: The time the resource was last updated.
+        restrictions:
+          type: object
+          properties:
+            smsVoiceQuota:
+              type: object
+              properties:
+                daily:
+                  type: integer
+                  description: |
+                    The maximum number of SMS and voice notifications that can be sent per user per day.
+                    - `restrictions.smsVoiceQuota.daily` can be set to any value between 0 and 50.
+                    - Trial accounts have a default value of 30.
+                    - The daily counters are reset every night at midnight UTC.
+              required:
+                - daily
+          required:
+            - smsVoiceQuota
+        id:
           type: string
-          format: binary
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        smsProvidersFallbackChain:
+          type: array
+          description: A list which represents the execution order of different SMS/Voice providers configured for the environment. The providers and their accounts’ configurations are represented in the list by the ID of the corresponding `PhoneDeliverySettings` resource. The only provider which is not represented by a `phoneDeliverySettingsID` is the PingOne Twilio provider. The PingOne Twilio provider is represented by the `PINGONE_TWILIO` string. If the `smsProvidersFallbackChain` list is empty, an SMS or voice message will be sent using the default Ping Twilio account. Otherwise, an SMS or voice message will be sent using the first provider in the list. If the server fails to queue the message using that provider, it will use the next provider in the list to try to send the message. This process will go on until there are no more providers in the list. If the server failed to send the message using all providers, the notification status is set to `FAILED`.
+          items:
+            type: string
+        from:
+          type: object
+          properties:
+            name:
+              type: string
+              description: A string that specifies the email's "from" name (relevant when the `deliveryMethod` is `Email`).  See [Note](https://apidocs.pingidentity.com/pingone/platform/v1/api/#notifications-settings-from-replyTo-note) for details.
+            address:
+              type: string
+              description: A string that specifies the email's "from" address (relevant when the `deliveryMethod` is `Email`). This value must be a trusted email address.  See [Note](https://apidocs.pingidentity.com/pingone/platform/v1/api/#notifications-settings-from-replyTo-note) for details.
+        replyTo:
+          type: object
+          properties:
+            name:
+              type: string
+              description: A string that specifies the email's "reply to" name (relevant when `deliveryMethod` is `Email`).  See [Note](https://apidocs.pingidentity.com/pingone/platform/v1/api/#notifications-settings-from-replyTo-note) for details.
+            address:
+              type: string
+              description: A string that specifies the email's "reply to" address (relevant when `deliveryMethod` is `Email`). This value must be a trusted email address.  See [Note](https://apidocs.pingidentity.com/pingone/platform/v1/api/#notifications-settings-from-replyTo-note) for details.
+    NotificationsSettingsEmailDeliverySettings:
+      type: object
+      properties:
+        host:
+          type: string
+          description: A string that specifies the organization's SMTP server.
+        port:
+          type: integer
+          description: An integer that specifies the port used by the organization's SMTP server to send emails (default `465`). Note that the protocol used depends upon the port specified. If you specify port `25`, `587`, or `2525`, SMTP with `STARTTLS` is used. Otherwise, `SMTPS` is used.
+          default: 465
+        username:
+          type: string
+          description: A string that specifies the organization's SMTP server's username.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        from:
+          type: object
+          properties:
+            name:
+              type: string
+              description: A string that specifies the email's "from" name.
+            address:
+              type: string
+              description: A string that specifies the email's "from" address.
+        replyTo:
+          type: object
+          properties:
+            name:
+              type: string
+              description: A string that specifies the email's "reply to" name.
+            address:
+              type: string
+              description: A string that specifies the email's "reply to" address.
+    NotificationsSettingsPhoneDeliverySettings:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        provider:
+          $ref: '#/components/schemas/EnumNotificationsSettingsPhoneDeliverySettingsProvider'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was created.
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was last updated.
       required:
-        - file
-        - usageType
+        - provider
+    NotificationsSettingsPhoneDeliverySettingsCustom:
+      allOf:
+        - $ref: '#/components/schemas/NotificationsSettingsPhoneDeliverySettings'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: The customer provider's name.
+            requests:
+              type: object
+              properties:
+                deliveryMethod:
+                  $ref: '#/components/schemas/EnumNotificationsSettingsPhoneDeliverySettingsCustomDeliveryMethod'
+                url:
+                  type: string
+                  description: |
+                    The provider's remote gateway or customer gateway URL.
+                    For requests using the POST method, use the provider's remote gateway URL.
+                    For requests using the GET method, use the provider's remote gateway URL, including the `${to}` and `${message}` mandatory variables, and the optional `${from}` variable, for example:
+                    `https://api.transmitsms.com/send-sms.json?to=${to}&from=${from}&message=${message}`
+                body:
+                  type: string
+                  description: |
+                    The notification's request body. The body should include the ${to} and ${message} mandatory variables. For some vendors, the optional ${from} variable may also be required. For example:
+                    `messageType=ARN&message=${message}&phoneNumber=${to}&sender=${from}`
+                    In addition, you can use the following optional variables:
+                    `${voice}` - the type of voice configured for notifications
+                    `${locale}` - locale
+                    `${otp}` - OTP
+                    `${user.user.name}` - user's username
+                    `${user.name.given}` - user's given name
+                    `${user.name.family}` - user's family name
+                    You can also use dynamic variables in the body. For more information, see [Dynamic variables](https://apidocs.pingidentity.com/pingone/platform/v1/api/#notifications-templates-dynamic-variables).
+                headers:
+                  type: string
+                  description: |
+                    The notification's request header, matching the format of the request body. The header can be one of:
+                    Form
+                    `(content-type=application/x-www-form-urlencoded)`
+                    JSON
+                    `(content-type=application/json)`
+                method:
+                  $ref: '#/components/schemas/EnumNotificationsSettingsPhoneDeliverySettingsCustomRequestMethod'
+                phoneNumberFormat:
+                  $ref: '#/components/schemas/EnumNotificationsSettingsPhoneDeliverySettingsCustomNumberFormat'
+                beforeTag:
+                  type: string
+                  description: |
+                    For voice OTP notifications only.
+                    An opening tag which is commonly used by custom providers for defining a pause between each number in the OTP number string.
+                    Possible value: `<Say>`
+                afterTag:
+                  type: string
+                  description: |
+                    For voice OTP notifications only.
+                    A closing tag which is commonly used by custom providers for defining a pause between each number in the OTP number string.
+                    Possible value: `</Say> <Pause length="1"/>`
+              required:
+                - deliveryMethod
+                - url
+                - body
+                - headers
+                - method
+                - phoneNumberFormat
+            authentication:
+              type: object
+              properties:
+                method:
+                  $ref: '#/components/schemas/EnumNotificationsSettingsPhoneDeliverySettingsCustomAuthMethod'
+                username:
+                  type: string
+                  description: The username for the custom provider account. Required when `authentication.method=BASIC`
+                password:
+                  type: string
+                  description: The password for the custom provider account. Required when `authentication.method=BASIC`
+                token:
+                  type: string
+                  description: The authentication token for the custom provider account.  Required when `authentication.method=BEARER`
+              required:
+                - method
+          required:
+            - requests
+            - authentication
+    NotificationsSettingsPhoneDeliverySettingsTwilioSyniverse:
+      allOf:
+        - $ref: '#/components/schemas/NotificationsSettingsPhoneDeliverySettings'
+        - type: object
+          properties:
+            sid:
+              type: string
+              description: |
+                The public ID of the Twilio account.
+                Relevant to Twilio only.
+            authToken:
+              type: string
+              description: The secret key of the Twilio or Syniverse account.
+            numbers:
+              type: array
+              description: A collection of Twilio or Syniverse numbers to use when sending a notification.
+              items:
+                type: object
+                properties:
+                  type:
+                    $ref: '#/components/schemas/EnumNotificationsSettingsPhoneDeliverySettingsTwilioSyniverseNumbersType'
+                  selected:
+                    type: boolean
+                    description: Specifies whether the number is selected by the admin for sending messages.
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                    description: The time the resource was created.
+                  number:
+                    type: string
+                    description: The phone number, toll-free number or short code.
+                  available:
+                    type: boolean
+                    description: Specifies whether the number is currently available in the provider account.
+                  capabilities:
+                    type: array
+                    description: A collection of the phone delivery service capabilities.
+                    items:
+                      $ref: '#/components/schemas/EnumNotificationsSettingsPhoneDeliverySettingsTwilioSyniverseNumbersCapability'
+                  supportedCountries:
+                    type: array
+                    description: |
+                      Specifies the number's supported countries for notification recipients, depending on the phone number `type`:
+                      - `SHORT_CODE`: A collection containing a single 2-character ISO country code, for example, `US`, `GB`, `CA`.
+                      If the custom provider is of `type=CUSTOM_PROVIDER`, `supportedCountries` must not be empty or null.
+                      For other custom provider types, if supportedCountries is null (empty is not supported), the specified short code number can only be used to dispatch notifications to United States recipient numbers.
+                      - `TOLL_FREE`: A collection of valid 2-character country ISO codes, for example, `US`, `GB`, `CA`.
+                      If the custom provider is of `type=CUSTOM_PROVIDER`, `supportedCountries` must not be empty or null.
+                      For other custom provider types, if `supportedCountries` is null (empty is not supported), the specified toll-free number can only be used to dispatch notifications to United States recipient numbers.
+                      - `PHONE_NUMBER`: `supportedCountries` can not be specified.
+                      If an SMS template has an alphanumeric sender ID and also has short code, the sender ID will be used for destination countries that support both alphanumeric senders and short codes. For Unites States and Canada that don't support alphanumeric sender IDs, a short code will be used if both an alphanumeric sender and a short code are specified.
+                    items:
+                      type: string
+                required:
+                  - type
+                  - selected
+                  - number
+                  - available
+                  - capabilities
+                  - supportedCountries
+          required:
+            - sid
+            - authToken
+            - numbers
     ObjectApplication:
       type: object
       readOnly: true
@@ -2726,6 +3072,26 @@ components:
         - notSimilarToCurrent
         - excludesProfileData
         - excludesCommonlyUsed
+    PKICAResponseFileUpload:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+        - file
+    PKIFileUpload:
+      type: object
+      properties:
+        usageType:
+          type: string
+          example: ENCRYPTION
+        file:
+          type: string
+          format: binary
+      required:
+        - file
+        - usageType
     Population:
       type: object
       properties:
@@ -16548,6 +16914,7 @@ paths:
       tags:
         - Notifications Settings
       summary: READ Notifications Settings
+      operationId: readNotificationsSettings
       parameters:
         - name: environmentID
           in: path
@@ -16594,11 +16961,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsSettings'
     put:
       tags:
         - Notifications Settings
       summary: UPDATE Notifications Settings
+      operationId: updateNotificationsSettings
       parameters:
         - name: environmentID
           in: path
@@ -16645,11 +17015,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsSettings'
     delete:
       tags:
         - Notifications Settings
       summary: DELETE Notifications Settings
+      operationId: deleteNotificationsSettings
       parameters:
         - name: environmentID
           in: path
@@ -16700,6 +17073,7 @@ paths:
       tags:
         - Notifications Settings (SMTP)
       summary: READ Notifications Settings (SMTP)
+      operationId: readNotificationsSettingsSMTP
       parameters:
         - name: environmentID
           in: path
@@ -16746,11 +17120,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsSettingsEmailDeliverySettings'
     put:
       tags:
         - Notifications Settings (SMTP)
       summary: UPDATE Notifications Settings (SMTP)
+      operationId: updateNotificationsSettingsSMTP
       requestBody:
         content:
           application/json:
@@ -16813,11 +17190,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsSettingsEmailDeliverySettings'
     delete:
       tags:
         - Phone Delivery Settings
       summary: DELETE Phone Delivery Settings
+      operationId: deletePhoneDeliverySettings
       parameters:
         - name: environmentID
           in: path
@@ -16868,6 +17248,7 @@ paths:
       tags:
         - Phone Delivery Settings
       summary: READ All Phone Delivery Settings
+      operationId: readAllPhoneDeliverySettings
       parameters:
         - name: environmentID
           in: path
@@ -16914,11 +17295,14 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
         - Phone Delivery Settings
-      summary: CREATE Phone Delivery Settings (Syniverse)
+      summary: CREATE Phone Delivery Settings
+      operationId: createPhoneDeliverySettings
       requestBody:
         content:
           application/json:
@@ -16979,19 +17363,22 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
-  /v1/environments/{environmentID}/notificationsSettings/phoneDeliverySettings/{phoneDeliverySettingsId}:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsSettingsPhoneDeliverySettings'
+  /v1/environments/{environmentID}/notificationsSettings/phoneDeliverySettings/{phoneDeliverySettingsID}:
     get:
       tags:
         - Phone Delivery Settings
       summary: READ One Phone Delivery Settings
+      operationId: readOnePhoneDeliverySettings
       parameters:
         - name: environmentID
           in: path
           schema:
             type: string
           required: true
-        - name: phoneDeliverySettingsId
+        - name: phoneDeliverySettingsID
           in: path
           schema:
             type: string
@@ -17036,18 +17423,21 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsSettingsPhoneDeliverySettings'
     put:
       tags:
         - Phone Delivery Settings
       summary: UPDATE Phone Delivery Settings
+      operationId: updatePhoneDeliverySettings
       requestBody:
         content:
           application/json:
             schema:
               type: object
               example:
-                id: someTwilioPhoneDeliverySettingsId
+                id: someTwiliophoneDeliverySettingsID
                 sid: someSid
                 provider: CUSTOM_TWILIO
                 numbers:
@@ -17095,7 +17485,7 @@ paths:
           schema:
             type: string
           required: true
-        - name: phoneDeliverySettingsId
+        - name: phoneDeliverySettingsID
           in: path
           schema:
             type: string
@@ -17140,7 +17530,356 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsSettingsPhoneDeliverySettings'
+    delete:
+      tags:
+        - Phone Delivery Settings
+      summary: DELETE Phone Delivery Settings
+      operationId: deletePhoneDeliverySettings
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: phoneDeliverySettingsID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
+  /v1/environments/{environmentID}/notificationsPolicies:
+    get:
+      tags:
+        - Notifications Policies
+      summary: READ All Notifications Policies
+      operationId: readAllNotificationsPolicies
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Notifications Policies
+      summary: CREATE Notifications Policy
+      operationId: createNotificationsPolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationsPolicy'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsPolicy'
+  /v1/environments/{environmentID}/notificationsPolicies/{notificationsPolicyID}:
+    get:
+      tags:
+        - Notifications Policies
+      summary: READ One Notifications Policy
+      operationId: readOneNotificationsPolicy
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: notificationsPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsPolicy'
+    put:
+      tags:
+        - Notifications Policies
+      summary: UPDATE Notifications Policy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationsPolicy'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: notificationsPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsPolicy'
+    delete:
+      tags:
+        - Notifications Policies
+      summary: DELETE Notifications Policy
+      operationId: deleteNotificationsPolicy
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: notificationsPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
   /v1/environments/{environmentID}/passwordPolicies:
     get:
       tags:
