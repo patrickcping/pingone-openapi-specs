@@ -17072,8 +17072,8 @@ paths:
     get:
       tags:
         - Notifications Settings (SMTP)
-      summary: READ Notifications Settings (SMTP)
-      operationId: readNotificationsSettingsSMTP
+      summary: READ Email Notifications Settings
+      operationId: readEmailNotificationsSettings
       parameters:
         - name: environmentID
           in: path
@@ -17126,8 +17126,8 @@ paths:
     put:
       tags:
         - Notifications Settings (SMTP)
-      summary: UPDATE Notifications Settings (SMTP)
-      operationId: updateNotificationsSettingsSMTP
+      summary: UPDATE Email Notifications Settings
+      operationId: updateEmailNotificationsSettings
       requestBody:
         content:
           application/json:
@@ -17196,8 +17196,8 @@ paths:
     delete:
       tags:
         - Phone Delivery Settings
-      summary: DELETE Phone Delivery Settings
-      operationId: deletePhoneDeliverySettings
+      summary: DELETE Email Delivery Settings
+      operationId: deleteEmailDeliverySettings
       parameters:
         - name: environmentID
           in: path
