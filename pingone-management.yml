@@ -2,12 +2,12 @@ openapi: 3.0.0
 info:
   title: PingOne Platform API - SSO and Base
   description: The PingOne Platform API covering the base and SSO services (otherwise known as the Management APIs)
-  version: '2022-08-02'
+  version: '2023-01-03'
 externalDocs:
   url: https://apidocs.pingidentity.com/pingone/platform/v1/api/#management-apis
   description: PingOne Platform API Reference - Management APIs
 servers:
-  - url: https://api.pingone.{suffix}
+  - url: https://api.pingone.{suffix}/{version}
     description: PingOne Platform API Endpoint
     variables:
       suffix:
@@ -17,6 +17,15 @@ servers:
           - 'asia'
           - 'ca'
         default: 'eu'
+      version:
+        enum:
+          - 'v1'
+        default: 'v1'
+  - url: https://{customEndpoint}
+    description: PingOne Platform API Endpoint (when using a custom endpoint)
+    variables:
+      customEndpoint:
+        default: 'api.pingone.eu/v1'
 components:
   securitySchemes:
     bearer:
@@ -4647,7 +4656,7 @@ tags:
   - name: User Accounts
   - name: Sessions
 paths:
-  /v1/environments:
+  /environments:
     get:
       tags:
         - Environments
@@ -4767,7 +4776,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Environment'
-  /v1/environments/{environmentID}:
+  /environments/{environmentID}:
     get:
       tags:
         - Environments
@@ -4931,7 +4940,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/activeIdentityCounts:
+  /environments/{environmentID}/activeIdentityCounts:
     get:
       tags:
         - Active Identity Counts
@@ -4998,7 +5007,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/metrics/activeIdentityCounts:
+  /environments/{environmentID}/metrics/activeIdentityCounts:
     get:
       tags:
         - Active Identity Counts
@@ -5070,7 +5079,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/agreements:
+  /environments/{environmentID}/agreements:
     post:
       tags:
         - Agreements Resources
@@ -5195,7 +5204,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/agreements/{agreementID}:
+  /environments/{environmentID}/agreements/{agreementID}:
     get:
       tags:
         - Agreements Resources
@@ -5377,7 +5386,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/agreements/{agreementID}/languages:
+  /environments/{environmentID}/agreements/{agreementID}/languages:
     post:
       tags:
         - Agreement Languages Resources
@@ -5511,7 +5520,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/agreements/{agreementID}/languages/{languageID}:
+  /environments/{environmentID}/agreements/{agreementID}/languages/{languageID}:
     get:
       tags:
         - Agreement Languages Resources
@@ -5708,7 +5717,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/agreements/{agreementID}/languages/{languageID}/revisions:
+  /environments/{environmentID}/agreements/{agreementID}/languages/{languageID}/revisions:
     post:
       tags:
         - Agreement Revisions Resources
@@ -5852,7 +5861,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/agreements/{agreementID}/languages/{languageID}/revisions/{revisionID}:
+  /environments/{environmentID}/agreements/{agreementID}/languages/{languageID}/revisions/{revisionID}:
     get:
       tags:
         - Agreement Revisions Resources
@@ -5987,7 +5996,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/alertChannels:
+  /environments/{environmentID}/alertChannels:
     get:
       tags:
         - Alerting
@@ -6116,7 +6125,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AlertChannel'
-  /v1/environments/{environmentID}/alertChannels/{alertChannelID}:
+  /environments/{environmentID}/alertChannels/{alertChannelID}:
     get:
       tags:
         - Alerting
@@ -6304,7 +6313,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/applications:
+  /environments/{environmentID}/applications:
     get:
       tags:
         - Applications
@@ -6446,7 +6455,7 @@ paths:
                   - $ref: '#/components/schemas/ApplicationSAML'
                   - $ref: '#/components/schemas/ApplicationOIDC'
                   - $ref: '#/components/schemas/ApplicationExternalLink'
-  /v1/environments/{environmentID}/applications/{applicationID}:
+  /environments/{environmentID}/applications/{applicationID}:
     get:
       tags:
         - Applications
@@ -6651,7 +6660,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/applications/{applicationID}/secret:
+  /environments/{environmentID}/applications/{applicationID}/secret:
     get:
       tags:
         - Application Secret
@@ -6774,7 +6783,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/applications/{applicationID}/grants:
+  /environments/{environmentID}/applications/{applicationID}/grants:
     post:
       tags:
         - Application Resource Grants
@@ -6909,7 +6918,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/applications/{applicationID}/grants/{grantID}:
+  /environments/{environmentID}/applications/{applicationID}/grants/{grantID}:
     get:
       tags:
         - Application Resource Grants
@@ -7109,7 +7118,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/applications/{applicationID}/signOnPolicyAssignments:
+  /environments/{environmentID}/applications/{applicationID}/signOnPolicyAssignments:
     get:
       tags:
         - >-
@@ -7243,7 +7252,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SignOnPolicyAssignment'
-  /v1/environments/{environmentID}/applications/{applicationID}/signOnPolicyAssignments/{SOPAssignmentID}:
+  /environments/{environmentID}/applications/{applicationID}/signOnPolicyAssignments/{SOPAssignmentID}:
     get:
       tags:
         - >-
@@ -7443,7 +7452,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/applications/{applicationID}/roleAssignments:
+  /environments/{environmentID}/applications/{applicationID}/roleAssignments:
     get:
       tags:
         - Application Role Assignments
@@ -7579,7 +7588,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RoleAssignment'
-  /v1/environments/{environmentID}/applications/{applicationID}/roleAssignments/{roleAssignmentID}:
+  /environments/{environmentID}/applications/{applicationID}/roleAssignments/{roleAssignmentID}:
     get:
       tags:
         - Application Role Assignments
@@ -7704,7 +7713,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/applications/{applicationID}/attributes:
+  /environments/{environmentID}/applications/{applicationID}/attributes:
     get:
       tags:
         - Application Attribute Mapping
@@ -7838,7 +7847,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationAttributeMapping'
-  /v1/environments/{environmentID}/applications/{applicationID}/attributes/{attrMappingID}:
+  /environments/{environmentID}/applications/{applicationID}/attributes/{attrMappingID}:
     get:
       tags:
         - Application Attribute Mapping
@@ -8036,7 +8045,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/activities:
+  /environments/{environmentID}/activities:
     get:
       tags:
         - Audit Activities
@@ -8161,7 +8170,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/activities/{activityID}:
+  /environments/{environmentID}/activities/{activityID}:
     get:
       tags:
         - Audit Activities
@@ -8218,7 +8227,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/applicationSignons:
+  /environments/{environmentID}/applicationSignons:
     get:
       tags:
         - Authentications per Application
@@ -8290,7 +8299,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/billOfMaterials:
+  /environments/{environmentID}/billOfMaterials:
     get:
       tags:
         - Bill of Materials (BOM)
@@ -8414,7 +8423,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BillOfMaterials'
-  /v1/environments/{environmentID}/brandingSettings:
+  /environments/{environmentID}/brandingSettings:
     get:
       tags:
         - Branding Settings
@@ -8528,7 +8537,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BrandingSettings'
-  /v1/environments/{environmentID}/capabilities:
+  /environments/{environmentID}/capabilities:
     get:
       tags:
         - Capabilities
@@ -8580,7 +8589,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/keys:
+  /environments/{environmentID}/keys:
     get:
       tags:
         - Certificate Management
@@ -8708,7 +8717,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Certificate'
-  /v1/environments/{environmentID}/keys/{keyID}:
+  /environments/{environmentID}/keys/{keyID}:
     get:
       tags:
         - Certificate Management
@@ -8901,7 +8910,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/keys/{keyID}/applications:
+  /environments/{environmentID}/keys/{keyID}/applications:
     get:
       tags:
         - Certificate Management
@@ -8961,7 +8970,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/keys/{keyID}/csr:
+  /environments/{environmentID}/keys/{keyID}/csr:
     get:
       tags:
         - Certificate Management
@@ -9095,7 +9104,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Certificate'
-  /v1/environments/{environmentID}/certificates:
+  /environments/{environmentID}/certificates:
     get:
       tags:
         - Certificate Management
@@ -9220,7 +9229,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Certificate'
-  /v1/environments/{environmentID}/certificates/{certID}:
+  /environments/{environmentID}/certificates/{certID}:
     get:
       tags:
         - Certificate Management
@@ -9335,7 +9344,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/certificates/{certID}/applications:
+  /environments/{environmentID}/certificates/{certID}/applications:
     get:
       tags:
         - Certificate Management
@@ -9395,7 +9404,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/encryptions:
+  /environments/{environmentID}/encryptions:
     post:
       tags:
         - Certificate Management
@@ -9464,7 +9473,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/decryptions:
+  /environments/{environmentID}/decryptions:
     post:
       tags:
         - Certificate Management
@@ -9532,7 +9541,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/signings:
+  /environments/{environmentID}/signings:
     post:
       tags:
         - Certificate Management
@@ -9600,7 +9609,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/verifications:
+  /environments/{environmentID}/verifications:
     post:
       tags:
         - Certificate Management
@@ -9670,7 +9679,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/customDomains:
+  /environments/{environmentID}/customDomains:
     get:
       tags:
         - Custom Domains
@@ -9792,7 +9801,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomDomain'
-  /v1/environments/{environmentID}/customDomains/{customDomainID}:
+  /environments/{environmentID}/customDomains/{customDomainID}:
     get:
       tags:
         - Custom Domains
@@ -9983,7 +9992,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/emailDomains:
+  /environments/{environmentID}/emailDomains:
     get:
       tags:
         - Trusted Email Domains
@@ -10103,7 +10112,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmailDomain'
-  /v1/environments/{environmentID}/emailDomains/{emailDomainID}:
+  /environments/{environmentID}/emailDomains/{emailDomainID}:
     get:
       tags:
         - Trusted Email Domains
@@ -10218,7 +10227,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/emailDomains/{emailDomainID}/ownership:
+  /environments/{environmentID}/emailDomains/{emailDomainID}/ownership:
     get:
       tags:
         - Trusted Email Domains
@@ -10278,7 +10287,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmailDomainOwnershipStatus'
-  /v1/environments/{environmentID}/emailDomains/{emailDomainID}/dkim:
+  /environments/{environmentID}/emailDomains/{emailDomainID}/dkim:
     get:
       tags:
         - Trusted Email Domains
@@ -10338,7 +10347,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmailDomainDKIMStatus'
-  /v1/environments/{environmentID}/emailDomains/{emailDomainID}/spf:
+  /environments/{environmentID}/emailDomains/{emailDomainID}/spf:
     get:
       tags:
         - Trusted Email Domains
@@ -10398,7 +10407,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmailDomainSPFStatus'
-  /v1/environments/{environmentID}/emailDomains/{emailDomainID}/trustedEmails/{trustedEmailId}:
+  /environments/{environmentID}/emailDomains/{emailDomainID}/trustedEmails/{trustedEmailId}:
     get:
       tags:
         - Trusted Email Addresses
@@ -10598,7 +10607,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/emailDomains/{emailDomainID}/trustedEmails:
+  /environments/{environmentID}/emailDomains/{emailDomainID}/trustedEmails:
     get:
       tags:
         - Trusted Email Addresses
@@ -10728,7 +10737,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmailDomainTrustedEmail'
-  /v1/environments/{environmentID}/type:
+  /environments/{environmentID}/type:
     put:
       tags:
         - Environments
@@ -10793,7 +10802,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Environment'
-  /v1/environments/{environmentID}/gateways:
+  /environments/{environmentID}/gateways:
     get:
       tags:
         - Gateways
@@ -10921,7 +10930,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/Gateway'
                   - $ref: '#/components/schemas/GatewayLDAP'
-  /v1/environments/{environmentID}/gateways/{gatewayID}:
+  /environments/{environmentID}/gateways/{gatewayID}:
     get:
       tags:
         - Gateways
@@ -11110,7 +11119,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/gateways/{gatewayID}/credentials:
+  /environments/{environmentID}/gateways/{gatewayID}/credentials:
     get:
       tags:
         - Gateway Credentials
@@ -11235,7 +11244,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GatewayCredential'
-  /v1/environments/{environmentID}/gateways/{gatewayID}/credentials/{credentialID}:
+  /environments/{environmentID}/gateways/{gatewayID}/credentials/{credentialID}:
     get:
       tags:
         - Gateway Credentials
@@ -11360,7 +11369,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/gateways/{gatewayID}/instances:
+  /environments/{environmentID}/gateways/{gatewayID}/instances:
     get:
       tags:
         - Gateway Instances
@@ -11420,7 +11429,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/gateways/{gatewayID}/instances/{instanceID}:
+  /environments/{environmentID}/gateways/{gatewayID}/instances/{instanceID}:
     get:
       tags:
         - Gateway Instances
@@ -11485,7 +11494,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GatewayInstance'
-  /v1/environments/{environmentID}/gateways/{gatewayID}/roleAssignments:
+  /environments/{environmentID}/gateways/{gatewayID}/roleAssignments:
     get:
       tags:
         - Gateway Role Assignments
@@ -11621,7 +11630,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RoleAssignment'
-  /v1/environments/{environmentID}/gateways/{gatewayID}/roleAssignments/{gatewayRoleAssignmentID}:
+  /environments/{environmentID}/gateways/{gatewayID}/roleAssignments/{gatewayRoleAssignmentID}:
     get:
       tags:
         - Gateway Role Assignments
@@ -11821,7 +11830,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/groups:
+  /environments/{environmentID}/groups:
     get:
       tags:
         - Groups
@@ -11958,7 +11967,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
-  /v1/environments/{environmentID}/groups/{groupID}:
+  /environments/{environmentID}/groups/{groupID}:
     get:
       tags:
         - Groups
@@ -12149,7 +12158,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/groups/{groupID}/memberOfGroups:
+  /environments/{environmentID}/groups/{groupID}/memberOfGroups:
     get:
       tags:
         - Groups
@@ -12281,7 +12290,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GroupNesting'
-  /v1/environments/{environmentID}/groups/{groupID}/memberOfGroups/{nestedGroupID}:
+  /environments/{environmentID}/groups/{groupID}/memberOfGroups/{nestedGroupID}:
     get:
       tags:
         - Groups
@@ -12406,7 +12415,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/propagation/revisions:
+  /environments/{environmentID}/propagation/revisions:
     post:
       tags:
         - >-
@@ -12466,7 +12475,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/revisions/id:latest:
+  /environments/{environmentID}/propagation/revisions/id:latest:
     get:
       tags:
         - >-
@@ -12525,7 +12534,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/revisions/{previousRevisionID}:
+  /environments/{environmentID}/propagation/revisions/{previousRevisionID}:
     get:
       tags:
         - >-
@@ -12589,7 +12598,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/plans:
+  /environments/{environmentID}/propagation/plans:
     get:
       tags:
         - >-
@@ -12714,7 +12723,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/plans/{planID}:
+  /environments/{environmentID}/propagation/plans/{planID}:
     get:
       tags:
         - >-
@@ -12904,7 +12913,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/propagation/stores:
+  /environments/{environmentID}/propagation/stores:
     get:
       tags:
         - >-
@@ -13047,7 +13056,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/stores/{storeID}:
+  /environments/{environmentID}/propagation/stores/{storeID}:
     get:
       tags:
         - >-
@@ -13250,7 +13259,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/propagation/stores/connection/status:
+  /environments/{environmentID}/propagation/stores/connection/status:
     post:
       tags:
         - >-
@@ -13334,7 +13343,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/storeMetadata/scim:
+  /environments/{environmentID}/propagation/storeMetadata/scim:
     post:
       tags:
         - >-
@@ -13412,7 +13421,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/storeMetadata/Salesforce:
+  /environments/{environmentID}/propagation/storeMetadata/Salesforce:
     post:
       tags:
         - >-
@@ -13485,7 +13494,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/storeMetadata/SalesforceContacts:
+  /environments/{environmentID}/propagation/storeMetadata/SalesforceContacts:
     post:
       tags:
         - >-
@@ -13558,7 +13567,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/storeMetadata/Aquera:
+  /environments/{environmentID}/propagation/storeMetadata/Aquera:
     post:
       tags:
         - >-
@@ -13636,7 +13645,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/rules:
+  /environments/{environmentID}/propagation/rules:
     get:
       tags:
         - >-
@@ -13775,7 +13784,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/rules/{ruleID}:
+  /environments/{environmentID}/propagation/rules/{ruleID}:
     get:
       tags:
         - >-
@@ -13900,7 +13909,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/propagation/plans/{planID}/rules:
+  /environments/{environmentID}/propagation/plans/{planID}/rules:
     get:
       tags:
         - >-
@@ -13969,7 +13978,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/rules/{storeID}:
+  /environments/{environmentID}/propagation/rules/{storeID}:
     put:
       tags:
         - >-
@@ -14046,7 +14055,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/mappings/{mappingID}:
+  /environments/{environmentID}/propagation/mappings/{mappingID}:
     get:
       tags:
         - >-
@@ -14178,7 +14187,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/rules/{ruleID}/mappings:
+  /environments/{environmentID}/propagation/rules/{ruleID}/mappings:
     get:
       tags:
         - >-
@@ -14319,7 +14328,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/propagation/mapping/{mappingID}:
+  /environments/{environmentID}/propagation/mapping/{mappingID}:
     delete:
       tags:
         - >-
@@ -14381,7 +14390,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/identityProviders:
+  /environments/{environmentID}/identityProviders:
     get:
       tags:
         - Identity Providers
@@ -14501,7 +14510,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IdentityProvider'
-  /v1/environments/{environmentID}/identityProviders/{providerID}:
+  /environments/{environmentID}/identityProviders/{providerID}:
     get:
       tags:
         - Identity Providers
@@ -14698,7 +14707,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/identityProviders/{providerID}/attributes:
+  /environments/{environmentID}/identityProviders/{providerID}/attributes:
     get:
       tags:
         - >-
@@ -14836,7 +14845,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IdentityProviderAttribute'
-  /v1/environments/{environmentID}/identityProviders/{providerID}/attributes/{providerAttributeID}:
+  /environments/{environmentID}/identityProviders/{providerID}/attributes/{providerAttributeID}:
     get:
       tags:
         - >-
@@ -15040,7 +15049,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/images:
+  /environments/{environmentID}/images:
     post:
       tags:
         - Images
@@ -15117,7 +15126,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Image'
-  /v1/environments/{environmentID}/images/{imgID}:
+  /environments/{environmentID}/images/{imgID}:
     get:
       tags:
         - Images
@@ -15232,7 +15241,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/integrations:
+  /environments/{environmentID}/integrations:
     get:
       tags:
         - Integration Catalog
@@ -15284,7 +15293,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/integrations/{integrationID}:
+  /environments/{environmentID}/integrations/{integrationID}:
     get:
       tags:
         - Integration Catalog
@@ -15341,7 +15350,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/integrations/{integrationID}/versions:
+  /environments/{environmentID}/integrations/{integrationID}/versions:
     get:
       tags:
         - Integration Catalog
@@ -15398,7 +15407,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/integrations/{integrationID}/versions/{integrationVersionID}:
+  /environments/{environmentID}/integrations/{integrationID}/versions/{integrationVersionID}:
     get:
       tags:
         - Integration Catalog
@@ -15460,7 +15469,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/integrations/{integrationID}/versions/{integrationVersionID}/asset:
+  /environments/{environmentID}/integrations/{integrationID}/versions/{integrationVersionID}/asset:
     get:
       tags:
         - Integration Catalog
@@ -15522,7 +15531,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/languages:
+  /environments/{environmentID}/languages:
     get:
       tags:
         - Languages
@@ -15642,7 +15651,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Language'
-  /v1/environments/{environmentID}/languages/{languageID}:
+  /environments/{environmentID}/languages/{languageID}:
     get:
       tags:
         - Languages
@@ -15821,7 +15830,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/languages/{languageID}/status:
+  /environments/{environmentID}/languages/{languageID}/status:
     get:
       tags:
         - Language Localization Status
@@ -15951,7 +15960,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LanguageLocalizationStatus'
-  /v1/environments/{environmentID}/languages/{languageID}/status/{l10nStatusID}:
+  /environments/{environmentID}/languages/{languageID}/status/{l10nStatusID}:
     get:
       tags:
         - Language Localization Status
@@ -16145,7 +16154,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/templates:
+  /environments/{environmentID}/templates:
     get:
       tags:
         - Notifications Templates
@@ -16210,7 +16219,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/templates/{templateName}:
+  /environments/{environmentID}/templates/{templateName}:
     get:
       tags:
         - Notifications Templates
@@ -16270,7 +16279,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Template'
-  /v1/environments/{environmentID}/templates/{templateName}/contents:
+  /environments/{environmentID}/templates/{templateName}/contents:
     get:
       tags:
         - Notifications Templates
@@ -16529,7 +16538,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/templates/{templateName}/contents/{contentID}:
+  /environments/{environmentID}/templates/{templateName}/contents/{contentID}:
     get:
       tags:
         - Notifications Templates
@@ -16723,7 +16732,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/notificationsSettings:
+  /environments/{environmentID}/notificationsSettings:
     get:
       tags:
         - Notifications Settings
@@ -16882,7 +16891,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/notificationsSettings/emailDeliverySettings:
+  /environments/{environmentID}/notificationsSettings/emailDeliverySettings:
     get:
       tags:
         - Notifications Settings (SMTP)
@@ -17057,7 +17066,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/notificationsSettings/phoneDeliverySettings:
+  /environments/{environmentID}/notificationsSettings/phoneDeliverySettings:
     get:
       tags:
         - Phone Delivery Settings
@@ -17180,7 +17189,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotificationsSettingsPhoneDeliverySettings'
-  /v1/environments/{environmentID}/notificationsSettings/phoneDeliverySettings/{phoneDeliverySettingsID}:
+  /environments/{environmentID}/notificationsSettings/phoneDeliverySettings/{phoneDeliverySettingsID}:
     get:
       tags:
         - Phone Delivery Settings
@@ -17402,7 +17411,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/notificationsPolicies:
+  /environments/{environmentID}/notificationsPolicies:
     get:
       tags:
         - Notifications Policies
@@ -17516,7 +17525,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotificationsPolicy'
-  /v1/environments/{environmentID}/notificationsPolicies/{notificationsPolicyID}:
+  /environments/{environmentID}/notificationsPolicies/{notificationsPolicyID}:
     get:
       tags:
         - Notifications Policies
@@ -17694,7 +17703,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/passwordPolicies:
+  /environments/{environmentID}/passwordPolicies:
     get:
       tags:
         - Password Policies
@@ -17815,7 +17824,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PasswordPolicy'
-  /v1/environments/{environmentID}/passwordPolicies/{passwordPolicyID}:
+  /environments/{environmentID}/passwordPolicies/{passwordPolicyID}:
     get:
       tags:
         - Password Policies
@@ -17994,7 +18003,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/populations:
+  /environments/{environmentID}/populations:
     get:
       tags:
         - Populations
@@ -18126,7 +18135,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Population'
-  /v1/environments/{environmentID}/populations/{populationID}:
+  /environments/{environmentID}/populations/{populationID}:
     get:
       tags:
         - Populations
@@ -18305,7 +18314,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/resources:
+  /environments/{environmentID}/resources:
     get:
       tags:
         - Resources
@@ -18430,7 +18439,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Resource'
-  /v1/environments/{environmentID}/resources/{resourceID}:
+  /environments/{environmentID}/resources/{resourceID}:
     get:
       tags:
         - Resources
@@ -18612,7 +18621,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/resources/{resourceID}/attributes:
+  /environments/{environmentID}/resources/{resourceID}/attributes:
     get:
       tags:
         - Resource Attributes
@@ -18745,7 +18754,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResourceAttribute'
-  /v1/environments/{environmentID}/resources/{resourceID}/attributes/{resourceAttrID}:
+  /environments/{environmentID}/resources/{resourceID}/attributes/{resourceAttrID}:
     get:
       tags:
         - Resource Attributes
@@ -18942,7 +18951,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/resources/{resourceID}/secret:
+  /environments/{environmentID}/resources/{resourceID}/secret:
     get:
       tags:
         - Resource Client Secret
@@ -19067,7 +19076,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResourceSecret'
-  /v1/environments/{environmentID}/resources/{resourceID}/scopes:
+  /environments/{environmentID}/resources/{resourceID}/scopes:
     get:
       tags:
         - Resource Scopes
@@ -19197,7 +19206,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResourceScope'
-  /v1/environments/{environmentID}/resources/{resourceID}/scopes/{scopeID}:
+  /environments/{environmentID}/resources/{resourceID}/scopes/{scopeID}:
     get:
       tags:
         - Resource Scopes
@@ -19407,7 +19416,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/schemas:
+  /environments/{environmentID}/schemas:
     get:
       tags:
         - Schemas
@@ -19462,7 +19471,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/schemas/{schemaID}:
+  /environments/{environmentID}/schemas/{schemaID}:
     get:
       tags:
         - Schemas
@@ -19522,7 +19531,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Schema'
-  /v1/environments/{environmentID}/schemas/{schemaID}/attributes:
+  /environments/{environmentID}/schemas/{schemaID}/attributes:
     get:
       tags:
         - Schemas
@@ -19664,7 +19673,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SchemaAttribute'
-  /v1/environments/{environmentID}/schemas/{schemaID}/attributes/{attributeID}:
+  /environments/{environmentID}/schemas/{schemaID}/attributes/{attributeID}:
     get:
       tags:
         - Schemas
@@ -19938,7 +19947,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/signOnPolicies:
+  /environments/{environmentID}/signOnPolicies:
     get:
       tags:
         - Sign-On Policies
@@ -20058,7 +20067,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SignOnPolicy'
-  /v1/environments/{environmentID}/signOnPolicies/{policyID}:
+  /environments/{environmentID}/signOnPolicies/{policyID}:
     get:
       tags:
         - Sign-On Policies
@@ -20237,7 +20246,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/signOnPolicies/{policyID}/actions:
+  /environments/{environmentID}/signOnPolicies/{policyID}/actions:
     get:
       tags:
         - Sign-On Policy Actions
@@ -20367,7 +20376,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SignOnPolicyAction'
-  /v1/environments/{environmentID}/signOnPolicies/{policyID}/actions/{actionID}:
+  /environments/{environmentID}/signOnPolicies/{policyID}/actions/{actionID}:
     get:
       tags:
         - Sign-On Policy Actions
@@ -20561,7 +20570,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/subscriptions:
+  /environments/{environmentID}/subscriptions:
     post:
       tags:
         - Subscriptions (webhooks)
@@ -20681,7 +20690,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/subscriptions/{subscriptionID}:
+  /environments/{environmentID}/subscriptions/{subscriptionID}:
     get:
       tags:
         - Subscriptions (webhooks)
@@ -20860,7 +20869,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/themes:
+  /environments/{environmentID}/themes:
     get:
       tags:
         - Branding Themes
@@ -20980,7 +20989,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BrandingTheme'
-  /v1/environments/{environmentID}/themes/{themeID}:
+  /environments/{environmentID}/themes/{themeID}:
     get:
       tags:
         - Branding Themes
@@ -21159,7 +21168,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/themes/{themeID}/default:
+  /environments/{environmentID}/themes/{themeID}/default:
     get:
       tags:
         - Branding Themes
@@ -21283,7 +21292,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BrandingThemeDefault'
-  /v1/environments/{environmentID}/totalIdentities:
+  /environments/{environmentID}/totalIdentities:
     get:
       tags:
         - Total Identities
@@ -21342,7 +21351,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/userActivities:
+  /environments/{environmentID}/userActivities:
     get:
       tags:
         - User Activities
@@ -21401,7 +21410,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users:
+  /environments/{environmentID}/users:
     get:
       tags:
         - Users
@@ -21547,7 +21556,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-  /v1/environments/{environmentID}/users/{userID}:
+  /environments/{environmentID}/users/{userID}:
     get:
       tags:
         - Users
@@ -21893,7 +21902,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/users/{userID}/identityProvider:
+  /environments/{environmentID}/users/{userID}/identityProvider:
     get:
       tags:
         - Users
@@ -22014,7 +22023,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/verifyStatus:
+  /environments/{environmentID}/users/{userID}/verifyStatus:
     get:
       tags:
         - Users
@@ -22134,7 +22143,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/memberOfGroups:
+  /environments/{environmentID}/users/{userID}/memberOfGroups:
     post:
       tags:
         - Group Membership
@@ -22285,7 +22294,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/users/{userID}/memberOfGroups/{groupID}:
+  /environments/{environmentID}/users/{userID}/memberOfGroups/{groupID}:
     delete:
       tags:
         - Group Membership
@@ -22415,7 +22424,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
-  /v1/environments/{environmentID}/users/{userID}/enabled:
+  /environments/{environmentID}/users/{userID}/enabled:
     get:
       tags:
         - Enable Users
@@ -22539,7 +22548,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserEnabled'
-  /v1/environments/{environmentID}/users/{userID}/linkedAccounts:
+  /environments/{environmentID}/users/{userID}/linkedAccounts:
     get:
       tags:
         - Linked Accounts
@@ -22596,7 +22605,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/linkedAccounts/{linkedAccountID}:
+  /environments/{environmentID}/users/{userID}/linkedAccounts/{linkedAccountID}:
     get:
       tags:
         - Linked Accounts
@@ -22717,7 +22726,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/users/{userID}/pairingKeys/{pairingKeyID}:
+  /environments/{environmentID}/users/{userID}/pairingKeys/{pairingKeyID}:
     get:
       tags:
         - MFA Pairing Keys
@@ -22838,7 +22847,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/users/{userID}/pairingKeys:
+  /environments/{environmentID}/users/{userID}/pairingKeys:
     post:
       tags:
         - MFA Pairing Keys
@@ -22909,7 +22918,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/population:
+  /environments/{environmentID}/users/{userID}/population:
     get:
       tags:
         - User Populations
@@ -23033,7 +23042,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserPopulation'
-  /v1/environments/{environmentID}/users/{userID}/password:
+  /environments/{environmentID}/users/{userID}/password:
     get:
       tags:
         - User Passwords
@@ -23235,7 +23244,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/roleAssignments:
+  /environments/{environmentID}/users/{userID}/roleAssignments:
     get:
       tags:
         - User Role Assignments
@@ -23371,7 +23380,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RoleAssignment'
-  /v1/environments/{environmentID}/users/{userID}/roleAssignments/{roleAssignmentID}:
+  /environments/{environmentID}/users/{userID}/roleAssignments/{roleAssignmentID}:
     get:
       tags:
         - User Role Assignments
@@ -23496,7 +23505,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/users/{userID}/verifyTransactions:
+  /environments/{environmentID}/users/{userID}/verifyTransactions:
     get:
       tags:
         - User ID Verification
@@ -23615,7 +23624,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/verifyTransactions/{transactionID}:
+  /environments/{environmentID}/users/{userID}/verifyTransactions/{transactionID}:
     get:
       tags:
         - User ID Verification
@@ -23805,7 +23814,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/users/{userID}/agreementConsents:
+  /environments/{environmentID}/users/{userID}/agreementConsents:
     get:
       tags:
         - User Agreement Consents
@@ -23862,7 +23871,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/agreementConsents/{agreementID}:
+  /environments/{environmentID}/users/{userID}/agreementConsents/{agreementID}:
     get:
       tags:
         - User Agreement Consents
@@ -23996,7 +24005,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/sessions:
+  /environments/{environmentID}/users/{userID}/sessions:
     get:
       tags:
         - Sessions
@@ -24053,7 +24062,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/sessions/{sessionID}:
+  /environments/{environmentID}/users/{userID}/sessions/{sessionID}:
     get:
       tags:
         - Sessions
@@ -24174,7 +24183,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/organizations:
+  /organizations:
     get:
       tags:
         - Organizations
@@ -24223,7 +24232,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/organizations/{organizationID}:
+  /organizations/{organizationID}:
     get:
       tags:
         - Organizations
@@ -24278,7 +24287,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Organization'
-  /v1/organizations/{organizationID}/capabilities:
+  /organizations/{organizationID}/capabilities:
     get:
       tags:
         - Capabilities
@@ -24330,7 +24339,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/organizations/{organizationID}/licenses:
+  /organizations/{organizationID}/licenses:
     get:
       tags:
         - Licenses
@@ -24396,7 +24405,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/organizations/{organizationID}/licenses/{licenseID}:
+  /organizations/{organizationID}/licenses/{licenseID}:
     get:
       tags:
         - Licenses
@@ -24456,7 +24465,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/License'
-  /v1/organizations/{organizationID}/licenses/{licenseID}/name:
+  /organizations/{organizationID}/licenses/{licenseID}/name:
     get:
       tags:
         - Licenses
@@ -24580,7 +24589,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LicenseName'
-  /v1/organizations/{organizationID}/licenses/{licenseID}/metrics/activeIdentityCounts:
+  /organizations/{organizationID}/licenses/{licenseID}/metrics/activeIdentityCounts:
     get:
       tags:
         - Active Identity Counts
@@ -24653,7 +24662,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/roles:
+  /roles:
     get:
       tags:
         - Roles
@@ -24702,7 +24711,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/roles/{roleID}:
+  /roles/{roleID}:
     get:
       tags:
         - Roles

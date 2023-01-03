@@ -2,12 +2,12 @@ openapi: 3.0.0
 info:
   title: PingOne Platform API - PingOne MFA
   description: The PingOne Platform API covering the PingOne MFA service
-  version: '2021-10-17'
+  version: '2023-01-03'
 externalDocs:
   url: https://apidocs.pingidentity.com/pingone/platform/v1/api/#pingone-mfa
   description: PingOne Platform API Reference - PingOne MFA APIs
 servers:
-  - url: https://api.pingone.{suffix}
+  - url: https://api.pingone.{suffix}/{version}
     description: PingOne Platform API Endpoint
     variables:
       suffix:
@@ -17,6 +17,15 @@ servers:
           - 'asia'
           - 'ca'
         default: 'eu'
+      version:
+        enum:
+          - 'v1'
+        default: 'v1'
+  - url: https://{customEndpoint}
+    description: PingOne Platform API Endpoint (when using a custom endpoint)
+    variables:
+      customEndpoint:
+        default: 'api.pingone.eu/v1'
 components:
   securitySchemes:
     bearer:
@@ -542,7 +551,7 @@ tags:
   - name: Users > Enable Users MFA
   - name: Users > MFA Pairing Keys
 paths:
-  /v1/environments/{environmentID}/applications/{applicationID}/pushCredentials:
+  /environments/{environmentID}/applications/{applicationID}/pushCredentials:
     get:
       tags:
         - Applications > Application MFA Push Credentials
@@ -677,7 +686,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MFAPushCredentialResponse'
-  /v1/environments/{environmentID}/applications/{applicationID}/pushCredentials/{pushCredentialID}:
+  /environments/{environmentID}/applications/{applicationID}/pushCredentials/{pushCredentialID}:
     get:
       tags:
         - Applications > Application MFA Push Credentials
@@ -886,7 +895,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/deviceAuthenticationPolicies:
+  /environments/{environmentID}/deviceAuthenticationPolicies:
     get:
       tags:
         - Device Authentication Policy
@@ -1006,7 +1015,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceAuthenticationPolicy'
-  /v1/environments/{environmentID}/deviceAuthenticationPolicies/{deviceAuthenticationPolicyID}:
+  /environments/{environmentID}/deviceAuthenticationPolicies/{deviceAuthenticationPolicyID}:
     get:
       tags:
         - Device Authentication Policy
@@ -1185,7 +1194,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/fidoDevicesMetadata:
+  /environments/{environmentID}/fidoDevicesMetadata:
     get:
       tags:
         - FIDO Device
@@ -1305,7 +1314,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FIDODevice'
-  /v1/environments/{environmentID}/fidoDevicesMetadata/{fidoDeviceID}:
+  /environments/{environmentID}/fidoDevicesMetadata/{fidoDeviceID}:
     get:
       tags:
         - FIDO Device
@@ -1420,7 +1429,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/fidoPolicies:
+  /environments/{environmentID}/fidoPolicies:
     get:
       tags:
         - FIDO Policy
@@ -1540,7 +1549,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FIDOPolicy'
-  /v1/environments/{environmentID}/fidoPolicies/{fidoPolicyID}:
+  /environments/{environmentID}/fidoPolicies/{fidoPolicyID}:
     get:
       tags:
         - FIDO Policy
@@ -1719,7 +1728,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/mfaSettings:
+  /environments/{environmentID}/mfaSettings:
     get:
       tags:
         - MFA Settings
@@ -1887,7 +1896,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MFASettings'
-  /v1/environments/{environmentID}/users/{userID}/devices:
+  /environments/{environmentID}/users/{userID}/devices:
     post:
       tags:
         - Users > MFA Devices
@@ -2082,7 +2091,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}:
+  /environments/{environmentID}/users/{userID}/devices/{deviceID}:
     post:
       tags:
         - Users > MFA Devices
@@ -2282,7 +2291,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}/nickname:
+  /environments/{environmentID}/users/{userID}/devices/{deviceID}/nickname:
     put:
       tags:
         - Users > MFA Devices
@@ -2351,7 +2360,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}/logs:
+  /environments/{environmentID}/users/{userID}/devices/{deviceID}/logs:
     put:
       tags:
         - Users > MFA Devices
@@ -2420,7 +2429,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/mfaEnabled:
+  /environments/{environmentID}/users/{userID}/mfaEnabled:
     get:
       tags:
         - Users > Enable Users MFA
@@ -2540,7 +2549,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/pairingKeys/{pairingKeyID}:
+  /environments/{environmentID}/users/{userID}/pairingKeys/{pairingKeyID}:
     get:
       tags:
         - Users > MFA Pairing Keys
@@ -2661,7 +2670,7 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/users/{userID}/pairingKeys:
+  /environments/{environmentID}/users/{userID}/pairingKeys:
     post:
       tags:
         - Users > MFA Pairing Keys
