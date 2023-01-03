@@ -1473,6 +1473,7 @@ components:
                 oneOf:
                   - $ref: '#/components/schemas/ApplicationSAML'
                   - $ref: '#/components/schemas/ApplicationOIDC'
+                  - $ref: '#/components/schemas/ApplicationWSFED'
                   - $ref: '#/components/schemas/ApplicationExternalLink'
                   - $ref: '#/components/schemas/ApplicationPingOnePortal'
                   - $ref: '#/components/schemas/ApplicationPingOneSelfService'
@@ -6463,6 +6464,7 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/ApplicationSAML'
                 - $ref: '#/components/schemas/ApplicationOIDC'
+                - $ref: '#/components/schemas/ApplicationWSFED'
                 - $ref: '#/components/schemas/ApplicationExternalLink'
               example:
                 name: app_{{$timestamp}}
@@ -6537,6 +6539,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/ApplicationSAML'
                   - $ref: '#/components/schemas/ApplicationOIDC'
+                  - $ref: '#/components/schemas/ApplicationWSFED'
                   - $ref: '#/components/schemas/ApplicationExternalLink'
   /v1/environments/{environmentID}/applications/{applicationID}:
     get:
@@ -6600,6 +6603,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/ApplicationSAML'
                   - $ref: '#/components/schemas/ApplicationOIDC'
+                  - $ref: '#/components/schemas/ApplicationWSFED'
                   - $ref: '#/components/schemas/ApplicationExternalLink'
                   - $ref: '#/components/schemas/ApplicationPingOnePortal'
                   - $ref: '#/components/schemas/ApplicationPingOneSelfService'
@@ -6615,6 +6619,7 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/ApplicationSAML'
                 - $ref: '#/components/schemas/ApplicationOIDC'
+                - $ref: '#/components/schemas/ApplicationWSFED'
                 - $ref: '#/components/schemas/ApplicationExternalLink'
                 - $ref: '#/components/schemas/ApplicationPingOnePortal'
                 - $ref: '#/components/schemas/ApplicationPingOneSelfService'
@@ -6685,6 +6690,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/ApplicationSAML'
                   - $ref: '#/components/schemas/ApplicationOIDC'
+                  - $ref: '#/components/schemas/ApplicationWSFED'
                   - $ref: '#/components/schemas/ApplicationExternalLink'
                   - $ref: '#/components/schemas/ApplicationPingOnePortal'
                   - $ref: '#/components/schemas/ApplicationPingOneSelfService'
