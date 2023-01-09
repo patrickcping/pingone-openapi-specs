@@ -632,6 +632,9 @@ components:
         - $ref: '#/components/schemas/Application'
         - type: object
           properties:
+            homePageUrl:
+              type: string
+              description: A string that specifies the custom home page URL for the application.
             acsUrls:
               type: array
               description: A string that specifies the Assertion Consumer Service URLs. The first URL in the list is used as default (there must be at least one URL). This is a required property.
@@ -701,7 +704,7 @@ components:
         - $ref: '#/components/schemas/Application'
         - type: object
           properties:
-            allowWildcardInRedirectUri:
+            allowWildcardInRedirectUris:
               type: boolean
               description: A boolean to specify whether wildcards are allowed in redirect URIs. For more information, see [Wildcards in Redirect URIs](https://docs.pingidentity.com/csh?context=p1_c_wildcard_redirect_uri).
             assignActorRoles:
@@ -24857,3 +24860,4 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Role'
+                
