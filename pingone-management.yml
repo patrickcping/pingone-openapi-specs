@@ -338,6 +338,20 @@ components:
       type: string
       enum: [ACTIVITY, SPLUNK, NEWRELIC]
       description: A string that specifies one of the supported subscription formats. Options are ACTIVITY, SPLUNK, and NEWRELIC. This is a required property.
+    EnumTemplateContentDeliveryMethod:
+      type: string
+      enum: [Email, SMS, Voice, Push]
+      description: The content's delivery method. Possible values are `Email`, `SMS`, `Voice` or `Push`. Cannot be changed after it is initially set in `POST /environments/{{envID}}/templates/{{templateName}}/contents`.
+    EnumTemplateContentPushCategory:
+      type: string
+      enum: [BANNER_BUTTONS, WITHOUT_BANNER_BUTTONS, APPROVE_AND_OPEN_APP]
+      description: |
+        For Push content, you can specify what type of banner should be displayed to the user. The available options are:
+        * `BANNER_BUTTONS` - the banner contains both Approve and Deny buttons
+        * `WITHOUT_BANNER_BUTTONS` - when the user clicks the banner, they are taken to an application that contains the necessary approval controls.
+        * `APPROVE_AND_OPEN_APP` - when the Approve button is clicked, authentication is completed and the user is taken to the relevant application.
+
+        If this parameter is not provided, the default is `BANNER_BUTTONS`. Note that to use the non-default push banners, you must implement them in your application code, using the PingOne SDK. For details, see the [README for iOS](https://github.com/pingidentity/pingone-mobile-sdk-ios/#171-push-notifications-categories) and the [README for Android](https://github.com/pingidentity/pingone-mobile-sdk-android).
     EnumTrustedEmailStatus:
       type: string
       enum: [ACTIVE, VERIFICATION_REQUIRED]
@@ -4224,6 +4238,12 @@ components:
         - deliveryMethods
         - variables
     TemplateContent:
+      oneOf:
+        - $ref: '#/components/schemas/TemplateContentEmail'
+        - $ref: '#/components/schemas/TemplateContentSMS'
+        - $ref: '#/components/schemas/TemplateContentPush'
+        - $ref: '#/components/schemas/TemplateContentVoice'
+    TemplateContentCommon:
       type: object
       properties:
         id:
@@ -4249,83 +4269,21 @@ components:
             Two-character language code followed by a two-character country code, separated by an underscore or dash, for example: "en_GB", "en-GB".
             Cannot be changed after it is initially set in `POST /environments/{{envID}}/templates/{{templateName}}/contents`.
         deliveryMethod:
-          type: string
-          description: The content's delivery method. Possible values are `Email`, `SMS`, `Voice` or `Push`. Cannot be changed after it is initially set in `POST /environments/{{envID}}/templates/{{templateName}}/contents`.
+          $ref: '#/components/schemas/EnumTemplateContentDeliveryMethod'
         variant:
           type: string
           description: Holds the unique user-defined name for each content variant that uses the same template + `deliveryMethod` + `locale` combination. This property is case insensitive and has a limit of 100 characters. For more information, see [Creating custom contents](https://apidocs.pingidentity.com/pingone/platform/v1/api/#notifications-templates-creating-custom-contents).
       required:
         - locale
         - deliveryMethod
-    TemplateContentSMSVoice:
+    TemplateContentEmail:
       allOf:
-        - $ref: '#/components/schemas/TemplateContent'
-        - type: object
-          properties:
-            content:
-              type: string
-              description: |
-                The SMS or voice text.
-                * **SMS**: UC-2 encoding is used for text that contains non GSM-7 characters. UC-2 encoded text cannot exceed 67 characters. GSM-7 encoded text cannot exceed 153 characters. If supported, it can include variables.
-                * **Voice**: Limited to 1Kb characters.
-                  The following substitution place holders can be embedded in the message:
-                  * `<pause1sec>`: Pauses the message narration for 1 second.
-                    The pause interval <pause1sec> cannot be modified. To pause the message narration for more than one second, repeat multiple `<pause1sec>` occurrences in succession, according to the desired pause interval duration. For example, `<pause1sec><pause1sec><pause1sec>` pauses the message narration for three seconds.
-                  * `<sayCharValue> .. </sayCharValue>`: Reads the character name of each character of the enclosed string separately.
-                  * `<repeatMessage val=x> .. </repeatMessage>`: Narrates the enclosed text `<val>` number of times.
-                  
-                  In the following message example, `${otp}` is assigned the value `"123456"`, and `${email}` is assigned the value `"joe@bxz.com"`:
-                  ```
-                  Hello <pause1sec> your authentication code is 
-                  <sayCharValue>${otp}</​sayCharValue> 
-                  <repeatMessage val=2> I repeat your code is 
-                  <sayCharValue>${otp}</​sayCharValue>
-                  </​repeatMessage> <pause1sec> 
-                  Mail <sayCharValue>${email}</​sayCharValue> for help
-                  ```
-                  The narrated message on the voice call sounds like:
-                  ```
-                  HELLO <1 second silence> YOUR AUTHENTICATION CODE IS 
-                  ONE TWO THREE FOUR FIVE SIX 
-                  I REPEAT YOUR CODE IS ONE TWO THREE FOUR FIVE SIX 
-                  I REPEAT YOUR CODE IS ONE TWO THREE FOUR FIVE SIX <1 second silence> 
-                  MAIL JAY OH EE AT BEE EX ZEE DOT SEE OH EM FOR HELP
-                  ```
-
-                  Voice OTP supports vendor-specific voices.
-                  * Supported Twilio voices:
-                    * Man, Woman
-                      Supported locales (default: en):
-                      en, en_GB, es, fr, de
-                    * Alice (Twilio only)
-                      Supported locales (default: en US):
-                      da_DK, de_DE, en_AU, en_CA, en_GB, en_US, ca_ES, es_ES, es_MX, fi_FI, fr_CA, fr_FR, it_IT, ja_JP, ko_KR, nb_NO, nl_NL, pl_PL, pt_BR, pt_PT, ru_RU, sv_SE, zh_CN, zh_HK, zh_TW
-                    * Amazon Polly
-                      cy_GB, ro_RO, is_IS, hi_IN tr_TR
-                  * Supported Syniverse voices:
-                    * Man, Woman
-                      Supported locales:
-                      en_US, en_GB, es_ES, es_US, fr_FR, de_DE, it_IT, en_AU, da_DK, is_IS, nl_NL, pl_PL, pt_BR, pt_PT, ru_RU, ja_JP
-                    * Woman only
-                      Supported locales:
-                      cmn_CN, cy_GB, en_IN, fr_CA, hi_IN, nb_NO, ro_RO, sv_SE, tr_TR, ko_KR, ar
-          required:
-            - content
-    TemplateContentEmailPush:
-      allOf:
-        - $ref: '#/components/schemas/TemplateContent'
+        - $ref: '#/components/schemas/TemplateContentCommon'
         - type: object
           properties:
             body:
               type: string
-              description: The email or push text (maximum 400 characters for push text). Email text cannot be larger than 100 kB. Email text can contain HTML. If supported, this can include variables.
-          required:
-            - body
-    TemplateContentEmail:
-      allOf:
-        - $ref: '#/components/schemas/TemplateContentEmailPush'
-        - type: object
-          properties:
+              description: The email text. Email text cannot be larger than 100 kB. Email text can contain HTML. If supported, this can include variables.
             from:
               type: object
               properties:
@@ -4376,23 +4334,96 @@ components:
               type: string
               description: If not specified, `text/html` is the default value.
               default: text/html
+          required:
+            - body
     TemplateContentSMS:
       allOf:
-        - $ref: '#/components/schemas/TemplateContentSMSVoice'
+        - $ref: '#/components/schemas/TemplateContentCommon'
         - type: object
           properties:
+            content:
+              type: string
+              description: |
+                The SMS text.
+                UC-2 encoding is used for text that contains non GSM-7 characters. UC-2 encoded text cannot exceed 67 characters. GSM-7 encoded text cannot exceed 153 characters. If supported, it can include variables.
+              maxLength: 153
             sender:
               type: string
               description: The SMS sender ID. This property can contain only alphanumeric characters and spaces, and its length cannot exceed 11 characters. In some countries, it is impossible to send an SMS with an alphanumeric sender ID. For those countries, the sender ID must be empty. For SMS recipients in specific countries, refer to Twilio's documentation on [International support for Alphanumeric Sender ID](https://support.twilio.com/hc/en-us/articles/223133767-International-support-for-Alphanumeric-Sender-ID).
+              maxLength: 11
+          required:
+            - content
     TemplateContentPush:
       allOf:
-        - $ref: '#/components/schemas/TemplateContentEmailPush'
+        - $ref: '#/components/schemas/TemplateContentCommon'
         - type: object
           properties:
             title:
               type: string
               description: The push title (maximum 200 characters). If supported, this can include variables.
               maxLength: 200
+            body:
+              type: string
+              description: The push text (maximum 400 characters for push text). If supported, this can include variables.
+              maxLength: 400
+            pushCategory:
+              $ref: '#/components/schemas/EnumTemplateContentPushCategory'
+          required:
+            - body
+    TemplateContentVoice:
+      allOf:
+        - $ref: '#/components/schemas/TemplateContentCommon'
+        - type: object
+          properties:
+            content:
+              type: string
+              description: |
+                The voice text.  Limited to 1Kb characters.
+                  The following substitution place holders can be embedded in the message:
+                  * `<pause1sec>`: Pauses the message narration for 1 second.
+                    The pause interval <pause1sec> cannot be modified. To pause the message narration for more than one second, repeat multiple `<pause1sec>` occurrences in succession, according to the desired pause interval duration. For example, `<pause1sec><pause1sec><pause1sec>` pauses the message narration for three seconds.
+                  * `<sayCharValue> .. </sayCharValue>`: Reads the character name of each character of the enclosed string separately.
+                  * `<repeatMessage val=x> .. </repeatMessage>`: Narrates the enclosed text `<val>` number of times.
+                  
+                  In the following message example, `${otp}` is assigned the value `"123456"`, and `${email}` is assigned the value `"joe@bxz.com"`:
+                  ```
+                  Hello <pause1sec> your authentication code is 
+                  <sayCharValue>${otp}</​sayCharValue> 
+                  <repeatMessage val=2> I repeat your code is 
+                  <sayCharValue>${otp}</​sayCharValue>
+                  </​repeatMessage> <pause1sec> 
+                  Mail <sayCharValue>${email}</​sayCharValue> for help
+                  ```
+                  The narrated message on the voice call sounds like:
+                  ```
+                  HELLO <1 second silence> YOUR AUTHENTICATION CODE IS 
+                  ONE TWO THREE FOUR FIVE SIX 
+                  I REPEAT YOUR CODE IS ONE TWO THREE FOUR FIVE SIX 
+                  I REPEAT YOUR CODE IS ONE TWO THREE FOUR FIVE SIX <1 second silence> 
+                  MAIL JAY OH EE AT BEE EX ZEE DOT SEE OH EM FOR HELP
+                  ```
+            voice:
+              type: string
+              description: |
+                Voice OTP supports vendor-specific voices.
+                  * Supported Twilio voices:
+                    * Man, Woman
+                      Supported locales (default: en):
+                      en, en_GB, es, fr, de
+                    * Alice (Twilio only)
+                      Supported locales (default: en US):
+                      da_DK, de_DE, en_AU, en_CA, en_GB, en_US, ca_ES, es_ES, es_MX, fi_FI, fr_CA, fr_FR, it_IT, ja_JP, ko_KR, nb_NO, nl_NL, pl_PL, pt_BR, pt_PT, ru_RU, sv_SE, zh_CN, zh_HK, zh_TW
+                    * Amazon Polly
+                      cy_GB, ro_RO, is_IS, hi_IN tr_TR
+                  * Supported Syniverse voices:
+                    * Man, Woman
+                      Supported locales:
+                      en_US, en_GB, es_ES, es_US, fr_FR, de_DE, it_IT, en_AU, da_DK, is_IS, nl_NL, pl_PL, pt_BR, pt_PT, ru_RU, ja_JP
+                    * Woman only
+                      Supported locales:
+                      cmn_CN, cy_GB, en_IN, fr_CA, hi_IN, nb_NO, ro_RO, sv_SE, tr_TR, ko_KR, ar
+          required:
+            - content
     TemplateContentBulkVariant:
       type: object
     User:
@@ -24860,4 +24891,3 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Role'
-                
