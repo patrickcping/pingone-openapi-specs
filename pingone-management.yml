@@ -4370,6 +4370,7 @@ components:
               $ref: '#/components/schemas/EnumTemplateContentPushCategory'
           required:
             - body
+            - title
     TemplateContentVoice:
       allOf:
         - $ref: '#/components/schemas/TemplateContentCommon'
