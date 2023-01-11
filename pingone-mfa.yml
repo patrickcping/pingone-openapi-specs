@@ -85,11 +85,6 @@ components:
     DeviceAuthenticationPolicy:
       type: object
       properties:
-        authentication:
-          type: object
-          properties:
-            deviceSelection:
-              $ref: '#/components/schemas/EnumDeviceAuthenticationPolicyDeviceSelection'
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
         id:
@@ -99,6 +94,14 @@ components:
         name:
           type: string
           description: Device authentication policy's name.
+        authentication:
+          type: object
+          description: An object that contains the device selection settings.
+          properties:
+            deviceSelection:
+              $ref: '#/components/schemas/EnumMFADevicePolicySelection'
+          required:
+            - deviceSelection
         sms:
           $ref: '#/components/schemas/DeviceAuthenticationPolicyOfflineDevice'
         voice:
@@ -175,14 +178,14 @@ components:
                       duration:
                         type: integer
                         description: The amount of time a user has to respond to a push notification before it expires. Minimum is 40 seconds and maximum is 150 seconds. If this parameter is not provided, the duration is set to 40 seconds.
-                        default: 40
                         minimum: 40
                         maximum: 150
+                        default: 40
                       timeUnit:
-                        $ref: '#/components/schemas/EnumPushTimeoutTimeUnit'
+                        $ref: '#/components/schemas/EnumTimeUnitPushTimeout'
                     required:
                       - duration
-                      - timeUnit
+                      - timeUnit  
                   otp:
                     type: object
                     properties:
@@ -305,15 +308,6 @@ components:
           type: number
         size:
           type: number
-    EnumDeviceAuthenticationPolicyDeviceSelection:
-      type: string
-      enum: [DEFAULT_TO_FIRST, PROMPT_TO_SELECT, ALWAYS_PROMPT_TO_SELECT]
-      description: |
-        The default method that should be used for authentication. Can take one of the following values:
-        * DEFAULT_TO_FIRST - use the method that the user set as their default
-        * PROMPT_TO_SELECT - always have the user select the method to use if there is more than one method available
-        * ALWAYS_PROMPT_TO_SELECT - always have the user select the method to use even if there is only one method available
-        If this parameter is not provided, the DEFAULT_TO_FIRST option is used.
     EnumFIDOAttestationRequirements:
       type: string
       enum: [NONE, AUDIT_ONLY, GLOBAL, CERTIFIED, SPECIFIC]
@@ -336,26 +330,36 @@ components:
       type: string
       enum: [permissive, restrictive]
       description: Controls how authentication or registration attempts should proceed if a device integrity check does not receive a response. Set the value to `permissive` if you want to allow the process to continue. Set the value to `restrictive` if you want to block the user in such situations.
+    EnumMFADevicePolicySelection:
+      type: string
+      enum: [DEFAULT_TO_FIRST, PROMPT_TO_SELECT, ALWAYS_PROMPT_TO_SELECT]
+      description: |
+        The default method that should be used for authentication. Can take one of the following values:
+        * `DEFAULT_TO_FIRST` - use the method that the user set as their default
+        * `PROMPT_TO_SELECT` - always have the user select the method to use if there is more than one method available
+        * `ALWAYS_PROMPT_TO_SELECT` - always have the user select the method to use even if there is only one method available
+        If this parameter is not provided, the `DEFAULT_TO_FIRST` option is used.
     EnumMFAPushCredentialAttrType:
       type: string
       enum: [APNS, FCM]
       description: A string that specifies the type of the push credentials. Mandatory. Valid values APNS, FCM
     EnumMFASettingsDeviceSelection:
       type: string
+      deprecated: true
       enum: [DEFAULT_TO_FIRST, PROMPT_TO_SELECT]
       description: A string that defines the device selection method. Options are DEFAULT_TO_FIRST (this is the default setting) and PROMPT_TO_SELECT.
     EnumMFASettingsPairingKeyFormat:
       type: string
       enum: [NUMERIC, ALPHANUMERIC]
       description: String that controls the type of pairing key issued. The valid values are NUMERIC (12-digit key) and ALPHANUMERIC (16-character alphanumeric key).
-    EnumPushTimeoutTimeUnit:
-      type: string
-      enum: [SECONDS]
-      description: The time unit for the `pushTimeout.duration` parameter. Currently, the only permitted value is `SECONDS`.
     EnumTimeUnit:
       type: string
       enum: [MINUTES, SECONDS]
       description: The type of time unit
+    EnumTimeUnitPushTimeout:
+      type: string
+      enum: [SECONDS]
+      description: The time unit for the `pushTimeout.duration` parameter. Currently, the only permitted value is `SECONDS`.
     FIDOCustomDeviceMetadata:
       type: object
     FIDODevice:
@@ -466,6 +470,7 @@ components:
           $ref: '#/components/schemas/ObjectEnvironment'
         authentication:
           type: object
+          deprecated: true
           description: An object that contains the device selection settings.
           properties:
             deviceSelection:
@@ -504,7 +509,6 @@ components:
           readOnly: true
           description: The time the resource was last updated.
       required:
-        - authentication
         - pairing
     ObjectEnvironment:
       type: object
