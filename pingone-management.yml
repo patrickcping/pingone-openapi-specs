@@ -24315,6 +24315,12 @@ paths:
         - Organizations
       summary: READ All Organizations
       operationId: readAllOrganizations
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          example: '1'
       responses:
         '400':
           description: Invalid request received.  Malformed JSON, malformed HTTP request.
@@ -24363,7 +24369,7 @@ paths:
       tags:
         - Organizations
       summary: READ One Organization
-      operationId: readOneOrganizations
+      operationId: readOneOrganization
       parameters:
         - name: organizationID
           in: path
