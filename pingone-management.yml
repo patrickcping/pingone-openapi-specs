@@ -356,6 +356,7 @@ components:
       type: string
       enum: [ACTIVE, VERIFICATION_REQUIRED]
       description: A string that specifies the status of the trusted email address.
+      readOnly: true
     EnumEnabledStatus:
       type: string
       enum: [ENABLED, DISABLED]
@@ -1445,8 +1446,9 @@ components:
           description: A string that specifies the auto generated ID of the trusted email address.
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
-        emailDomain:
+        domain:
           type: object
+          readOnly: true
           properties:
             id:
               type: string
@@ -1456,6 +1458,10 @@ components:
           description: A string that specifies the trusted email address, for example john.smith@shopco.com.
         status:
           $ref: '#/components/schemas/EnumTrustedEmailStatus'
+        domainId:
+          type: string
+          description: A string that specifies the trusted email domain resource’s unique identifier associated with the resource.
+          readOnly: true
       required:
         - emailAddress
     EntityArray:
