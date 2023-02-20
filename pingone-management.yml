@@ -734,6 +734,12 @@ components:
                 packageName:
                   type: string
                   description: A string that specifies the package name associated with the application, for push notifications in native apps. The value of the mobile.packageName property is unique per environment, and once defined, is immutable.  this setting overrides the top-level packageName field.
+                huaweiAppId:
+                  type: string
+                  description: The unique identifier for the app on the device and in the Huawei Mobile Service AppGallery. The value of the `huaweiAppId` property is unique per environment, and once defined, is immutable. Used only for applications for the Huawei ecosystem.
+                huaweiPackageName:
+                  type: string
+                  description: The package name associated with the application, for push notifications in native apps. The value of the `huaweiPackageName` property is unique per environment, and once defined, is immutable. Used only for applications for the Huawei ecosystem.
                 passcodeRefreshDuration:
                   type: object
                   properties:

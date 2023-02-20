@@ -292,6 +292,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/MFAPushCredentialAPNS'
                   - $ref: '#/components/schemas/MFAPushCredentialFCM'
+                  - $ref: '#/components/schemas/MFAPushCredentialHMS'
             deviceAuthenticationPolicies:
               type: array
               items:
@@ -341,8 +342,13 @@ components:
         If this parameter is not provided, the `DEFAULT_TO_FIRST` option is used.
     EnumMFAPushCredentialAttrType:
       type: string
-      enum: [APNS, FCM]
-      description: A string that specifies the type of the push credentials. Mandatory. Valid values APNS, FCM
+      enum: [APNS, FCM, HMS]
+      description: |
+        Specifies the push credential type.
+        Valid values:
+        * APNS (for Apple)
+        * FCM (for Google)
+        * HMS (for Huawei)
     EnumMFASettingsDeviceSelection:
       type: string
       deprecated: true
@@ -422,17 +428,16 @@ components:
       properties:
         type:
           $ref: '#/components/schemas/EnumMFAPushCredentialAttrType'
-        key:
-          type: string
-          description: A string that Apple uses as an identifier to identify an authentication key.  Mandatory.
       required:
         - type
-        - key
     MFAPushCredentialAPNS:
       allOf:
         - $ref: '#/components/schemas/MFAPushCredential'
         - type: object
           properties:
+            key:
+              type: string
+              description: A string that Apple uses as an identifier to identify an authentication key.  Mandatory.
             teamId:
               type: string
               description: A string that Apple uses as an identifier to identify teams.
@@ -440,10 +445,33 @@ components:
               type: string
               description: A string that Apple uses as the authentication token signing key to securely connect to APNS. This is a p8 file with a private key format.
           required:
+            - key
             - teamId
             - token
     MFAPushCredentialFCM:
-      $ref: '#/components/schemas/MFAPushCredential'
+      allOf:
+        - $ref: '#/components/schemas/MFAPushCredential'
+        - type: object
+          properties:
+            key:
+              type: string
+              description: A string that Apple uses as an identifier to identify an authentication key.  Mandatory.
+          required:
+            - key
+    MFAPushCredentialHMS:
+      allOf:
+        - $ref: '#/components/schemas/MFAPushCredential'
+        - type: object
+          properties:
+            clientId:
+              type: string
+              description: Used only if type is set to HMS. OAuth 2.0 Client ID from the Huawei Developers API console.
+            clientSecret:
+              type: string
+              description: Used only if type is set to HMS. The client secret associated with the OAuth 2.0 Client ID.
+          required:
+            - clientId
+            - clientSecret
     MFAPushCredentialResponse:
       type: object
       properties:
@@ -650,6 +678,7 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/MFAPushCredentialAPNS'
                 - $ref: '#/components/schemas/MFAPushCredentialFCM'
+                - $ref: '#/components/schemas/MFAPushCredentialHMS'
               example:
                 type: FCM
                 key: key.value
@@ -790,6 +819,7 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/MFAPushCredentialAPNS'
                 - $ref: '#/components/schemas/MFAPushCredentialFCM'
+                - $ref: '#/components/schemas/MFAPushCredentialHMS'
               example:
                 type: APNS
                 key: key.value.updated
