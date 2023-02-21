@@ -134,14 +134,14 @@ components:
       type: string
       enum: [PRODUCTION, SANDBOX]
       description: A string that specifies the type of environment to use.
-    EnumGatewayLDAPSecurity:
+    EnumGatewayTypeLDAPSecurity:
       type: string
       enum: [None, TLS, StartTLS]
       description: A string that specifies the connection security type. Options are None, TLS, and StartTLS. The default value is None.
     EnumGatewayType:
       type: string
-      enum: [LDAP, PING_FEDERATE, PING_INTELLIGENCE, API_GATEWAY_INTEGRATION]
-      description: A string that specifies the type of gateway resource. Options are LDAP, PING_FEDERATE, API_GATEWAY_INTEGRATION and PING_INTELLIGENCE. This is a required property.
+      enum: [LDAP, PING_FEDERATE, PING_INTELLIGENCE, API_GATEWAY_INTEGRATION, RADIUS]
+      description: A string that specifies the type of gateway resource. Options are LDAP, PING_FEDERATE, API_GATEWAY_INTEGRATION, RADIUS and PING_INTELLIGENCE. This is a required property.
     EnumGatewayPasswordAuthority:
       type: string
       enum: [PING_ONE, LDAP]
@@ -1539,7 +1539,8 @@ components:
               items:
                 anyOf:
                   - $ref: '#/components/schemas/Gateway'
-                  - $ref: '#/components/schemas/GatewayLDAP'
+                  - $ref: '#/components/schemas/GatewayTypeLDAP'
+                  - $ref: '#/components/schemas/GatewayTypeRADIUS'
             grants:
               type: array
               items:
@@ -1761,7 +1762,7 @@ components:
         - name
         - type
         - enabled
-    GatewayLDAP:
+    GatewayTypeLDAP:
       allOf:
         - $ref: '#/components/schemas/Gateway'
         - type: object
@@ -1773,7 +1774,7 @@ components:
               type: string
               description: A string that specifies the bind password for the LDAP database. This is a required property.
             connectionSecurity:
-              $ref: '#/components/schemas/EnumGatewayLDAPSecurity'
+              $ref: '#/components/schemas/EnumGatewayTypeLDAPSecurity'
             kerberos:
               type: object
               description: Contains the Kerberos authentication settings. Set this to null to disable Kerberos authentication.
@@ -1872,6 +1873,44 @@ components:
             - bindPassword
             - vendor
             - serversHostAndPort
+    GatewayTypeRADIUS:
+      allOf:
+        - $ref: '#/components/schemas/Gateway'
+        - type: object
+          properties:
+            davinci:
+              type: object
+              properties:
+                policy:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: The ID of the Davinci flow policy to use.
+                  required:
+                    - id
+              required:
+                - policy
+            defaultSharedSecret:
+              type: string
+              description: Value to use for the shared secret if the shared secret is not provided for one or more of the RADIUS clients specified.
+            radiusClients:
+              type: array
+              description: Collection of RADIUS clients.
+              items:
+                type: object
+                properties:
+                  ip:
+                    type: string
+                    description: The IP of the RADIUS client.
+                  sharedSecret:
+                    type: string
+                    description: The shared secret for the RADIUS client. If this value is not provided, the shared secret specified with `defaultSharedSecret` is used. If you are not providing a shared secret for the client, leave out `sharedSecret` or set it to null.
+                required:
+                  - ip
+          required:
+            - davinci
+            - radiusClients
     GatewayCredential:
       type: object
       properties:
@@ -11006,7 +11045,8 @@ paths:
             schema:
               oneOf:
                 - $ref: '#/components/schemas/Gateway'
-                - $ref: '#/components/schemas/GatewayLDAP'
+                - $ref: '#/components/schemas/GatewayTypeLDAP'
+                - $ref: '#/components/schemas/GatewayTypeRADIUS'
               example:
                 name: PING_FED-Gateway
                 description: My PingFederate Gateway
@@ -11067,7 +11107,8 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Gateway'
-                  - $ref: '#/components/schemas/GatewayLDAP'
+                  - $ref: '#/components/schemas/GatewayTypeLDAP'
+                  - $ref: '#/components/schemas/GatewayTypeRADIUS'
   /v1/environments/{environmentID}/gateways/{gatewayID}:
     get:
       tags:
@@ -11129,7 +11170,8 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Gateway'
-                  - $ref: '#/components/schemas/GatewayLDAP'
+                  - $ref: '#/components/schemas/GatewayTypeLDAP'
+                  - $ref: '#/components/schemas/GatewayTypeRADIUS'
     put:
       tags:
         - Gateways
@@ -11141,7 +11183,8 @@ paths:
             schema:
               oneOf:
                 - $ref: '#/components/schemas/Gateway'
-                - $ref: '#/components/schemas/GatewayLDAP'
+                - $ref: '#/components/schemas/GatewayTypeLDAP'
+                - $ref: '#/components/schemas/GatewayTypeRADIUS'
               example:
                 name: PING_FED-Gateway
                 description: My PingFederate Gateway
@@ -11201,7 +11244,8 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Gateway'
-                  - $ref: '#/components/schemas/GatewayLDAP'
+                  - $ref: '#/components/schemas/GatewayTypeLDAP'
+                  - $ref: '#/components/schemas/GatewayTypeRADIUS'
     delete:
       tags:
         - Gateways
