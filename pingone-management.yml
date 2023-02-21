@@ -17771,6 +17771,7 @@ paths:
       tags:
         - Notifications Policies
       summary: UPDATE Notifications Policy
+      operationId: updateNotificationsPolicy
       requestBody:
         content:
           application/json:
