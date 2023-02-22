@@ -2806,9 +2806,16 @@ components:
           type: integer
           description: An integer that specifies the port used by the organization's SMTP server to send emails (default `465`). Note that the protocol used depends upon the port specified. If you specify port `25`, `587`, or `2525`, SMTP with `STARTTLS` is used. Otherwise, `SMTPS` is used.
           default: 465
+        protocol:
+          type: string
+          description: A string that specifies the organization's SMTP server's protocol.
+          readOnly: true
         username:
           type: string
           description: A string that specifies the organization's SMTP server's username.
+        password:
+          type: string
+          description: A string that specifies the organization's SMTP server's password.
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
         from:
@@ -2820,6 +2827,8 @@ components:
             address:
               type: string
               description: A string that specifies the email's "from" address.
+          required:
+            - address
         replyTo:
           type: object
           properties:
