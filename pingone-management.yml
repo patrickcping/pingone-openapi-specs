@@ -17146,7 +17146,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/NotificationsSettingsEmailDeliverySettings'
               example:
                 host: email-smtp.server.com
                 port: 465
@@ -17209,7 +17209,7 @@ paths:
                 $ref: '#/components/schemas/NotificationsSettingsEmailDeliverySettings'
     delete:
       tags:
-        - Phone Delivery Settings
+        - Notifications Settings (SMTP)
       summary: DELETE Email Delivery Settings
       operationId: deleteEmailDeliverySettings
       parameters:
