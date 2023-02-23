@@ -594,6 +594,14 @@ components:
                   maximumValue:
                     description: The maximum value allowed for the request.
                     type: integer
+    UserMFAEnabled:
+      type: object
+      properties:
+        mfaEnabled:
+          type: boolean
+          description: Whether multi-factor authentication is enabled. This attribute is set to `false` by default when the user is created.
+      required:
+        - mfaEnabled
 security:
   - bearer: []
 tags:
@@ -601,10 +609,10 @@ tags:
   - name: Device Authentication Policy
   - name: FIDO Policy
   - name: MFA Settings
-  - name: Users > MFA Devices
-  - name: Users > MFA Devices > FIDO2 Biometrics Devices
-  - name: Users > Enable Users MFA
-  - name: Users > MFA Pairing Keys
+  - name: MFA Devices
+  - name: MFA Devices > FIDO2 Biometrics Devices
+  - name: Enable Users MFA
+  - name: MFA Pairing Keys
 paths:
   /v1/environments/{environmentID}/applications/{applicationID}/pushCredentials:
     get:
@@ -1956,7 +1964,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/devices:
     post:
       tags:
-        - Users > MFA Devices
+        - MFA Devices
       summary: SET Device Order
       requestBody:
         content:
@@ -2035,7 +2043,7 @@ paths:
             application/json: {}
     get:
       tags:
-        - Users > MFA Devices
+        - MFA Devices
       summary: READ All MFA User Devices
       parameters:
         - name: environmentID
@@ -2091,7 +2099,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Users > MFA Devices
+        - MFA Devices
       summary: DELETE Device Order
       parameters:
         - name: Content-Type
@@ -2151,7 +2159,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}:
     post:
       tags:
-        - Users > MFA Devices
+        - MFA Devices
       summary: ACTIVATE MFA User Device
       requestBody:
         content:
@@ -2230,7 +2238,7 @@ paths:
             application/json: {}
     get:
       tags:
-        - Users > MFA Devices
+        - MFA Devices
       summary: READ One MFA User Device
       parameters:
         - name: environmentID
@@ -2291,7 +2299,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Users > MFA Devices
+        - MFA Devices
       summary: DELETE MFA User Device
       parameters:
         - name: environmentID
@@ -2351,7 +2359,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}/nickname:
     put:
       tags:
-        - Users > MFA Devices
+        - MFA Devices
       summary: UPDATE Device Nickname
       requestBody:
         content:
@@ -2420,7 +2428,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}/logs:
     put:
       tags:
-        - Users > MFA Devices
+        - MFA Devices
       summary: SEND MFA Device Logs
       requestBody:
         content:
@@ -2489,8 +2497,9 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/mfaEnabled:
     get:
       tags:
-        - Users > Enable Users MFA
+        - Enable Users MFA
       summary: READ User MFA Enabled
+      operationId: readUserMFAEnabled
       parameters:
         - name: environmentID
           in: path
@@ -2542,16 +2551,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMFAEnabled'
     put:
       tags:
-        - Users > Enable Users MFA
+        - Enable Users MFA
       summary: UPDATE User MFA Enabled
+      operationId: updateUserMFAEnabled
       requestBody:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/UserMFAEnabled'
               example:
                 mfaEnabled: true
       parameters:
@@ -2605,11 +2617,13 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMFAEnabled'
   /v1/environments/{environmentID}/users/{userID}/pairingKeys/{pairingKeyID}:
     get:
       tags:
-        - Users > MFA Pairing Keys
+        - MFA Pairing Keys
       summary: READ One MFA Pairing Key
       parameters:
         - name: environmentID
@@ -2670,7 +2684,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - Users > MFA Pairing Keys
+        - MFA Pairing Keys
       summary: DELETE MFA Pairing Key
       parameters:
         - name: environmentID
@@ -2730,7 +2744,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/pairingKeys:
     post:
       tags:
-        - Users > MFA Pairing Keys
+        - MFA Pairing Keys
       summary: CREATE MFA Pairing Key
       requestBody:
         content:
