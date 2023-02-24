@@ -134,6 +134,9 @@ components:
       type: string
       enum: [PRODUCTION, SANDBOX]
       description: A string that specifies the type of environment to use.
+    EnumFlowPolicyTriggerType:
+      type: string
+      enum: [AUTHENTICATION]
     EnumGatewayTypeLDAPSecurity:
       type: string
       enum: [None, TLS, StartTLS]
@@ -1538,6 +1541,14 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Environment'
+            flowPolicies:
+              type: array
+              items:
+                $ref: '#/components/schemas/FlowPolicy'
+            flowPolicyAssignments:
+              type: array
+              items:
+                $ref: '#/components/schemas/FlowPolicyAssignment'
             gatewayInstances:
               type: array
               items:
@@ -1710,6 +1721,55 @@ components:
               href: https://example.com
         license:
           id: 34f0efac-21d9-4a17-8a35-196bb3362983
+    FlowPolicy:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        application:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+          readOnly: true
+        enabled:
+          type: boolean
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        trigger:
+          type: object
+          properties:
+            type:
+              $ref: '#/components/schemas/EnumFlowPolicyTriggerType'
+          readOnly: true
+    FlowPolicyAssignment:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        application:
+          $ref: '#/components/schemas/ObjectApplication'
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        flowPolicy:
+          type: object
+          properties:
+            id:
+              type: string
+          required:
+            - id
+        priority:
+          type: integer
+      required:
+        - flowPolicy
     Gateway:
       type: object
       properties:
@@ -4769,6 +4829,7 @@ tags:
   - name: Applications
   - name: Application Secret
   - name: Application Resource Grants
+  - name: Application Flow Policy Assignments
   - name: Application Sign-On Policy Assignments
   - name: Application Role Assignments
   - name: Application Attribute Mapping
@@ -4783,6 +4844,7 @@ tags:
   - name: Custom Domains
   - name: Device Authentication Policy
   - name: Environments
+  - name: Flow Policies
   - name: Gateway Management
   - name: Gateways
   - name: Gateway Credentials
@@ -7648,6 +7710,340 @@ paths:
                 $ref: '#/components/schemas/P1Error'
         '204':
           description: Successful response
+  /v1/environments/{environmentID}/applications/{applicationID}/flowPolicyAssignments:
+    get:
+      tags:
+        - >-
+          Application Flow Policy
+          Assignments
+      summary: READ All Flow Policy Assignments
+      operationId: readAllFlowPolicyAssignments
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - >-
+          Application Flow Policy
+          Assignments
+      summary: CREATE Flow Assignment
+      operationId: createFlowPolicyAssignment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlowPolicyAssignment'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '405':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowPolicyAssignment'
+  /v1/environments/{environmentID}/applications/{applicationID}/flowPolicyAssignments/{flowPolicyAssignmentID}:
+    get:
+      tags:
+        - >-
+          Application Flow Policy
+          Assignments
+      summary: READ One Flow Policy Assignment
+      operationId: readOneFlowPolicyAssignment
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: flowPolicyAssignmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowPolicyAssignment'
+    put:
+      tags:
+        - >-
+          Application Flow Policy
+          Assignments
+      summary: UPDATE Flow Policy Assignment
+      operationId: updateFlowPolicyAssignment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlowPolicyAssignment'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: flowPolicyAssignmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowPolicyAssignment'
+    delete:
+      tags:
+        - >-
+          Application Flow Policy
+          Assignments
+      summary: DELETE Flow Policy Assignment
+      operationId: deleteFlowPolicyAssignment
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: flowPolicyAssignmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
   /v1/environments/{environmentID}/applications/{applicationID}/roleAssignments:
     get:
       tags:
@@ -8785,6 +9181,126 @@ paths:
           description: Successful response
           content:
             application/json: {}
+  /v1/environments/{environmentID}/flowPolicies:
+    get:
+      tags:
+        - Flow Policies
+      summary: READ All Flow Policies
+      operationId: readAllFlowPolicies
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: filter
+          in: query
+          schema:
+            type: string
+          example: trigger.type eq "AUTHENTICATION"
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+  /v1/environments/{environmentID}/flowPolicies/{flowPolicyID}:
+    get:
+      tags:
+        - Flow Policies
+      summary: READ ONE Flow Policy
+      operationId: readOneFlowPolicy
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: flowPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowPolicy'
   /v1/environments/{environmentID}/keys:
     get:
       tags:
