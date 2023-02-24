@@ -868,6 +868,13 @@ components:
               $ref: '#/components/schemas/EnumApplicationOIDCTokenAuthMethod'
           required:
             - tokenEndpointAuthMethod
+    ApplicationPingOneAdminConsole:
+      type: object
+      properties:
+        pkceEnforcement:
+          $ref: '#/components/schemas/EnumApplicationOIDCPKCEOption'
+        tokenEndpointAuthMethod:
+          $ref: '#/components/schemas/EnumApplicationOIDCTokenAuthMethod'
     ApplicationPingOnePortal:
       allOf:
         - $ref: '#/components/schemas/ApplicationOIDCInternal'
@@ -1506,6 +1513,7 @@ components:
                   - $ref: '#/components/schemas/ApplicationExternalLink'
                   - $ref: '#/components/schemas/ApplicationPingOnePortal'
                   - $ref: '#/components/schemas/ApplicationPingOneSelfService'
+                  - $ref: '#/components/schemas/ApplicationPingOneAdminConsole'
             certificates:
               type: array
               items:
@@ -6704,6 +6712,7 @@ paths:
                   - $ref: '#/components/schemas/ApplicationExternalLink'
                   - $ref: '#/components/schemas/ApplicationPingOnePortal'
                   - $ref: '#/components/schemas/ApplicationPingOneSelfService'
+                  - $ref: '#/components/schemas/ApplicationPingOneAdminConsole'
     put:
       tags:
         - Applications
@@ -6791,6 +6800,7 @@ paths:
                   - $ref: '#/components/schemas/ApplicationExternalLink'
                   - $ref: '#/components/schemas/ApplicationPingOnePortal'
                   - $ref: '#/components/schemas/ApplicationPingOneSelfService'
+                  - $ref: '#/components/schemas/ApplicationPingOneAdminConsole'
     delete:
       tags:
         - Applications
