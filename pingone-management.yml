@@ -25,6 +25,10 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
+    EnumAgreementRevisionContentType:
+      type: string
+      description: An immutable string that specifies the content type of text. Options are text/html and text/plain, as defined by [rfc-6838](https://datatracker.ietf.org/doc/html/rfc6838#section-4.2.1) and [Media Types/text](https://www.iana.org/assignments/media-types/media-types.xhtml#text). This attribute is supported in POST requests only.
+      enum: [text/html,text/plain]
     EnumAlertChannelAlertType:
       type: string
       enum: [CERTIFICATE_EXPIRED, CERTIFICATE_EXPIRING, KEY_PAIR_EXPIRED, GATEWAY_VERSION_DEPRECATED, KEY_PAIR_EXPIRING, GATEWAY_VERSION_DEPRECATING]
@@ -419,7 +423,8 @@ components:
           type: string
           description: A string that specifies the name of the agreement resource. This is a required property.
         reconsentPeriodDays:
-          type: integer
+          type: number
+          format: float
           description: A number that represents the number of days until a consent to this agreement expires.
         totalUserConsents:
           type: integer
@@ -488,11 +493,10 @@ components:
               description: A read-only string of the ID for the agreement resource for this revision.
           readOnly: true
         contentType:
-          type: string
-          description: An immutable string that specifies the content type of text. Options are text/html and text/plain, as defined by rfc-6838 and Media Types/text. This attribute is supported in POST requests only.
-          enum: [text/html,text/plain]
+          $ref: '#/components/schemas/EnumAgreementRevisionContentType'
         effectiveAt:
           type: string
+          format: date-time
           description: A date that specifies the start date that the revision is presented to users. This property value can be modified only if the current value is a date that has not already passed. The effective date must be unique for each language agreement, and the property value can be the present date or a future date only.
         id:
           type: string
@@ -507,14 +511,20 @@ components:
           readOnly: true
         notValidAfter:
           type: string
+          format: date-time
           description: A date that specifies whether the revision is still valid in the context of all revisions for a language. This property is calculated dynamically at read time, taking into consideration the agreement language, the language enabled property, and the agreement enabled property. When a new revision is added, the notValidAfter property values for all other previous revisions might be impacted. For example, if a new revision becomes effective and it forces reconsent, then all older revisions are no longer valid.
           readOnly: true
-        requiresReconsent:
+        requireReconsent:
           type: boolean
           description: A boolean that specifies whether the user is required to provide consent to the language revision after it becomes effective.
         text:
           type: string
           description: An immutable string that specifies text or HTML for the revision. This attribute is supported in POST requests only. For more information, see contentType.
+      required:
+        - contentType
+        - effectiveAt
+        - requireReconsent
+        - text
     AlertChannel:
       type: object
       properties:
