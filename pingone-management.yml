@@ -5855,7 +5855,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/AgreementLanguage'
               example:
                 locale: en-CH
                 displayName: Language_{{$timestamp}}
