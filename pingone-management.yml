@@ -399,7 +399,7 @@ components:
     Agreement:
       type: object
       properties:
-        consentCountsUpdatedAt:
+        consentsAggregatedAt:
           type: string
           format: date-time
           description: The time the consent count metric was last updated. This value is typically updated once every 24 hours.
@@ -412,7 +412,7 @@ components:
           description: A boolean that specifies the current enabled state of the agreement. This is a required property. The agreement must support the default language to be enabled. It cannot be disabled if it is referenced by a sign-on action. When an agreement is disabled, it is not used anywhere it is configured across PingOne.
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
-        expiredUserConsents:
+        totalExpiredConsents:
           type: integer
           description: An integer that identifies the number of users who have consented to the agreement, but their consent has expired. This value is last calculated at the consentCountsUpdatedAt time.
           readOnly: true
@@ -427,7 +427,7 @@ components:
           type: number
           format: float
           description: A number that represents the number of days until a consent to this agreement expires.
-        totalUserConsents:
+        totalConsents:
           type: integer
           description: An integer that identifies the total number of users who have consented to the agreement. This value is last calculated at the consentCountsUpdatedAt time.
           readOnly: true
