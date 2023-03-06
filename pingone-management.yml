@@ -193,6 +193,18 @@ components:
       type: string
       enum: [png, jpg, gif]
       description: A string that specifies the type of format used for the image. Options are jpg, png, and gif.
+    EnumKeyRotationPolicyAlgorithm:
+      type: string
+      enum: [RSA]
+      description: The algorithm this KRP applies to generated `KrpKeys`. `RSA` is currently the only supported value.
+    EnumKeyRotationPolicySigAlgorithm:
+      type: string
+      enum: [SHA256withRSA]
+      description: The signature algorithm this KRP will apply to generated `KrpKeys`. `SHA256withRSA` is currently the only supported value.
+    EnumKeyRotationPolicyUsageType:
+      type: string
+      enum: [SIGNING]
+      description: How the KRP will be used, pertaining to what operations the KRP supports. The only valid value for initial release is `SIGNING`.
     EnumLicenseStatus:
       type: string
       enum: [ACTIVE, EXPIRED, FUTURE, TERMINATED]
@@ -1591,6 +1603,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Certificate'
+            keyRotationPolicies:
+              type: array
+              items:
+                $ref: '#/components/schemas/KeyRotationPolicy'
             languages:
               type: array
               items:
@@ -2455,6 +2471,57 @@ components:
                   type: integer
                   readOnly: true
                   description: The height of the image (in pixels).
+    KeyRotationPolicy:
+      type: object
+      properties:
+        algorithm:
+          $ref: '#/components/schemas/EnumKeyRotationPolicyAlgorithm'
+        currentKeyId:
+          type: string
+          description: The `kid` (key identifier) of the `KrpKey` designated as `CURRENT`.
+          readOnly: true
+        dn:
+          type: string
+          description: The DN this KRP will apply to generated `KrpKeys`. Is applied as both `issuerDN` and `subjectDN` because generated `KrpKeys` are self-signed.
+        id:
+          type: string
+          description: The resource’s unique identifier.
+          readOnly: true
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        keyLength:
+          type: integer
+          description: The number of bytes of a cryptographic key this KRP will apply to generated `KrpKeys`.
+        name:
+          type: string
+          description: Human-readable name displayed in the admin console.
+        nextKeyId:
+          type: string
+          description: The `kid` (key identifier) of the `KrpKey` designated as `NEXT`.
+          readOnly: true
+        rotatedAt:
+          type: string
+          format: date-time
+          description: The last time this KRP was rotated.
+          readOnly: true
+        rotationPeriod:
+          type: integer
+          description: The number of days to elapse before this KRP rotates `KrpKeys`. The default value is `90` days. The minimum value is `30` days. The maximum value is 1 day less than the `validityPeriod` value.
+        signatureAlgorithm:
+          $ref: '#/components/schemas/EnumKeyRotationPolicySigAlgorithm'
+        usageType:
+          $ref: '#/components/schemas/EnumKeyRotationPolicyUsageType'
+        validityPeriod:
+          type: integer
+          description: Controls the `startsAt` and `expiresAt` fields this KRP will apply to generated `KrpKeys`. The default value is `365` days.
+      required:
+        - algorithm
+        - dn
+        - keyLength
+        - name
+        - signatureAlgorithm
+        - usageType
+        - validityPeriod
     Language:
       type: object
       properties:
@@ -4863,6 +4930,7 @@ tags:
   - name: Gateway Role Assignments
   - name: Groups
   - name: Identity Propagation (Provisioning)
+  - name: Key Rotation Policies
   - name: >-
       Propagation
       Revisions
@@ -9827,6 +9895,305 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Certificate'
+  /v1/environments/{environmentID}/keyRotationPolicies:
+    get:
+      tags:
+        - Key Rotation Policies
+      summary: GET Key Rotation Policies
+      operationId: getKeyRotationPolicies
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Key Rotation Policies
+      summary: CREATE Key Rotation Policy
+      operationId: createKeyRotationPolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyRotationPolicy'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '405':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyRotationPolicy'
+  /v1/environments/{environmentID}/keyRotationPolicies/{keyRotationPolicyID}:
+    get:
+      tags:
+        - Key Rotation Policies
+      summary: GET Key Rotation Policy
+      operationId: getKeyRotationPolicy
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: keyRotationPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyRotationPolicy'
+    put:
+      tags:
+        - Key Rotation Policies
+      summary: UPDATE Key Rotation Policy
+      operationId: updateKeyRotationPolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyRotationPolicy'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: keyRotationPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyRotationPolicy'
+    delete:
+      tags:
+        - Key Rotation Policies
+      summary: DELETE Key Rotation Policy
+      operationId: deleteKeyRotationPolicy
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: keyRotationPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid request received.  Malformed JSON, malformed HTTP request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '401':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '403':
+          description: Request failed due to authorization issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '429':
+          description: Request was rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '500':
+          description: Uncaught error occurred.  Platform outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/P1Error'
+        '204':
+          description: Successful response
   /v1/environments/{environmentID}/certificates:
     get:
       tags:
