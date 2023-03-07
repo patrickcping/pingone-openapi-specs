@@ -268,8 +268,8 @@ components:
         `CUSTOM_PROVIDER`: Specifies a custom-defined SMS provider (excluding Twilio and Syniverse).
     EnumOrganizationType:
       type: string
-      enum: [PAID, TRIAL]
-      description: A string that specifies the organization type. If the organization has any paid licenses, the type property value is set to `PAID`. Otherwise, the property value is set to `TRIAL`.
+      enum: [PAID, TRIAL, INTERNAL]
+      description: A string that specifies the organization type. If the organization has any paid licenses, the type property value is set to `PAID`. Otherwise, the property value is set to `TRIAL`.  Internal organizations have a value of `INTERNAL`.
     EnumPasscodeRefreshTimeUnit:
       type: string
       description: The type of time unit for `mobile.passcodeRefreshDuration.duration`.  Must be SECONDS.
