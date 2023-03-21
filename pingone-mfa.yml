@@ -609,10 +609,10 @@ tags:
   - name: Device Authentication Policy
   - name: FIDO Policy
   - name: MFA Settings
-  - name: MFA Devices
-  - name: MFA Devices > FIDO2 Biometrics Devices
+  - name: User MFA Devices
+  - name: User MFA Devices > FIDO2 Biometrics Devices
   - name: Enable Users MFA
-  - name: MFA Pairing Keys
+  - name: User MFA Pairing Keys
 paths:
   /v1/environments/{environmentID}/applications/{applicationID}/pushCredentials:
     get:
@@ -1964,7 +1964,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/devices:
     post:
       tags:
-        - MFA Devices
+        - User MFA Devices
       summary: SET Device Order
       requestBody:
         content:
@@ -2043,7 +2043,7 @@ paths:
             application/json: {}
     get:
       tags:
-        - MFA Devices
+        - User MFA Devices
       summary: READ All MFA User Devices
       parameters:
         - name: environmentID
@@ -2099,7 +2099,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - MFA Devices
+        - User MFA Devices
       summary: DELETE Device Order
       parameters:
         - name: Content-Type
@@ -2159,7 +2159,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}:
     post:
       tags:
-        - MFA Devices
+        - User MFA Devices
       summary: ACTIVATE MFA User Device
       requestBody:
         content:
@@ -2238,7 +2238,7 @@ paths:
             application/json: {}
     get:
       tags:
-        - MFA Devices
+        - User MFA Devices
       summary: READ One MFA User Device
       parameters:
         - name: environmentID
@@ -2299,7 +2299,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - MFA Devices
+        - User MFA Devices
       summary: DELETE MFA User Device
       parameters:
         - name: environmentID
@@ -2359,7 +2359,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}/nickname:
     put:
       tags:
-        - MFA Devices
+        - User MFA Devices
       summary: UPDATE Device Nickname
       requestBody:
         content:
@@ -2428,7 +2428,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}/logs:
     put:
       tags:
-        - MFA Devices
+        - User MFA Devices
       summary: SEND MFA Device Logs
       requestBody:
         content:
@@ -2623,7 +2623,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/pairingKeys/{pairingKeyID}:
     get:
       tags:
-        - MFA Pairing Keys
+        - User MFA Pairing Keys
       summary: READ One MFA Pairing Key
       parameters:
         - name: environmentID
@@ -2684,7 +2684,7 @@ paths:
             application/json: {}
     delete:
       tags:
-        - MFA Pairing Keys
+        - User MFA Pairing Keys
       summary: DELETE MFA Pairing Key
       parameters:
         - name: environmentID
@@ -2744,7 +2744,7 @@ paths:
   /v1/environments/{environmentID}/users/{userID}/pairingKeys:
     post:
       tags:
-        - MFA Pairing Keys
+        - User MFA Pairing Keys
       summary: CREATE MFA Pairing Key
       requestBody:
         content:

@@ -140,6 +140,7 @@ components:
       description: A string that specifies the type of environment to use.
     EnumFlowPolicyTriggerType:
       type: string
+      description: An enum string that specifies the trigger type associated with the flow policy trigger.
       enum: [AUTHENTICATION]
     EnumGatewayTypeLDAPSecurity:
       type: string
@@ -699,9 +700,7 @@ components:
                   required:
                     - id
                 algorithm:
-                  type: string
-                  description: A string that specifies the IdP Signing key algorithm.
-                  readOnly: true
+                  $ref: '#/components/schemas/EnumCertificateKeySignagureAlgorithm'
               required:
                 - key
             nameIdFormat:
@@ -1753,25 +1752,32 @@ components:
       properties:
         id:
           type: string
+          description: The flow policy resource's unique identifier.
           readOnly: true
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
         application:
           type: object
+          description: An object that specifies the application information associated with the flow policy resource.
           properties:
             id:
               type: string
+              description: The unique identifier of the application resource associated with the flow policy.
             name:
               type: string
+              description: The name of the application resource associated with the flow policy.
           readOnly: true
         enabled:
           type: boolean
+          description: A boolean that specifies whether the flow policy is enabled.
           readOnly: true
         name:
           type: string
+          description: The flow policy resource name.
           readOnly: true
         trigger:
           type: object
+          description: An object that specifies trigger information associated with the flow policy resource.
           properties:
             type:
               $ref: '#/components/schemas/EnumFlowPolicyTriggerType'
@@ -1781,6 +1787,7 @@ components:
       properties:
         id:
           type: string
+          description: A string that specifies the flow policy assignment resource's unique identifier.
           readOnly: true
         application:
           $ref: '#/components/schemas/ObjectApplication'
@@ -1788,15 +1795,20 @@ components:
           $ref: '#/components/schemas/ObjectEnvironment'
         flowPolicy:
           type: object
+          description: An object that contains details of the flow policy resource.
           properties:
             id:
               type: string
+              description: A string that specifies the flow policy resource ID associated with the flow policy assignment.
           required:
             - id
         priority:
           type: integer
+          description: The order in which the policy referenced by this assignment is evaluated during an authentication flow relative to other policies. An assignment with a lower priority will be evaluated first.
+          minimum: 1
       required:
         - flowPolicy
+        - priority
     Gateway:
       type: object
       properties:
@@ -3423,9 +3435,14 @@ components:
           type: string
           description: The time the resource was created.
           readOnly: true
+        default:
+          type: boolean
+          description: The population to use as the default population for the environment. Only one population per environment can be the default. New users are assigned to the default population if it exists, and the Population ID is not provided in the [Create User](https://apidocs.pingidentity.com/pingone/platform/v1/api/#post-create-user) request.
         description:
           type: string
           description: A string that specifies the description of the population.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
         id:
           type: string
           description: A string that specifies the resource’s unique identifier.
