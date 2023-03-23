@@ -1319,6 +1319,10 @@ components:
           type: integer
           minimum: 1
           description: Specifies the number of days the key is valid.
+        customCRL:
+          type: string
+          pattern: ^http:\/\/[a-zA-Z0-9.-\/]*$
+          description: A URL string of a custom Certificate Revokation List endpoint.  Used for certificates of type `ISSUANCE`.
       required:
         - name
         - algorithm
