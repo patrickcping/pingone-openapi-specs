@@ -46,40 +46,63 @@ components:
     EnumCompletionStatus:
       type: string
       enum: [FAILED, IN_PROGRESS, SUCCESS]
-      description: A string that specifies the state of the transaction. Options are FAILED, IN_PROGRESS, and SUCCESS. If a value is not provided, the value defaults to IN_PROGRESS. The value of this property can be changed only if its current state is IN_PROGRESS.
+      description: A string that specifies the state of the transaction. Options are `FAILED`, `IN_PROGRESS`, and `SUCCESS`. If a value is not provided, the value defaults to `IN_PROGRESS`. The value of this property can be changed only if its current state is `IN_PROGRESS`.
+    EnumDistanceUnit:
+      type: string
+      enum: [kilometers, miles]
+      description: A string that specifies the unit of distance. Options are `kilometers`, `miles`.
     EnumEventSharingType:
       type: string
       enum: [UNSPECIFIED, SHARED, PRIVATE]
-      description: A string that specifies the device sharing type. Options are UNSPECIFIED, SHARED, and PRIVATE.
+      description: A string that specifies the device sharing type. Options are `UNSPECIFIED`, `SHARED`, and `PRIVATE`.
     EnumFlowType:
       type: string
       enum: [AUTHENTICATION]
-      description: A string that specifies the flow type for the event. The only option (and default) is AUTHENTICATION.
+      description: A string that specifies the flow type for the event. The only option (and default) is `AUTHENTICATION`.
+    EnumPredictorCompositeConditionType:
+      type: string
+      enum: [VALUE_COMPARISON]
     EnumPredictorType:
       type: string
-      enum: [VELOCITY, USER_RISK_BEHAVIOR, MAP]
-      description: An enum type. This can be either VELOCITY, USER_RISK_BEHAVIOR, or MAP
+      enum: [ANONYMOUS_NETWORK, COMPOSITE, GEO_VELOCITY, IP_REPUTATION, MAP, NEW_DEVICE, USER_LOCATION_ANOMALY, USER_RISK_BEHAVIOR, VELOCITY]
+      description: An enum type. This can be either `ANONYMOUS_NETWORK`, `COMPOSITE`, `GEO_VELOCITY`, `IP_REPUTATION`, `MAP`, `NEW_DEVICE`, `USER_LOCATION_ANOMALY`, `USER_RISK_BEHAVIOR` or `VELOCITY`.
+    EnumPredictorUnit:
+      type: string
+      enum: [DAY, HOUR]
+    EnumPredictorVelocityFallbackStrategy:
+      type: string
+      enum: [ENVIRONMENT_MAX]
+    EnumPredictorVelocityMeasure:
+      type: string
+      enum: [DISTINCT_COUNT]
+    EnumPredictorVelocityUseType:
+      type: string
+      enum: [POISSON_WITH_MAX]
     EnumResultType:
       type: string
       enum: [VALUE]
-      description: A string that specifies the risk evaluation result type. Options are VALUE.
+      description: A string that specifies the risk evaluation result type. Options are `VALUE`.
     EnumRiskLevel:
       type: string
       enum: [LOW, MEDIUM, HIGH]
-      description: Enum string that specifies a given risk level
+      description: Enum string that specifies a given risk level.  Options are `LOW`, `MEDIUM`, `HIGH`.
+    EnumRiskModel:
+      type: string
+      enum: [points, login_anomaly_statistic]
+      description: Enum string that specifies the risk model.  Options are `points` (individual user model) and `login_anomaly_statistic` (organization wide model).
     EnumThresholdSource:
       type: string
       enum: [MIN_NOT_REACHED, CALCULATED, ENVIRONMENT_FALLBACK, DEFAULT_FALLBACK]
       description:  >-
         An enum indicating the source used to calculate the threshold. This can be
-        MIN_NOT_REACHED. If the measure is less than every.minSample, the threshold isn't calculated. Instead, a value of LOW is automatically assigned. If less than five IPs were used by the user during the past hour, MIN_NOT_REACHED is set.
-        CALCULATED. Indicates the threshold is guaranteed to be calculated.
-        ENVIRONMENT_FALLBACK. Indicates a global threshold calculated for the entire environment is used. The global threshold is used when the ipVelocityByUser.threshold couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the threshold calculation.
-        DEFAULT_FALLBACK. Indicates the default threshold defined for the predictor (in threshold.medium or threshold.high) is used. The default threshold is used when ENVIRONMENT_FALLBACK (the global threshold) couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the environment threshold calculation.
+        `MIN_NOT_REACHED`. If the measure is less than `every.minSample`, the threshold isn't calculated. Instead, a value of `LOW` is automatically assigned. If less than five IPs were used by the user during the past hour, `MIN_NOT_REACHED` is set.
+        `CALCULATED`. Indicates the threshold is guaranteed to be calculated.
+        `ENVIRONMENT_FALLBACK`. Indicates a global threshold calculated for the entire environment is used. The global threshold is used when the `ipVelocityByUser.threshold` couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the threshold calculation.
+        `DEFAULT_FALLBACK`. Indicates the default threshold defined for the predictor (in `threshold.medium` or `threshold.high`) is used. The default threshold is used when `ENVIRONMENT_FALLBACK` (the global threshold) couldn't be calculated, generally due to a lack of past transactions for the risk predictor to use for the environment threshold calculation.
     EnumUserType:
       type: string
       enum: [EXTERNAL]
-      description: A string that specifies the type of user associated with the event. Options are EXTERNAL.
+      description: A string that specifies the type of user associated with the event. Options are `EXTERNAL`.
     ObjectEnvironment:
       type: object
       readOnly: true
@@ -615,6 +638,7 @@ components:
         compactName:
           type: string
           description: A string type. A unique name for the predictor. This property is immutable; it cannot be modified after initial creation. The value must be alpha-numeric, with no special characters or spaces. This name is used in the API both for policy configuration, and in the Risk Evaluation response (under details).
+          format: ^[a-zA-Z0-9]+$
         type:
           $ref: '#/components/schemas/EnumPredictorType'
         description:
@@ -622,18 +646,31 @@ components:
           description: A string type. This specifies the desription of the risk predictor. Maximum length is 1024 characters.
         createdAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was created.
         updatedAt:
           type: string
+          format: date-time
           readOnly: true
           description: The time the resource was updated.
+        licensed:
+          type: boolean
+          description: Indicates whether PingOne Risk is licensed for the environment.
+        deletable:
+          type: boolean
+          description: A boolean to indicate whether the predictor is deletable in the environment.
         default:
           type: object
+          description: Contains the default values used for a new risk predictor.
           properties:
             weight:
               type: integer
               description: An integer type. This specifies the weight assigned to the risk predictor in a new policy by default.
+            score:
+              type: integer
+            evaluated:
+              type: boolean
             result:
               type: object
               description: >-
@@ -651,41 +688,175 @@ components:
           required:
             - weight
             - result
-        map:
+        condition:
           type: object
-          description: An object that defines the mapping of risk levels for the list of all results.
+          readOnly: true
           properties:
-            high:
-              $ref: '#/components/schemas/RiskPredictorItemMap'
-            medium:
-              $ref: '#/components/schemas/RiskPredictorItemMap'
-            low:
-              $ref: '#/components/schemas/RiskPredictorItemMap'
+            scores:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  value:
+                    type: string
       required:
         - name
         - compactName
         - type
-    RiskPredictorItemMap:
+    RiskPredictorAnonymous:
+      allOf:
+        - $ref: '#/components/schemas/RiskPredictor'
+        - type: object
+          properties:
+            whiteList:
+              type: array
+              description: A list of IP addresses (CDIRs) that are ignored for the predictor results.
+              items:
+                type: string
+                format: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$
+    RiskPredictorComposite:
+      allOf:
+        - $ref: '#/components/schemas/RiskPredictor'
+        - type: object
+          properties:
+            composition:
+              type: object
+              properties:
+                condition:
+                  $ref: '#/components/schemas/RiskPredictorCompositeConditionBase'
+                level:
+                  $ref: '#/components/schemas/EnumRiskLevel'
+              required:
+                - condition
+                - level
+          required:
+            - composition
+    RiskPredictorCompositeAnd:
       type: object
+      properties:
+        and:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskPredictorCompositeCondition'
+      required:
+        - and
+    RiskPredictorCompositeConditionBase:
+      oneOf:
+        - $ref: '#/components/schemas/RiskPredictorCompositeNot'
+        - $ref: '#/components/schemas/RiskPredictorCompositeAnd'
+        - $ref: '#/components/schemas/RiskPredictorCompositeOr'
+    RiskPredictorCompositeCondition:
+      oneOf:
+        - $ref: '#/components/schemas/RiskPredictorCompositeNot'
+        - $ref: '#/components/schemas/RiskPredictorCompositeOr'
+        - $ref: '#/components/schemas/RiskPredictorCompositeAnd'
+        - type: object
+          properties:
+            equals:
+              type: object
+            notEquals:
+              type: object
+            greater:
+              type: integer
+            greaterEquals:
+              type: integer
+            lower:
+              type: integer
+            lowerEquals:
+              type: integer
+            value:
+              type: string
+              format: ^\${(event|details)[a-z\.]+}$
+            type:
+              $ref: '#/components/schemas/EnumPredictorCompositeConditionType'
+          required:
+            - value
+    RiskPredictorCompositeNot:
+      type: object
+      properties:
+        not:
+          $ref: '#/components/schemas/RiskPredictorCompositeOr'
+      required:
+        - not
+    RiskPredictorCompositeOr:
+      type: object
+      properties:
+        or:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskPredictorCompositeCondition'
+      required:
+        - or
+    RiskPredictorCustom:
+      allOf:
+        - $ref: '#/components/schemas/RiskPredictor'
+        - type: object
+          properties:
+            map:
+              type: object
+              description: An object that defines the mapping of risk levels for the list of all results.
+              properties:
+                high:
+                  $ref: '#/components/schemas/RiskPredictorCustomItem'
+                medium:
+                  $ref: '#/components/schemas/RiskPredictorCustomItem'
+                low:
+                  $ref: '#/components/schemas/RiskPredictorCustomItem'
+          required:
+            - map
+    RiskPredictorCustomItem:
+      oneOf:
+        - $ref: '#/components/schemas/RiskPredictorCustomItemIPRange'
+        - $ref: '#/components/schemas/RiskPredictorCustomItemBetween'
+        - $ref: '#/components/schemas/RiskPredictorCustomItemList'
+    RiskPredictorCustomItemIPRange:
+      type: object
+      description: The mapping of risk levels for the IP ranges specified.
       properties:
         contains:
           type: string
+          format: ^\${(event|details)[a-z\.]+}$
         ipRange:
           type: array
           description: List of CIDRs to include
           items:
             type: string
+            pattern: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$
+      required:
+        - contains
+        - ipRange
+    RiskPredictorCustomItemBetween:
+      type: object
+      description: The mapping of risk levels for numerical values in a minimum, maxiumum boundary.
+      properties:
+        contains:
+          type: string
+          format: ^\${(event|details)[a-z\.]+}$
         between:
           type: object
           description: Minimum and maximum boundaries
           properties:
             minScore:
               type: number
+              format: float
             maxScore:
               type: number
+              format: float
           required:
             - minScore
             - maxScore
+      required:
+        - contains
+        - between
+    RiskPredictorCustomItemList:
+      type: object
+      description: The mapping of risk levels for the list of all results.
+      properties:
+        contains:
+          type: string
+          format: ^\${(event|details)[a-z\.]+}$
         list:
           type: array
           description: An array that specifies the list of entities that represent the risk conditions.
@@ -693,6 +864,125 @@ components:
             type: string
       required:
         - contains
+        - list
+    RiskPredictorGeovelocity:
+      allOf:
+        - $ref: '#/components/schemas/RiskPredictor'
+        - type: object
+          properties:
+            whiteList:
+              type: array
+              description: A list of IP addresses (CDIRs) that are ignored for the predictor results.
+              items:
+                type: string
+                pattern: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$
+    RiskPredictorIPReputation:
+      allOf:
+        - $ref: '#/components/schemas/RiskPredictor'
+        - type: object
+          properties:
+            whiteList:
+              type: array
+              description: A list of IP addresses (CDIRs) that are ignored for the predictor results.
+              items:
+                type: string
+                pattern: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$
+    RiskPredictorNewDevice:
+      $ref: '#/components/schemas/RiskPredictor'
+    RiskPredictorUserLocationAnomaly:
+      allOf:
+        - $ref: '#/components/schemas/RiskPredictor'
+        - type: object
+          properties:
+            days:
+              type: integer
+            radius:
+              type: object
+              properties:
+                distance:
+                  type: integer
+                  description: A value to apply to the distance radius.  Minimum of 10 miles (16 km) and maximum of 100 miles (160 km)
+                  minimum: 10
+                  maximum: 160
+                unit:
+                  $ref: '#/components/schemas/EnumDistanceUnit'
+              required:
+                - distance
+                - unit
+          required:
+            - radius
+    RiskPredictorUEBA:
+      allOf:
+        - $ref: '#/components/schemas/RiskPredictor'
+        - type: object
+          properties:
+            predictionModel:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/EnumRiskModel'
+              required:
+                - name
+          required:
+            - predictionModel
+    RiskPredictorVelocity:
+      allOf:
+        - $ref: '#/components/schemas/RiskPredictor'
+        - type: object
+          properties:
+            by:
+              type: array
+              items:
+                type: string
+                format: ^\${event\.user\.id}$|^\${event\.ip}$
+            every:
+              type: object
+              properties:
+                unit:
+                  $ref: '#/components/schemas/EnumPredictorUnit'
+                quantity:
+                  type: integer
+                minSample:
+                  type: integer
+            fallback:
+              type: object
+              properties:
+                strategy:
+                  $ref: '#/components/schemas/EnumPredictorVelocityFallbackStrategy'
+                high:
+                  type: integer
+                medium:
+                  type: integer
+            maxDelay:
+              type: object
+              properties:
+                unit:
+                  $ref: '#/components/schemas/EnumPredictorUnit'
+                quantity:
+                  type: integer
+            measure:
+              $ref: '#/components/schemas/EnumPredictorVelocityMeasure'
+            of:
+              type: string
+              format: ^\${event\.user\.id}$|^\${event\.ip}$
+            slidingWindow:
+              type: object
+              properties:
+                minSample:
+                  type: integer
+                quantity:
+                  type: integer
+                unit:
+                  $ref: '#/components/schemas/EnumPredictorUnit'
+            use:
+              type: object
+              properties:
+                high:
+                  type: integer
+                medium:
+                  type: integer
+                type:
+                  $ref: '#/components/schemas/EnumPredictorVelocityUseType'
 security:
   - bearer: []
 tags:
