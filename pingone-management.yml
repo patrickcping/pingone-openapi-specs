@@ -213,6 +213,18 @@ components:
     EnumMobileIntegrityDetectionPlatform:
       type: string
       enum: [IOS, GOOGLE]
+    EnumNotificationsPolicyCountryLimitDeliveryMethod:
+      type: string
+      enum: [SMS, Voice]
+      description: The delivery method that the defined limitation should be applied to.  Options are `SMS`, `Voice`.
+    EnumNotificationsPolicyCountryLimitType:
+      type: string
+      enum: [NONE, ALLOWED, DENIED]
+      description: |
+        Determines the kind of limitation being defined. The possible values are:
+        `NONE`
+        `ALLOWED` - allows SMS/Voice notifications only for the countries specified with `countryLimit.countries`
+        `DENIED` - denies SMS/Voice notifications for the countries specified with `countryLimit.countries`
     EnumNotificationsPolicyQuotaDeliveryMethods:
       type: string
       enum: [SMS, Voice]
