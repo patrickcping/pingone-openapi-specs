@@ -79,6 +79,43 @@ components:
                   maximumValue:
                     description: The maximum value allowed for the request.
                     type: integer
+  responses:
+    '400':
+      description: Invalid request received.  Malformed JSON, malformed HTTP request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/P1Error'
+    '401':
+      description: Request failed due to authorization issue.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/P1Error'
+    '403':
+      description: Request failed due to authorization issue.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/P1Error'
+    '404':
+      description: Not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/P1Error'
+    '429':
+      description: Request was rate limited
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/P1Error'
+    '500':
+      description: Uncaught error occurred.  Platform outage
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/P1Error'
 security:
   - bearer: []
 tags:
@@ -113,41 +150,17 @@ paths:
           required: true
       responses:
         '400':
-          description: Invalid request received.  Malformed JSON, malformed HTTP request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
+          $ref: '#/components/responses/400'
         '401':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
+          $ref: '#/components/responses/401'
         '403':
-          description: Request failed due to authorization issue.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
+          $ref: '#/components/responses/403'
         '404':
-          description: Not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
+          $ref: '#/components/responses/404'
         '429':
-          description: Request was rate limited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
+          $ref: '#/components/responses/429'
         '500':
-          description: Uncaught error occurred.  Platform outage
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/P1Error'
+          $ref: '#/components/responses/500'
         '200':
           description: Successful response
           content:
