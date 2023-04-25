@@ -38,7 +38,7 @@ components:
             riskPredictors:
               type: array
               items:
-                $ref: '#/components/schemas/RiskPredictor'
+                $ref: '#/components/schemas/RiskPredictorCommon'
         count:
           type: number
         size:
@@ -626,6 +626,17 @@ components:
       required:
         - level
     RiskPredictor:
+      oneOf:
+        - $ref: '#/components/schemas/RiskPredictorAnonymousNetwork'
+        - $ref: '#/components/schemas/RiskPredictorComposite'
+        - $ref: '#/components/schemas/RiskPredictorCustom'
+        - $ref: '#/components/schemas/RiskPredictorGeovelocity'
+        - $ref: '#/components/schemas/RiskPredictorIPReputation'
+        - $ref: '#/components/schemas/RiskPredictorNewDevice'
+        - $ref: '#/components/schemas/RiskPredictorUserLocationAnomaly'
+        - $ref: '#/components/schemas/RiskPredictorUEBA'
+        - $ref: '#/components/schemas/RiskPredictorVelocity'
+    RiskPredictorCommon:
       type: object
       properties:
         id:
@@ -710,7 +721,7 @@ components:
         - type
     RiskPredictorAnonymousNetwork:
       allOf:
-        - $ref: '#/components/schemas/RiskPredictor'
+        - $ref: '#/components/schemas/RiskPredictorCommon'
         - type: object
           properties:
             whiteList:
@@ -721,7 +732,7 @@ components:
                 format: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$
     RiskPredictorComposite:
       allOf:
-        - $ref: '#/components/schemas/RiskPredictor'
+        - $ref: '#/components/schemas/RiskPredictorCommon'
         - type: object
           properties:
             composition:
@@ -809,7 +820,7 @@ components:
         - or
     RiskPredictorCustom:
       allOf:
-        - $ref: '#/components/schemas/RiskPredictor'
+        - $ref: '#/components/schemas/RiskPredictorCommon'
         - type: object
           properties:
             map:
@@ -885,7 +896,7 @@ components:
         - list
     RiskPredictorGeovelocity:
       allOf:
-        - $ref: '#/components/schemas/RiskPredictor'
+        - $ref: '#/components/schemas/RiskPredictorCommon'
         - type: object
           properties:
             whiteList:
@@ -896,7 +907,7 @@ components:
                 pattern: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$
     RiskPredictorIPReputation:
       allOf:
-        - $ref: '#/components/schemas/RiskPredictor'
+        - $ref: '#/components/schemas/RiskPredictorCommon'
         - type: object
           properties:
             whiteList:
@@ -907,7 +918,7 @@ components:
                 pattern: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$
     RiskPredictorNewDevice:
       allOf:
-        - $ref: '#/components/schemas/RiskPredictor'
+        - $ref: '#/components/schemas/RiskPredictorCommon'
         - type: object
           properties:
             activationAt:
@@ -916,7 +927,7 @@ components:
               description: You can use the `activationAt` parameter to specify a date on which the learning process for the predictor should be restarted. This can be used in conjunction with the fallback setting (`default.result.level`) to force strong authentication when moving the predictor to production. The date should be in an RFC3339 format. Note that activation date uses UTC time.
     RiskPredictorUserLocationAnomaly:
       allOf:
-        - $ref: '#/components/schemas/RiskPredictor'
+        - $ref: '#/components/schemas/RiskPredictorCommon'
         - type: object
           properties:
             days:
@@ -938,7 +949,7 @@ components:
             - radius
     RiskPredictorUEBA:
       allOf:
-        - $ref: '#/components/schemas/RiskPredictor'
+        - $ref: '#/components/schemas/RiskPredictorCommon'
         - type: object
           properties:
             predictionModel:
@@ -952,7 +963,7 @@ components:
             - predictionModel
     RiskPredictorVelocity:
       allOf:
-        - $ref: '#/components/schemas/RiskPredictor'
+        - $ref: '#/components/schemas/RiskPredictorCommon'
         - type: object
           properties:
             by:
