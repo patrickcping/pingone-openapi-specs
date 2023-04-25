@@ -45,6 +45,10 @@ components:
       type: string
       description: A string that specifies the user role required to access the application. Options are ADMIN_USERS_ONLY. A user is an admin user if the user has one or more of the following roles Organization Admin, Environment Admin, Identity Data Admin, or Client Application Developer.
       enum: [ADMIN_USERS_ONLY]
+    EnumApplicationNativeGooglePlayVerificationType:
+      type: string
+      enum: [GOOGLE, INTERNAL]
+      description: The type of verification that should be used. The possible values are `GOOGLE` and `INTERNAL`. Using internal verification will not count against your Google API call quota. The value you select for `verificationType` determines what other parameters you must provide. When set to `GOOGLE`, you must provide `serviceAccountCredentials`. When set to `INTERNAL`, you must provide `decryptionKey` and `verificationKey`.
     EnumApplicationOIDCGrantType:
       type: string
       enum: [AUTHORIZATION_CODE, IMPLICIT, REFRESH_TOKEN, CLIENT_CREDENTIALS]
@@ -796,7 +800,7 @@ components:
                   properties:
                     excludedPlatforms:
                       type: array
-                      description: You can enable device integrity checking separately for Android and iOS by setting `mobile.integrityDetection.mode` to `ENABLED` and then using `mobile.integrityDetection.excludedPlatforms` to specify the OS where you do not want to use device integrity checking. The values to use are `GOOGLE` and `IOS` (all upper case). Note that this is implemented as an array even though currently you can only include a single value.
+                      description: You can enable device integrity checking separately for Android and iOS by setting `mobile.integrityDetection.mode` to `ENABLED` and then using `mobile.integrityDetection.excludedPlatforms` to specify the OS where you do not want to use device integrity checking. The values to use are `GOOGLE` and `IOS` (all upper case). Note that this is implemented as an array even though currently you can only include a single value.  If `GOOGLE` is not included as a value, `googlePlay` is required to be set.
                       maxItems: 1
                       items:
                         $ref: '#/components/schemas/EnumMobileIntegrityDetectionPlatform'
@@ -812,6 +816,21 @@ components:
                         units:
                           $ref: '#/components/schemas/EnumDurationUnitMinsHours'
                           description: A string that specifies the time units of the mobile.integrityDetection.cacheDuration.amount :MINUTES, HOURS
+                    googlePlay:
+                      type: object
+                      description: Object that contains the credentials required for using Google's Play Integrity API for integrity detection.  Required if `excludedPlatforms` does not contain `GOOGLE`.
+                      properties:
+                        decryptionKey:
+                          type: string
+                          description: Play Integrity verdict decryption key from your Google Play Services account. This parameter must be provided if you have set `mobile.integrityDetection.googlePlay.verificationType` to `INTERNAL`.
+                        serviceAccountCredentials:
+                          type: string
+                          description: Contents of the JSON file that represents your Service Account Credentials. This parameter must be provided if you have set `mobile.integrityDetection.googlePlay.verificationType` to `GOOGLE`.
+                        verificationKey:
+                          type: string
+                          description: Play Integrity verdict signature verification key from your Google Play Services account. This parameter must be provided if you have set `mobile.integrityDetection.googlePlay.verificationType` to `INTERNAL`.
+                        verificationType:
+                          $ref: '#/components/schemas/EnumApplicationNativeGooglePlayVerificationType'
                 uriPrefix:
                   type: string
                   description: A string that specifies a URI prefix that enables direct triggering of the mobile application when scanning a QR code. The URI prefix can be set to a universal link with a valid value (which can be a URL address that starts with `HTTP://` or `HTTPS://`, such as `https://www.acme.com`), or an app schema, which is just a string and requires no special validation.
