@@ -3756,6 +3756,10 @@ components:
     Schema:
       type: object
       properties:
+        allowsContainsOperator:
+          type: boolean
+          readOnly: true
+          description: Indicates whether or not the `contains` operator can be used. You can use the `contains` operator in a maximum of 5 custom attributes.
         attributes:
           type: array
           readOnly: true
@@ -3812,6 +3816,11 @@ components:
               description: A string that specifies the identifier of the resource referenced by this relationship.
         schemaType:
           $ref: '#/components/schemas/EnumSchemaAttributeSchemaType'
+        subAttributes:
+          type: array
+          description: The list of sub-attributes of this attribute. Only `COMPLEX` attribute types can have sub-attributes, and only one-level of nesting is allowed. The leaf attribute definition must have a type of `STRING` or `JSON`. A `COMPLEX` attribute definition must have at least one child attribute definition.
+          items:
+            $ref: '#/components/schemas/SchemaAttribute'
         type:
           $ref: '#/components/schemas/EnumSchemaAttributeType'
         unique:
@@ -3820,6 +3829,46 @@ components:
         multiValued:
           type: boolean
           description: A boolean that specifies whether the attribute has multiple values or a single one. This value can only change from false to true, as changing from true to false is not allowed. Maximum number of values stored is 1,000.
+        enumeratedValues:
+          type: array
+          items:
+            type: object
+            description: An object representation of an enumerated value. Maximum number of enumerations is 100.
+            properties:
+              value:
+                type: string
+                description: A string that specifies the immutable value. Values are case sensitive; two values that differ only by case are not allowed.
+              archived:
+                type: boolean
+                description: A boolean that specifies whether the enumerated value is archived. Archived values cannot be added to a user, but existing archived values are preserved. This allows clients that read the schema to know all possible values of an attribute.
+              description:
+                type: string
+                description: A string that specifies the description of the enumerated value.
+            required:
+              - value
+        regexValidation:
+          type: object
+          description: Object representation of the optional regular expression representation of this attribute.
+          properties:
+            pattern:
+              type: string
+              description: A string that specifies the regular expression to which the attribute must conform.
+            requirements:
+              type: string
+              description: A string that specifies a developer friendly description of the regular expression requirements.
+            valuesPatternShouldMatch:
+              type: array
+              description: An array that specifies the list of strings matching the regular expression.
+              items:
+                type: string
+            valuesPatternShouldNotMatch:
+              type: array
+              description: An array that specifies the list of strings not matching the regular expression.
+              items:
+                type: string
+          required:
+            - pattern
+            - requirements
       required:
         - name
         - enabled
