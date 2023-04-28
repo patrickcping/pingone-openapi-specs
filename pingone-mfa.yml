@@ -186,6 +186,51 @@ components:
                     required:
                       - duration
                       - timeUnit  
+                  pairingKeyLifetime:
+                    type: object
+                    properties:
+                      duration:
+                        type: integer
+                        description: The amount of time an issued pairing key can be used until it expires. Minimum is 1 minute and maximum is 48 hours. If this parameter is not provided, the duration is set to 10 minutes.
+                        default: 10
+                      timeUnit:
+                        $ref: '#/components/schemas/EnumTimeUnit'
+                    required:
+                      - duration
+                      - timeUnit 
+                  pushLimit:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
+                        description: The number of consecutive push notifications that can be ignored or rejected by a user within a defined period before push notifications are blocked for the application. The minimum value is 1 and the maximum value is 50. If this parameter is not provided, the default value is 5.
+                        minimum: 1
+                        maximum: 50
+                        default: 5
+                      lockDuration:
+                        type: object
+                        properties:
+                          duration:
+                            type: integer
+                            description: The length of time that push notifications should be blocked for the application if the defined limit has been reached. The minimum value is 1 minute and the maximum value is 120 minutes. If this parameter is not provided, the default value is 30 minutes.
+                            default: 30
+                          timeUnit:
+                            $ref: '#/components/schemas/EnumTimeUnit'
+                        required:
+                          - duration
+                          - timeUnit 
+                      timePeriod:
+                        type: object
+                        properties:
+                          duration:
+                            type: integer
+                            description: The time period in which the push notifications are counted towards the defined limit. The minimum value is 1 minute and the maximum value is 120 minutes. If this parameter is not provided, the default value is 10 minutes.
+                            default: 10
+                          timeUnit:
+                            $ref: '#/components/schemas/EnumTimeUnit'
+                        required:
+                          - duration
+                          - timeUnit 
                   otp:
                     type: object
                     properties:
