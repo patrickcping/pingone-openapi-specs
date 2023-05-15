@@ -61,7 +61,7 @@ components:
       description: A string that specifies the flow type for the event. The only option (and default) is `AUTHENTICATION`.
     EnumPredictorCompositeConditionType:
       type: string
-      enum: [VALUE_COMPARISON, STRING_LIST]
+      enum: [VALUE_COMPARISON, STRING_LIST, AND, NOT, OR]
     EnumPredictorNewDeviceDetectType:
       type: string
       enum: [NEW_DEVICE]
@@ -741,7 +741,7 @@ components:
               type: object
               properties:
                 condition:
-                  type: object
+                  $ref: '#/components/schemas/RiskPredictorCompositeConditionBase'
                 level:
                   $ref: '#/components/schemas/EnumRiskLevel'
               required:
@@ -749,6 +749,87 @@ components:
                 - level
           required:
             - composition
+    RiskPredictorCompositeAnd:
+      type: object
+      properties:
+        and:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskPredictorCompositeCondition'
+        type:
+          $ref: '#/components/schemas/EnumPredictorCompositeConditionType'
+      required:
+        - and
+    RiskPredictorCompositeConditionBase:
+      oneOf:
+        - $ref: '#/components/schemas/RiskPredictorCompositeNot'
+        - $ref: '#/components/schemas/RiskPredictorCompositeAnd'
+        - $ref: '#/components/schemas/RiskPredictorCompositeOr'
+    RiskPredictorCompositeCondition:
+      oneOf:
+        - $ref: '#/components/schemas/RiskPredictorCompositeNot'
+        - $ref: '#/components/schemas/RiskPredictorCompositeOr'
+        - $ref: '#/components/schemas/RiskPredictorCompositeAnd'
+        - type: object
+          properties:
+            contains:
+              type: string
+              format: ^\${(event|details)[a-z\.]+}$
+            list:
+              type: array
+              items:
+                type: string
+            type:
+              $ref: '#/components/schemas/EnumPredictorCompositeConditionType'
+          required:
+            - contains
+            - list
+            - type
+        - type: object
+          properties:
+            equals:
+              oneOf:
+                - type: string
+                - type: integer
+            notEquals:
+              oneOf:
+                - type: string
+                - type: integer
+            greater:
+              type: integer
+            greaterEquals:
+              type: integer
+            lower:
+              type: integer
+            lowerEquals:
+              type: integer
+            value:
+              type: string
+              format: ^\${(event|details)[a-z\.]+}$
+            type:
+              $ref: '#/components/schemas/EnumPredictorCompositeConditionType'
+          required:
+            - value
+    RiskPredictorCompositeNot:
+      type: object
+      properties:
+        not:
+          $ref: '#/components/schemas/RiskPredictorCompositeOr'
+        type:
+          $ref: '#/components/schemas/EnumPredictorCompositeConditionType'
+      required:
+        - not
+    RiskPredictorCompositeOr:
+      type: object
+      properties:
+        or:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskPredictorCompositeCondition'
+        type:
+          $ref: '#/components/schemas/EnumPredictorCompositeConditionType'
+      required:
+        - or
     RiskPredictorCustom:
       allOf:
         - $ref: '#/components/schemas/RiskPredictorCommon'
