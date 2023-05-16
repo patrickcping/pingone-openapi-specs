@@ -697,11 +697,10 @@ components:
               properties:
                 level:
                   $ref: '#/components/schemas/EnumRiskLevel'
-                  description: A string that identifies the risk level. Options are HIGH, MEDIUM, and LOW.
                 type:
                   $ref: '#/components/schemas/EnumResultType'
               required:
-                - level
+                - type
           required:
             - weight
         condition:
