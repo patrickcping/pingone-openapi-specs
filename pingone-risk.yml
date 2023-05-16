@@ -38,7 +38,7 @@ components:
             riskPredictors:
               type: array
               items:
-                $ref: '#/components/schemas/RiskPredictorCommon'
+                $ref: '#/components/schemas/RiskPredictor'
         count:
           type: number
         size:
