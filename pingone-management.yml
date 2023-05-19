@@ -836,10 +836,14 @@ components:
                   description: A string that specifies a URI prefix that enables direct triggering of the mobile application when scanning a QR code. The URI prefix can be set to a universal link with a valid value (which can be a URL address that starts with `HTTP://` or `HTTPS://`, such as `https://www.acme.com`), or an app schema, which is just a string and requires no special validation.
             bundleId:
               type: string
-              description: A string that specifies the bundle associated with the application, for push notifications in native apps. The value of the bundleId property is unique per environment, and once defined, is immutable.
+              deprecated: true
+              description: |
+                **Deprecation Notice** This field is deprecated and will be removed in a future release. Use `mobile.bundleId` instead.  A string that specifies the bundle associated with the application, for push notifications in native apps. The value of the bundleId property is unique per environment, and once defined, is immutable.
             packageName:
               type: string
-              description: A string that specifies the package name associated with the application, for push notifications in native apps. The value of the mobile.packageName property is unique per environment, and once defined, is immutable.
+              deprecated: true
+              description: |
+                **Deprecation Notice** This field is deprecated and will be removed in a future release. Use `mobile.packageName` instead.  A string that specifies the package name associated with the application, for push notifications in native apps. The value of the mobile.packageName property is unique per environment, and once defined, is immutable.
             kerberos:
               type: object
               description: Object containing Kerberos settings
