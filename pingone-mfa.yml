@@ -576,6 +576,13 @@ components:
           required:
             - maxAllowedDevices
             - pairingKeyFormat
+        phoneExtensions:
+          type: object
+          description: Contains settings for phone extension support.
+          properties:
+            enabled:
+              type: boolean
+              description: Set to `true` to allow one-time passwords to be delivered via voice to phone numbers that include extensions. Set to `false` to disable support for phone numbers with extensions. By default, support for extensions is disabled.
         updatedAt:
           type: string
           format: date-time
