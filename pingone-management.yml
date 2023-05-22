@@ -4532,6 +4532,14 @@ components:
               description: An array of tags that events must have to be monitored by the subscription. If tags are not specified, all events are monitored. Currently, the available tags are `adminIdentityEvent`. Identifies the event as the action of an administrator on other administrators.
               items:
                 $ref: '#/components/schemas/EnumSubscriptionFilterIncludedTags'
+            ipAddressExposed:
+              type: boolean
+              description: Whether the IP address of an actor should be present in the `source` section of the event.
+              default: false
+            userAgentExposed:
+              type: boolean
+              description: Whether the User-Agent HTTP header of an event should be present in the `source` section of the event.
+              default: false
           required:
             - includedActionTypes
         format:
