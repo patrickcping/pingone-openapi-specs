@@ -142,6 +142,50 @@ components:
       type: string
       enum: [PRODUCTION, SANDBOX]
       description: A string that specifies the type of environment to use.
+    EnumFormItemAlignment:
+      type: string
+      enum: [LEFT, CENTER, RIGHT]
+      description: A string that specifies the alignment of the item.
+    EnumFormCategory:
+      type: string
+      enum: [CUSTOM]
+      description: A string that specifies the type of form. The `CUSTOM` form type allows the form to be built with fields that do not map specifically to the PingOne directory attributes.
+    EnumFormElementLabelMode:
+      type: string
+      enum: [DEFAULT, FLOAT]
+      description: A string that specifies how the field is rendered.
+    EnumFormElementLayout:
+      type: string
+      enum: [HORIZONTAL, VERTICAL]
+      description: A string that specifies layout attributes for radio button and checkbox fields. This is a required property when the type is `RADIO` or `CHECKBOX`.
+    EnumFormElementValidationType:
+      type: string
+      enum: [NONE, CUSTOM]
+      description: A string that specifies the validation type. This is a required property when the field type is `TEXT`.
+    EnumFormFieldType:
+      type: string
+      enum: [TEXT, PASSWORD, PASSWORD_VERIFY, RADIO, CHECKBOX, DROPDOWN, COMBOBOX, DIVIDER, EMPTY_FIELD, TEXTBLOB, SLATE_TEXTBLOB, SUBMIT_BUTTON, ERROR_DISPLAY, FLOW_LINK, FLOW_BUTTON, RECAPTCHA_V2, QR_CODE, SOCIAL_LOGIN_BUTTON]
+      description: A string that specifies the type of the field.
+    EnumFormRecaptchaV2Size:
+      type: string
+      enum: [NORMAL, COMPACT]
+      description: A string that specifies the size of the reCAPTCHA widget.
+    EnumFormRecaptchaV2Theme:
+      type: string
+      enum: [LIGHT, DARK]
+      description: A string that specifies the theme of the reCAPTCHA widget.
+    EnumFormSocialLoginIdpType:
+      type: string
+      enum: [FACEBOOK, APPLE, GOOGLE, AMAZON, LINKEDIN, MICROSOFT, TWITTER, YAHOO, PAYPAL, GITHUB, OPENID_CONNECT, SAML, LDAP]
+      description: A string that specifies the external identity provider type.
+    EnumFormTranslationMethod:
+      type: string
+      enum: [TRANSLATE, DEFAULT_VALUE, KEY]
+      description: A string that specifies how to translate the text strings in the form.
+    EnumFormQrCodeType:
+      type: string
+      enum: [MFA_AUTH]
+      description: A string that specifies the QR Code type.
     EnumFlowPolicyTriggerType:
       type: string
       description: An enum string that specifies the trigger type associated with the flow policy trigger.
@@ -1628,6 +1672,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FlowPolicyAssignment'
+            forms:
+              type: array
+              items:
+                $ref: '#/components/schemas/Form'
             gatewayInstances:
               type: array
               items:
@@ -1868,6 +1916,503 @@ components:
       required:
         - flowPolicy
         - priority
+    Form:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        name:
+          type: string
+          description: A string that specifies the form name, which must be provided and must be unique within an environment.
+        description:
+          type: string
+          description: A string that specifies the description of the form.
+        category:
+          $ref: '#/components/schemas/EnumFormCategory'
+        components:
+          $ref: '#/components/schemas/FormComponents'
+        cols:
+          type: integer
+          description: An integer that specifies the number of columns in the form (min = 1; max = 4).
+          minimum: 1
+          maximum: 4
+        markOptional:
+          type: boolean
+          description: A boolean that specifies whether optional fields are highlighted in the rendered form.
+        markRequired:
+          type: boolean
+          description: A boolean that specifies whether required fields are highlighted in the rendered form.
+        translationMethod:
+          $ref: '#/components/schemas/EnumFormTranslationMethod'
+        fieldTypes:
+          type: array
+          readOnly: true
+          description: A read-only object that specifies the list of the FormField types in the form.
+          items:
+            $ref: '#/components/schemas/EnumFormFieldType'
+        languageBundle:
+          type: object
+          description: An object that provides a map of i18n keys to their translations. This object includes both the keys and their default translations. The PingOne language management service finds this object, and creates the new keys for translation for this form.
+          additionalProperties:
+            type: string
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The date the resouce was created (ISO-8061 format).
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The date the resouce was modified (ISO-8061 format).
+      required:
+        - category
+        - components
+        - markOptional
+        - markRequired
+        - name
+    FormComponents:
+      type: object
+      properties:
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/FormField'
+      required:
+        - fields
+    FormElement:
+      type: object
+      properties:
+        attributeDisabled:
+          type: boolean
+          readOnly: true
+          description: A boolean that specifies whether the linked directory attribute is disabled.
+        key:
+          type: string
+          description: A string that specifies an identifier for the field component.
+        label:
+          type: string
+          description: A string of escaped JSON that is designed to store a series of text and translatable keys.
+        labelMode:
+          $ref: '#/components/schemas/EnumFormElementLabelMode'
+        required:
+          type: boolean
+          description: A boolean that specifies whether the field is required.
+        otherOptionEnabled:
+          type: boolean
+          description: A boolean that specifies whether the end user can type an entry that is not in a predefined list.
+        otherOptionKey:
+          type: string
+          description: A string that specifies whether the form identifies that the choice is a custom choice not from a predefined list.
+        otherOptionlabel:
+          type: string
+          description: A string that specifies the label for a custom or "other" choice in a list.
+        otherOptionInputlabel:
+          type: string
+          description: A string that specifies the label for the other option in drop-down controls.
+        otherOptionAttributeDisabled:
+          type: boolean
+          description: A boolean that specifies whether the directory attribute option is disabled. Set to true if it references a PingOne directory attribute.
+      required:
+        - key
+        - required
+    FormElementOption:
+      type: object
+      properties:
+        label:
+          type: string
+          description: A string that specifies the label shown to the end user for this option.
+        value:
+          type: string
+          description: A string that specifies the value of the field if this option is selected.
+      required:
+        - label
+        - value
+    FormElementValidation:
+      type: object
+      description: An object containing validation data for the field. This is a required property when the type is `TEXT`.
+      properties:
+        regex:
+          type: string
+          description: A string that specifies a validation regular expression. The expression must be a valid regular expression string. This is a required property when the validation type is `CUSTOM`.
+        type:
+          $ref: '#/components/schemas/EnumFormElementValidationType'
+        errorMessage:
+          type: string
+          description: A string that specifies the error message to be displayed when the field validation fails.
+    FormElementPasswordVerify:
+      type: object
+      properties:
+        labelPasswordVerify:
+          type: string
+          description: A string that when a second field for verifies password is used, this poperty specifies the field label for that verify field.
+    FormField:
+      oneOf:
+        - $ref: '#/components/schemas/FormFieldText'
+        - $ref: '#/components/schemas/FormFieldPassword'
+        - $ref: '#/components/schemas/FormFieldPasswordVerify'
+        - $ref: '#/components/schemas/FormFieldRadio'
+        - $ref: '#/components/schemas/FormFieldCheckbox'
+        - $ref: '#/components/schemas/FormFieldDropdown'
+        - $ref: '#/components/schemas/FormFieldCombobox'
+        - $ref: '#/components/schemas/FormFieldDivider'
+        - $ref: '#/components/schemas/FormFieldEmptyField'
+        - $ref: '#/components/schemas/FormFieldSlateTextblob'
+        - $ref: '#/components/schemas/FormFieldSubmitButton'
+        - $ref: '#/components/schemas/FormFieldErrorDisplay'
+        - $ref: '#/components/schemas/FormFieldFlowLink'
+        - $ref: '#/components/schemas/FormFieldFlowButton'
+        - $ref: '#/components/schemas/FormFieldRecaptchaV2'
+        - $ref: '#/components/schemas/FormFieldQrCode'
+        - $ref: '#/components/schemas/FormFieldSocialLoginButton'
+      discriminator:
+        propertyName: type
+        mapping:
+          TEXT: '#/components/schemas/FormFieldText'
+          PASSWORD: '#/components/schemas/FormFieldPassword'
+          PASSWORD_VERIFY: '#/components/schemas/FormFieldPasswordVerify'
+          RADIO: '#/components/schemas/FormFieldRadio'
+          CHECKBOX: '#/components/schemas/FormFieldCheckbox'
+          DROPDOWN: '#/components/schemas/FormFieldDropdown'
+          COMBOBOX: '#/components/schemas/FormFieldCombobox'
+          DIVIDER: '#/components/schemas/FormFieldDivider'
+          EMPTY_FIELD: '#/components/schemas/FormFieldEmptyField'
+          SLATE_TEXTBLOB: '#/components/schemas/FormFieldSlateTextblob'
+          SUBMIT_BUTTON: '#/components/schemas/FormFieldSubmitButton'
+          ERROR_DISPLAY: '#/components/schemas/FormFieldErrorDisplay'
+          FLOW_LINK: '#/components/schemas/FormFieldFlowLink'
+          FLOW_BUTTON: '#/components/schemas/FormFieldFlowButton'
+          RECAPTCHA_V2: '#/components/schemas/FormFieldRecaptchaV2'
+          QR_CODE: '#/components/schemas/FormFieldQrCode'
+          SOCIAL_LOGIN_BUTTON: '#/components/schemas/FormFieldSocialLoginButton'
+    FormFieldCommon:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/EnumFormFieldType'
+        position:
+          type: object
+          properties:
+            row:
+              type: integer
+              description: An integer that specifies the number of rows (maximum number is 50).
+              maximum: 50
+            col:
+              type: integer
+              description: An integer that specifies the number of columns (min = 1; max = 4).
+              minimum: 1
+              maximum: 4
+            width:
+              type: integer
+              description: An integer that specifies the width of the field (in percentage).
+          required:
+            - row
+            - col
+      required:
+        - type
+        - position
+    FormFieldText:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormElement'
+        - type: object
+          properties:
+            layout:
+              $ref: '#/components/schemas/EnumFormElementLayout'
+            options:
+              type: array
+              description: An array of strings that specifies the unique list of options. This is a required property when the type is `RADIO`, `CHECKBOX`, or `DROPDOWN`.
+              items:
+                type: string
+            validation:
+              $ref: '#/components/schemas/FormElementValidation'
+          required:
+            - validation
+    FormFieldPassword:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormElement'
+        - type: object
+          properties:
+            layout:
+              $ref: '#/components/schemas/EnumFormElementLayout'
+            options:
+              type: array
+              description: An array of strings that specifies the unique list of options. This is a required property when the type is `RADIO`, `CHECKBOX`, or `DROPDOWN`.
+              items:
+                type: string
+            validation:
+              $ref: '#/components/schemas/FormElementValidation'
+    FormFieldPasswordVerify:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormElementPasswordVerify'
+    FormFieldRadio:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormElement'
+        - type: object
+          properties:
+            layout:
+              $ref: '#/components/schemas/EnumFormElementLayout'
+            options:
+              type: array
+              description: An array of strings that specifies the unique list of options. This is a required property when the type is `RADIO`, `CHECKBOX`, or `DROPDOWN`.
+              items:
+                type: string
+            validation:
+              $ref: '#/components/schemas/FormElementValidation'
+          required:
+            - layout
+            - options
+    FormFieldCheckbox:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormElement'
+        - type: object
+          properties:
+            layout:
+              $ref: '#/components/schemas/EnumFormElementLayout'
+            options:
+              type: array
+              description: An array of strings that specifies the unique list of options. This is a required property when the type is `RADIO`, `CHECKBOX`, or `DROPDOWN`.
+              items:
+                type: string
+            validation:
+              $ref: '#/components/schemas/FormElementValidation'
+          required:
+            - layout
+            - options
+    FormFieldDropdown:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormElement'
+        - type: object
+          properties:
+            layout:
+              $ref: '#/components/schemas/EnumFormElementLayout'
+            options:
+              type: array
+              description: An array of strings that specifies the unique list of options. This is a required property when the type is `RADIO`, `CHECKBOX`, or `DROPDOWN`.
+              items:
+                type: string
+            validation:
+              $ref: '#/components/schemas/FormElementValidation'
+          required:
+            - options
+    FormFieldCombobox:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormElementOption'
+    FormFieldDivider:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormItem'
+    FormFieldEmptyField:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormItem'
+    FormFieldSlateTextblob:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormItem'
+    FormFieldSubmitButton:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormSubmit'
+    FormFieldErrorDisplay:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormItem'
+    FormFieldFlowLink:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormFlowLink'
+    FormFieldFlowButton:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormFlowButton'
+    FormFieldRecaptchaV2:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormRecaptchaV2'
+    FormFieldQrCode:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormQrCode'
+    FormFieldSocialLoginButton:
+      allOf:
+        - $ref: '#/components/schemas/FormFieldCommon'
+        - $ref: '#/components/schemas/FormSocialLoginButton'
+    FormFlowButton:
+      type: object
+      properties:
+        key:
+          type: string
+          description: A string that specifies an identifier for the field component.
+        label:
+          type: string
+          description: A string that specifies the button label.
+        styles:
+          type: object
+          properties:
+            width:
+              type: integer
+              description: An integer that specifies the button width. Set as a percentage.
+            alignment:
+              $ref: '#/components/schemas/EnumFormItemAlignment'
+            backgroundColor:
+              type: string
+              description: A string that specifies the button background color. The value must be a valid hexadecimal color.
+            textColor:
+              type: string
+              description: A string that specifies the button text color. The value must be a valid hexadecimal color.
+            borderColor:
+              type: string
+              description: A string that specifies the button border color. The value must be a valid hexadecimal color.
+            enabled:
+              type: boolean
+              description: A boolean that specifies whether the button is enabled.
+      required:
+        - key
+        - label
+    FormFlowLink:
+      type: object
+      properties:
+        key:
+          type: string
+          description: A string that specifies an identifier for the field component.
+        label:
+          type: string
+          description: A string that specifies the link label.
+        styles:
+          type: object
+          properties:
+            horizontalAlignment:
+              $ref: '#/components/schemas/EnumFormItemAlignment'
+            textColor:
+              type: string
+              description: A string that specifies the link text color. The value must be a valid hexadecimal color.
+            enabled:
+              type: boolean
+              description: A boolean that specifies whether the link is enabled.
+      required:
+        - key
+        - label
+    FormItem:
+      type: object
+      properties:
+        content:
+          type: string
+          description: A string that specifies the field content.
+    FormRecaptchaV2:
+      type: object
+      properties:
+        key:
+          type: string
+          description: A string that specifies an identifier for the field component.
+        size:
+          $ref: '#/components/schemas/EnumFormRecaptchaV2Size'
+        theme:
+          $ref: '#/components/schemas/EnumFormRecaptchaV2Theme'
+        alignment:
+          $ref: '#/components/schemas/EnumFormItemAlignment'
+      required:
+        - key
+        - size
+        - theme
+        - alignment
+    FormSocialLoginButton:
+      type: object
+      properties:
+        label:
+          type: string
+          description: A string that specifies the social login button label.
+        styles:
+          type: object
+          properties:
+            horizontalAlignment:
+              $ref: '#/components/schemas/EnumFormItemAlignment'
+            textColor:
+              type: string
+              description: A string that specifies the social login button text color.
+            enabled:
+              type: boolean
+              description: A boolean that specifies whether the social login button is enabled.
+        idpType:
+          $ref: '#/components/schemas/EnumFormSocialLoginIdpType'
+        idpName:
+          type: string
+          description: A string that specifies the external identity provider name.
+        idpId:
+          type: string
+          description: A string that specifies the external identity provider's ID.
+        idpEnabled:
+          type: boolean
+          description: A boolean that specifies whether the external identity provider is enabled.
+        iconSrc:
+          type: string
+          description: A string that specifies the HTTP link (URL format) for the external identity provider's icon.
+        width:
+          type: integer
+          description: An integer that specifies the button width. Set as a percentage.
+      required:
+        - label
+        - idpType
+        - idpName
+        - idpId
+        - idpEnabled
+        - iconSrc
+    FormSubmit:
+      type: object
+      properties:
+        key:
+          type: string
+          description: A string that specifies an identifier for the field component.
+        label:
+          type: string
+          description: A string that specifies the button label.
+        styles:
+          type: object
+          properties:
+            width:
+              type: integer
+              description: An integer that specifies the button width. Set as a percentage.
+            alignment:
+              $ref: '#/components/schemas/EnumFormItemAlignment'
+            backgroundColor:
+              type: string
+              description: A string that specifies the button background color. The value must be a valid hexadecimal color.
+            textColor:
+              type: string
+              description: A string that specifies the button text color. The value must be a valid hexadecimal color.
+            borderColor:
+              type: string
+              description: A string that specifies the button border color. The value must be a valid hexadecimal color.
+            enabled:
+              type: boolean
+              description: A boolean that specifies whether the button is enabled.
+      required:
+        - key
+        - label
+    FormQrCode:
+      type: object
+      properties:
+        QrCodeType:
+          $ref: '#/components/schemas/EnumFormQrCodeType'
+        alignment:
+          $ref: '#/components/schemas/EnumFormItemAlignment'
+        showBorder:
+          type: boolean
+          description: A boolean that specifies the border visibility.
+      required:
+        - QrCodeType
+        - alignment
+        - showBorder
     Gateway:
       type: object
       properties:
@@ -3565,6 +4110,30 @@ components:
           readOnly: true
       required:
         - name
+    RecaptchaConfiguration:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the configuration was created.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the configuration was last updated.
+        siteKey:
+          type: string
+          description: A string that specifies the public site key for the Recaptcha configuration provided by Google.
+        secretKey:
+          type: string
+          description: A string that specifies the confidential secret key for the Recaptcha configuration provided by Google.
+      required:
+        - siteKey
+        - secretKey
     Resource:
       type: object
       properties:
@@ -7911,6 +8480,181 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlowPolicy'
+  /v1/environments/{environmentID}/forms:
+    get:
+      tags:
+        - Form Management
+      summary: READ All Forms
+      operationId: readAllForms
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Form Management
+      summary: CREATE Form
+      operationId: createForm
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Form'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Form'
+  /v1/environments/{environmentID}/forms/{formID}:
+    get:
+      tags:
+        - Form Management
+      summary: READ One Form
+      operationId: readForm
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: formID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Form'
+    put:
+      tags:
+        - Form Management
+      summary: UPDATE Form
+      operationId: updateForm
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Form'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: formID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Form'
+    delete:
+      tags:
+        - Form Management
+      summary: DELETE Form
+      operationId: deleteForm
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: formID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
   /v1/environments/{environmentID}/keys:
     get:
       tags:
@@ -14010,6 +14754,100 @@ paths:
             type: string
           required: true
         - name: populationID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
+  /v1/environments/{environmentID}/recaptchaV2Config:
+    get:
+      tags:
+        - Recaptcha Configuration
+      summary: READ Recaptcha Configuration
+      operationId: readRecaptchaConfiguration
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecaptchaConfiguration'
+    put:
+      tags:
+        - Recaptcha Configuration
+      summary: UPDATE Recaptcha Configuration
+      operationId: updateRecaptchaConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecaptchaConfiguration'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecaptchaConfiguration'
+    delete:
+      tags:
+        - Recaptcha Configuration
+      summary: DELETE Recaptcha Configuration
+      operationId: deleteRecaptchaConfiguration
+      parameters:
+        - name: environmentID
           in: path
           schema:
             type: string
