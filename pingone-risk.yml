@@ -64,6 +64,10 @@ components:
       description: |
         Indicates the type of policy you are defining. Can be one of the following values: `AGGREGATED_SCORES`, `AGGREGATED_WEIGHTS`, `VALUE_COMPARISON`, and `IP_RANGE` (for override policies or custom predictors).
       enum: [AGGREGATED_WEIGHTS, AGGREGATED_SCORES, VALUE_COMPARISON, IP_RANGE]
+    EnumRiskPolicyResultLevel:
+      type: string
+      enum: [LOW]
+      description: Contains the default result level returned if none of the conditions in the policy are evaluated to true. At this time, the value must be `LOW`.
     EnumPredictorCompositeConditionType:
       type: string
       enum: [VALUE_COMPARISON, STRING_LIST, AND, NOT, OR]
@@ -605,8 +609,15 @@ components:
           type: integer
           description: An integer that specifies priority of the policy inside a risk policy set, designating which policy should run first. This is a read-only value. The priority is determined by the order in which policies are listed in the policy set. The first policy in the list is assigned priority 1 and is evaluated first. The next policy in the list is assigned priority 2 and so on.
         result:
-          $ref: '#/components/schemas/RiskPolicyResult'
+          type: object
           description: A result object that specifies the result returned if the policy is evaluated as true. If several policies are evaluated as true, the result related to the highest priority policy is returned. for more information, see the Result attribute data model in the Risk Evaluations topic.
+          properties:
+            level:
+              $ref: '#/components/schemas/EnumRiskPolicyResultLevel'
+            type:
+              $ref: '#/components/schemas/EnumResultType'
+          required:
+            - level
         updatedAt:
           type: string
           format: date-time
