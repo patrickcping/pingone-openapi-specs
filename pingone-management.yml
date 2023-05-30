@@ -411,6 +411,10 @@ components:
       type: string
       description: A string that specifies the type of action. Options are `LOGIN`, `MULTI_FACTOR_AUTHENTICATION`, `IDENTIFIER_FIRST`, `IDENTITY_PROVIDER` `AGREEMENT` and `PROGRESSIVE_PROFILING`.  Workforce environments also include `PINGID_WINLOGIN_PASSWORDLESS_AUTHENTICATION` and `PINGID_AUTHENTICATION`
       enum: [LOGIN, MULTI_FACTOR_AUTHENTICATION, IDENTIFIER_FIRST, IDENTITY_PROVIDER, PROGRESSIVE_PROFILING, AGREEMENT, PINGID_WINLOGIN_PASSWORDLESS_AUTHENTICATION, PINGID_AUTHENTICATION]
+    EnumSignOnPolicyActionLoginNewUserProvisioningGatewayType:
+      type: string
+      enum: [LDAP]
+      description: A string identifying the type of gateway. Currently, only `LDAP` is supported.
     EnumSolutionType:
       type: string
       enum: [WORKFORCE, CUSTOMER]
@@ -4693,6 +4697,36 @@ components:
             enforceLockoutForIdentityProviders:
               type: boolean
               description: A boolean that if set to true and if the user's account is locked (the account.canAuthenticate attribute is set to false), then social sign on with an external identity provider is prevented.
+            newUserProvisioning:
+              type: object
+              description: Enables user entries existing outside of PingOne to be provisioned in PingDirectory during login, using an external integration solution (such as a Gateway).
+              properties:
+                gateways:
+                  type: array
+                  description: Allows a set of preconfigured gateways or `userType` pairs that are specified in the [Gateway Management](https://apidocs.pingidentity.com/pingone/platform/v1/api/#gateway-management) schema to determine how to find and migrate user entries existing in an external directory.
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: A string referencing the UUID for the gateway.
+                      type:
+                        $ref: '#/components/schemas/EnumSignOnPolicyActionLoginNewUserProvisioningGatewayType'
+                      userType:
+                        type: object
+                        description: A reference to the ID of the `userTypes` configuration set on the gateway for user account migration.
+                        properties:
+                          id:
+                            type: string
+                            description: A string referencing the UUID of `userType`.
+                        required:
+                          - id
+                    required:
+                      - id
+                      - type
+                      - userType
+              required:
+                - gateways
             recovery:
               type: object
               description: Specifies the account recovery options.

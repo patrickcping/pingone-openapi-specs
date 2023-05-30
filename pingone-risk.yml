@@ -68,6 +68,10 @@ components:
       type: string
       enum: [LOW]
       description: Contains the default result level returned if none of the conditions in the policy are evaluated to true. At this time, the value must be `LOW`.
+    EnumRiskPolicySetTriggerType:
+      type: string
+      enum: [POLICY_SET_STAGING]
+      description: A string that specifies the trigger type for the policy set. The only option is `POLICY_SET_STAGING`.
     EnumPredictorCompositeConditionType:
       type: string
       enum: [VALUE_COMPARISON, STRING_LIST, AND, NOT, OR]
@@ -674,6 +678,30 @@ components:
                 description: A string that specifies the resource’s unique identifier.
             required:
               - id
+        triggers:
+          type: array
+          description: An array of triggers related to this policy set.
+          items:
+            type: object
+            properties:
+              type:
+                $ref: '#/components/schemas/EnumRiskPolicySetTriggerType'
+              policySet:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: A string that specifies the resource’s unique identifier.
+                required:
+                  - id
+              expiresAt:
+                type: string
+                format: date-time
+                description: The time the trigger expires (format ISO-8061).
+            required:
+              - type
+              - policySet
+              - expiresAt
       required:
         - name
     RiskPolicyResult:
