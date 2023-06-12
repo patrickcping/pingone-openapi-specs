@@ -194,10 +194,10 @@ components:
                         description: The amount of time an issued pairing key can be used until it expires. Minimum is 1 minute and maximum is 48 hours. If this parameter is not provided, the duration is set to 10 minutes.
                         default: 10
                       timeUnit:
-                        $ref: '#/components/schemas/EnumTimeUnit'
+                        $ref: '#/components/schemas/EnumTimeUnitPairingKeyLifetime'
                     required:
                       - duration
-                      - timeUnit 
+                      - timeUnit
                   pushLimit:
                     type: object
                     properties:
@@ -218,7 +218,7 @@ components:
                             $ref: '#/components/schemas/EnumTimeUnit'
                         required:
                           - duration
-                          - timeUnit 
+                          - timeUnit
                       timePeriod:
                         type: object
                         properties:
@@ -407,6 +407,10 @@ components:
       type: string
       enum: [MINUTES, SECONDS]
       description: The type of time unit
+    EnumTimeUnitPairingKeyLifetime:
+      type: string
+      enum: [MINUTES, HOURS]
+      description: The time unit for the `pairingKeyLifetime.duration` parameter.
     EnumTimeUnitPushTimeout:
       type: string
       enum: [SECONDS]

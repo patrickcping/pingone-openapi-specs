@@ -613,15 +613,7 @@ components:
           type: integer
           description: An integer that specifies priority of the policy inside a risk policy set, designating which policy should run first. This is a read-only value. The priority is determined by the order in which policies are listed in the policy set. The first policy in the list is assigned priority 1 and is evaluated first. The next policy in the list is assigned priority 2 and so on.
         result:
-          type: object
-          description: A result object that specifies the result returned if the policy is evaluated as true. If several policies are evaluated as true, the result related to the highest priority policy is returned. for more information, see the Result attribute data model in the Risk Evaluations topic.
-          properties:
-            level:
-              $ref: '#/components/schemas/EnumRiskPolicyResultLevel'
-            type:
-              $ref: '#/components/schemas/EnumResultType'
-          required:
-            - level
+          $ref: '#/components/schemas/RiskPolicyResult'
         updatedAt:
           type: string
           format: date-time
@@ -643,8 +635,15 @@ components:
           type: boolean
           description: A boolean that specifies whether this risk policy set is the environment's default risk policy set, which is used whenever an explicit policySet ID is not specified in the risk policy evaluation request. If this property is not specified, the value defaults to false, and this risk policy set is not regarded as the default risk policy set for the environment. When this property is set to true (in PUT or POST requests), the default property of all other risk policy sets in the environment is set to false.
         defaultResult:
-          $ref: '#/components/schemas/RiskPolicyResult'
+          type: object
           description: A result object that specifies the default result returned if none of the conditions in the policy set are evaluated to true. At this time, the defaultResultLevel value must be LOW.
+          properties:
+            level:
+              $ref: '#/components/schemas/EnumRiskPolicyResultLevel'
+            type:
+              $ref: '#/components/schemas/EnumResultType'
+          required:
+            - level
         description:
           type: string
           description: A string that specifies a description for this policy set. This is an optional property. Valid characters consist of any Unicode letter, mark (for example, accent, umlaut), numeric character, punctuation character, or space. Maximum size is 1024 characters.
@@ -706,6 +705,7 @@ components:
         - name
     RiskPolicyResult:
       type: object
+      description: A result object that specifies the result returned if the policy is evaluated as true. If several policies are evaluated as true, the result related to the highest priority policy is returned. for more information, see the Result attribute data model in the Risk Evaluations topic.
       properties:
         level:
           $ref: '#/components/schemas/EnumRiskLevel'
