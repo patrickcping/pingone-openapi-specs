@@ -337,6 +337,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/MFAPushCredentialAPNS'
                   - $ref: '#/components/schemas/MFAPushCredentialFCM'
+                  - $ref: '#/components/schemas/MFAPushCredentialFCMHTTPV1'
                   - $ref: '#/components/schemas/MFAPushCredentialHMS'
             deviceAuthenticationPolicies:
               type: array
@@ -387,12 +388,13 @@ components:
         If this parameter is not provided, the `DEFAULT_TO_FIRST` option is used.
     EnumMFAPushCredentialAttrType:
       type: string
-      enum: [APNS, FCM, HMS]
+      enum: [APNS, FCM, HMS, FCM_HTTP_V1]
       description: |
         Specifies the push credential type.
         Valid values:
         * APNS (for Apple)
-        * FCM (for Google)
+        * FCM_HTTP_V1 (for Google)
+        * FCM (deprecated, used previously for Google)
         * HMS (for Huawei)
     EnumMFASettingsDeviceSelection:
       type: string
@@ -498,15 +500,28 @@ components:
             - teamId
             - token
     MFAPushCredentialFCM:
+      deprecated: true
       allOf:
         - $ref: '#/components/schemas/MFAPushCredential'
         - type: object
+          deprecated: true
           properties:
             key:
               type: string
               description: A string that Apple uses as an identifier to identify an authentication key.  Mandatory.
+              deprecated: true
           required:
             - key
+    MFAPushCredentialFCMHTTPV1:
+      allOf:
+        - $ref: '#/components/schemas/MFAPushCredential'
+        - type: object
+          properties:
+            googleServiceAccountCredentials:
+              type: string
+              description: Used when `type` is set to `FCM_HTTP_V1`. The value should be the contents of the JSON file that represents your Service Account Credentials.
+          required:
+            - googleServiceAccountCredentials
     MFAPushCredentialHMS:
       allOf:
         - $ref: '#/components/schemas/MFAPushCredential'
@@ -761,6 +776,7 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/MFAPushCredentialAPNS'
                 - $ref: '#/components/schemas/MFAPushCredentialFCM'
+                - $ref: '#/components/schemas/MFAPushCredentialFCMHTTPV1'
                 - $ref: '#/components/schemas/MFAPushCredentialHMS'
               example:
                 type: FCM
@@ -850,6 +866,7 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/MFAPushCredentialAPNS'
                 - $ref: '#/components/schemas/MFAPushCredentialFCM'
+                - $ref: '#/components/schemas/MFAPushCredentialFCMHTTPV1'
                 - $ref: '#/components/schemas/MFAPushCredentialHMS'
               example:
                 type: APNS
