@@ -27,6 +27,7 @@ components:
   schemas:
     DeviceAuthenticationPolicyFIDODevice:
       type: object
+      deprecated: true
       properties:
         enabled:
           type: boolean
@@ -42,6 +43,9 @@ components:
         enabled:
           type: boolean
           description: Enabled or disabled in the policy.
+        pairingDisabled:
+          type: boolean
+          description: A boolean to specify whether pairing is disabled for the method.
         otp:
           type: object
           properties:
@@ -108,13 +112,27 @@ components:
           $ref: '#/components/schemas/DeviceAuthenticationPolicyOfflineDevice'
         email:
           $ref: '#/components/schemas/DeviceAuthenticationPolicyOfflineDevice'
+        fido2:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+              description: A boolean that specifies whether the method is enabled or disabled in the policy.
+            pairingDisabled:
+              type: boolean
+              description: A boolean to specify whether pairing is disabled for the method.
+            fido2PolicyId:
+              type: string
+              description: Specifies the UUID that represents the FIDO2 policy in PingOne. This property can be null. When null, the environment's default FIDO2 Policy is used.
+          required:
+            - enabled
         mobile:
           type: object
           description: Mobile device authentication policy settings.
           properties:
             enabled:
               type: boolean
-              description: Enabled or disabled in the policy.
+              description: A boolean that specifies whether the method is enabled or disabled in the policy.
             otp:
               type: object
               properties:
@@ -256,7 +274,10 @@ components:
                         type: boolean
                         description: Set to true if you want the application to allow Auto Enrollment. Auto Enrollment means that the user can authenticate for the first time from an unpaired device, and the successful authentication will result in the pairing of the device for MFA.
                     required:
-                      - enabled
+                      - enabled      
+                  pairingDisabled:
+                    type: boolean
+                    description: A boolean to specify whether pairing is disabled for the method.
                   integrityDetection:
                     $ref: '#/components/schemas/EnumMFADevicePolicyMobileIntegrityDetection'
                 required:
@@ -300,12 +321,14 @@ components:
             - enabled
             - otp
         securityKey:
+          deprecated: true
           $ref: '#/components/schemas/DeviceAuthenticationPolicyFIDODevice'
         platform:
+          deprecated: true
           $ref: '#/components/schemas/DeviceAuthenticationPolicyFIDODevice'
         default:
           type: boolean
-          description: The default policy for Flow Manager.
+          description: A boolean that specifies whether the policy is the default for the environment.
         forSignOnPolicy:
           type: boolean
           deprecated: true
@@ -321,8 +344,6 @@ components:
         - voice
         - mobile
         - totp
-        - securityKey
-        - platform
         - default
         - forSignOnPolicy
     EntityArray:
@@ -334,11 +355,7 @@ components:
             pushCredentials:
               type: array
               items:
-                anyOf:
-                  - $ref: '#/components/schemas/MFAPushCredentialAPNS'
-                  - $ref: '#/components/schemas/MFAPushCredentialFCM'
-                  - $ref: '#/components/schemas/MFAPushCredentialFCMHTTPV1'
-                  - $ref: '#/components/schemas/MFAPushCredentialHMS'
+                $ref: '#/components/schemas/MFAPushCredentialResponse'
             deviceAuthenticationPolicies:
               type: array
               items:
@@ -349,8 +366,13 @@ components:
                 $ref: '#/components/schemas/FIDODevice'
             fidoPolicies:
               type: array
+              deprecated: true
               items:
                 $ref: '#/components/schemas/FIDOPolicy'
+            fido2Policies:
+              type: array
+              items:
+                $ref: '#/components/schemas/FIDO2Policy'
         count:
           type: number
         size:
@@ -369,6 +391,45 @@ components:
       type: string
       enum: [DISCOURAGED, REQUIRED]
       description: Used to enable resident keys. Value can be `DISCOURAGED` or `REQUIRED`.
+    EnumFIDO2PolicyAttestationRequirements:
+      type: string
+      enum: [DIRECT, NONE]
+      description: Set to `DIRECT` if you want to require attestation. Set to `NONE` if you don't want to require attestation. If you set `attestationRequirements` to `NONE`, you should also set `mdsAuthenticatorsRequirements.option` to `NONE`.
+    EnumFIDO2PolicyAuthenticatorAttachment:
+      type: string
+      enum: [PLATFORM, CROSS_PLATFORM, BOTH]
+      description: |
+        Used to control the type of authenticators that are allowed. Can be one of the following values:
+        - `PLATFORM` - only allow the use of FIDO device authenticators that contain an internal authenticator (such as a face or fingerprint scanner)
+        - `CROSS_PLATFORM` - allow use of cross-platform authenticators, which are external to the accessing device (such as a security key)
+        - `BOTH` - allow both categories of authenticators
+    EnumFIDO2PolicyDiscoverableCredentials:
+      type: string
+      enum: [DISCOURAGED, REQUIRED, PREFERRED]
+      description: |
+        Use this field to specify when registered users can authenticate without providing credentials. The possible values are:
+        - `DISCOURAGED` - discoverable credentials are not used, even when supported by the FIDO device. In cases where use of discoverable credentials is required by the FIDO device itself, this setting does not override the device setting.
+        - `REQUIRED` - require the use of discoverable credentials. This option is required for usernameless authentication.
+        - `PREFERRED` - use discoverable credentials where possible.
+    EnumFIDO2PolicyMDSAuthenticatorOption:
+      type: string
+      enum: [NONE, AUDIT_ONLY, GLOBAL, CERTIFIED, SPECIFIC]
+      description: |
+        Use `option` to specify the types of devices you want to allow on the basis of the attestation provided. Can be one of the following values:
+        - `NONE` - do not request attestation, allow all FIDO devices
+        - `AUDIT_ONLY` - attestation is requested and the information is used for logging purposes, but the information is not used for filtering authenticators
+        - `GLOBAL` - allow use of all FIDO authenticators listed in the Global Authenticators table.
+        - `CERTIFIED` - allow only FIDO Certified authenticators
+        - `SPECIFIC` - allow only the authenticators specified with the `mdsAuthenticatorsRequirements.allowedAuthenticators` parameter.
+    EnumFIDO2PolicyUserVerificationOption:
+      type: string
+      enum: [REQUIRED, DISCOURAGED, PREFERRED]
+      description: |
+        Can be one of the following values:
+        - `REQUIRED` - only FIDO devices supporting user verification can be used
+        - `DISCOURAGED` - user verification is not required, even when supported by the FIDO device. In cases where user verification is required by the FIDO device itself, this setting does not override the device setting.
+        - `PREFERRED` - user verification is required if the user's FIDO device supports it, but is not required if the user's device does not support it.
+        For usernameless flows, only FIDO devices supporting user verification can be used, regardless of the value you set for `userVerification.option`.
     EnumMFADevicePolicyMobileExtraVerification:
       type: string
       description: Specifies the level of further verification when deviceAuthorization is enabled. The PingOne platform performs an extra verification check by sending a “silent” push notification to the customer native application, and receives a confirmation in return.
@@ -423,6 +484,7 @@ components:
       type: object
     FIDOPolicy:
       type: object
+      deprecated: true
       properties:
         id:
           type: string
@@ -474,6 +536,146 @@ components:
         - name
         - attestationRequirements
         - residentKeyRequirement
+    FIDO2Policy:
+      type: object
+      properties:
+        id:
+          type: string
+          description: FIDO policy's UUID.
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was created.
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was last updated.
+        attestationRequirements:
+          $ref: '#/components/schemas/EnumFIDO2PolicyAttestationRequirements'
+        authenticatorAttachment:
+          $ref: '#/components/schemas/EnumFIDO2PolicyAuthenticatorAttachment'
+        backupEligibility:
+          type: object
+          description: Used to control whether users should be allowed to register and authenticate with a device that uses cloud-synced credentials, such as a passkey.
+          properties:
+            allow:
+              type: boolean
+              description: Set to `true` if you want to let users register and authenticate with a device that uses cloud-synced credentials. Set to `false` if you don't want to allow this.
+            enforceDuringAuthentication:
+              type: boolean
+              description: Set to `true` if you want the backup eligibility of the device to be checked again at each authentication attempt and not just once during registration. Set to `false` to have it checked only at registration.
+          required:
+            - allow
+            - enforceDuringAuthentication
+        default:
+          type: boolean
+          description: Whether this policy should serve as the default FIDO policy.
+        description:
+          type: string
+          description: Description of the FIDO policy.
+        deviceAuthenticationPolicies:
+          type: array
+          description: The device authentication policies that use the relevant FIDO policy. If you include the parameter `expand=deviceAuthenticationPolicies` in the URL of the request, this array is included in the response when reading FIDO policies. Each object in the array contains the ID and the name of the device authentication policy.
+          readOnly: true
+          items:
+            type: string
+        deviceDisplayName:
+          type: string
+          description: The name to display for the device in registration and authentication windows. Can be up to 100 characters. If you want to use translatable text, you can use any of the keys listed on the *FIDO Policy* page of the *Self-Service* module and the *Sign On Policy* module. The value of the parameter should include only the part of the key name that comes after the module name, for example, `fidoPolicy.deviceDisplayName01` or `fidoPolicy.deviceDisplayName07`. See the pages in the UI for the full list of keys. For more information on translatable keys, see [Modifying translatable keys](https://docs.pingidentity.com/access/sources/dita/topic?category=p1&resourceid=pingone_modifying_translatable_keys) in the PingOne documentation.
+          maxLength: 100
+        discoverableCredentials:
+          $ref: '#/components/schemas/EnumFIDO2PolicyDiscoverableCredentials'
+        mdsAuthenticatorsRequirements:
+          type: object
+          description: Used to specify whether attestation is requested from the authenticator, and whether this information is used to restrict authenticator usage.
+          properties:
+            allowedAuthenticators:
+              type: array
+              description: If you set `mdsAuthenticatorsRequirements.option` to `SPECIFIC`, use this array to specify the authenticators that you want to allow.
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The mdsIdentitfer of the authenticator to allow.
+                required:
+                  - id
+            enforceDuringAuthentication:
+              type: boolean
+              description: Set to true if you want the device characteristics related to attestation to be checked again at each authentication attempt and not just once during registration. Set to false to have them checked only at registration.
+            option:
+              $ref: '#/components/schemas/EnumFIDO2PolicyMDSAuthenticatorOption'
+          required:
+            - allowedAuthenticators
+            - enforceDuringAuthentication
+            - option
+        name:
+          type: string
+          description: The name to use for the FIDO policy. Can be up to 256 characters.
+          maxLength: 256
+        relyingPartyId:
+          type: string
+          description: The ID of the relying party. The value should be a domain name, such as `example.com` (in lower-case characters).
+        userDisplayNameAttributes:
+          type: object
+          description: Used to specify the string associated with the users's account that is displayed during registration and authentication.
+          properties:
+            attributes:
+              type: array
+              description: |
+                List of strings associated with the users's account that can be displayed during registration and authentication. Each object in the array is a name:value pair where the first part is "name" and the second is the name of the user attribute, for example, `{"name": "username"}`, `{"name": "email"}`. If you want to use the "name" attribute for the user, you must also specify the "subAttributes", which can be either the "given" and "family" user attributes or the "formatted" user attribute. For example, `{"name": “name”, “subAttributes”:[{“name”: “given”}, {“name”: “family”}]}, {"name": "email"}` or `{"name": “name”, “subAttributes”:[{“name”: “formatted”}]}, {"name": "email"}`.
+                - The content of the list should reflect the preferred order.
+                - If the first attribute is empty for the user, PingOne will continue through the list until a non-empty attribute is found.
+                - You can specify any user attribute (including custom attributes) that meet the following criteria: attribute type must be String, validation cannot be set to enumerated values.
+                - The array must contain the user attribute "username" - to ensure that there is at least one non-empty attribute.
+                - You can have a maximum of six user attributes in the list.
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The name of the attribute to use for the user display name.
+                  subAttributes:
+                    type: array
+                    description: The sub-attributes to use for the user display name.
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: The name of the sub-attribute to use for the user display name.
+                      required:
+                        - name
+                required:
+                  - name
+          required:
+            - attributes
+        userVerification:
+          type: object
+          description: Used to control whether the user must perform a gesture (such as a public key credential, fingerprint scan, or a PIN code) when registering or authenticating with their FIDO device.
+          properties:
+            enforceDuringAuthentication:
+              type: boolean
+              description: Set to `true` if you want the device characteristics related to user verification to be checked again at each authentication attempt and not just once during registration. Set to `false` to have them checked only at registration.
+            option:
+              $ref: '#/components/schemas/EnumFIDO2PolicyUserVerificationOption'
+          required:
+            - enforceDuringAuthentication
+            - option
+      required:
+        - attestationRequirements
+        - authenticatorAttachment
+        - backupEligibility
+        - deviceDisplayName
+        - discoverableCredentials
+        - mdsAuthenticatorsRequirements
+        - name
+        - relyingPartyId
+        - userDisplayNameAttributes
+        - userVerification
     MFAPushCredential:
       type: object
       properties:
@@ -536,6 +738,12 @@ components:
           required:
             - clientId
             - clientSecret
+    MFAPushCredentialRequest:
+      oneOf:
+        - $ref: '#/components/schemas/MFAPushCredentialAPNS'
+        - $ref: '#/components/schemas/MFAPushCredentialFCM'
+        - $ref: '#/components/schemas/MFAPushCredentialFCMHTTPV1'
+        - $ref: '#/components/schemas/MFAPushCredentialHMS'
     MFAPushCredentialResponse:
       type: object
       properties:
@@ -773,11 +981,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/MFAPushCredentialAPNS'
-                - $ref: '#/components/schemas/MFAPushCredentialFCM'
-                - $ref: '#/components/schemas/MFAPushCredentialFCMHTTPV1'
-                - $ref: '#/components/schemas/MFAPushCredentialHMS'
+              $ref: '#/components/schemas/MFAPushCredentialRequest'
               example:
                 type: FCM
                 key: key.value
@@ -863,11 +1067,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/MFAPushCredentialAPNS'
-                - $ref: '#/components/schemas/MFAPushCredentialFCM'
-                - $ref: '#/components/schemas/MFAPushCredentialFCMHTTPV1'
-                - $ref: '#/components/schemas/MFAPushCredentialHMS'
+              $ref: '#/components/schemas/MFAPushCredentialRequest'
               example:
                 type: APNS
                 key: key.value.updated
@@ -1264,6 +1464,7 @@ paths:
           description: Successful response
   /v1/environments/{environmentID}/fidoPolicies:
     get:
+      deprecated: true
       tags:
         - FIDO Policy
       summary: READ FIDO Policies
@@ -1294,6 +1495,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EntityArray'
     post:
+      deprecated: true
       tags:
         - FIDO Policy
       summary: CREATE FIDO Policy
@@ -1332,6 +1534,7 @@ paths:
                 $ref: '#/components/schemas/FIDOPolicy'
   /v1/environments/{environmentID}/fidoPolicies/{fidoPolicyID}:
     get:
+      deprecated: true
       tags:
         - FIDO Policy
       summary: READ One FIDO Policy
@@ -1367,6 +1570,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/FIDOPolicy'
     put:
+      deprecated: true
       tags:
         - FIDO Policy
       summary: UPDATE FIDO Policy
@@ -1407,6 +1611,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/FIDOPolicy'
     delete:
+      deprecated: true
       tags:
         - FIDO Policy
       summary: DELETE FIDO Policy
@@ -1418,6 +1623,186 @@ paths:
             type: string
           required: true
         - name: fidoPolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
+  /v1/environments/{environmentID}/fido2Policies:
+    get:
+      tags:
+        - FIDO2 Policy
+      summary: READ FIDO2 Policies
+      operationId: readFido2Policies
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - FIDO2 Policy
+      summary: CREATE FIDO2 Policy
+      operationId: createFido2Policy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FIDO2Policy'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FIDO2Policy'
+  /v1/environments/{environmentID}/fido2Policies/{fido2PolicyID}:
+    get:
+      tags:
+        - FIDO2 Policy
+      summary: READ One FIDO2 Policy
+      operationId: readOneFido2Policy
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: fido2PolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: expand
+          in: query
+          schema:
+            type: string
+            enum: [deviceAuthenticationPolicies]
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FIDO2Policy'
+    put:
+      tags:
+        - FIDO2 Policy
+      summary: UPDATE FIDO2 Policy
+      operationId: updateFIDO2Policy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FIDO2Policy'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: fido2PolicyID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FIDO2Policy'
+    delete:
+      tags:
+        - FIDO2 Policy
+      summary: DELETE FIDO2 Policy
+      operationId: deleteFido2Policy
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: fido2PolicyID
           in: path
           schema:
             type: string
