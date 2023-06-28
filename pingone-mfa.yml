@@ -32,6 +32,9 @@ components:
         enabled:
           type: boolean
           description: Enabled or disabled in the policy.
+        pairingDisabled:
+          type: boolean
+          description: You can set `pairingDisabled` to true to prevent users from pairing new devices with the relevant method. You can use this option if you want to phase out an existing authentication method but want to allow users to continue using the method for authentication for existing devices.
         fidoPolicyId:
           type: string
           description: Specifies the FIDO policy UUID. This property can be null. When null, the environment's default FIDO Policy is used.
@@ -45,7 +48,7 @@ components:
           description: Enabled or disabled in the policy.
         pairingDisabled:
           type: boolean
-          description: A boolean to specify whether pairing is disabled for the method.
+          description: You can set `pairingDisabled` to true to prevent users from pairing new devices with the relevant method. You can use this option if you want to phase out an existing authentication method but want to allow users to continue using the method for authentication for existing devices.
         otp:
           type: object
           properties:
@@ -120,7 +123,7 @@ components:
               description: A boolean that specifies whether the method is enabled or disabled in the policy.
             pairingDisabled:
               type: boolean
-              description: A boolean to specify whether pairing is disabled for the method.
+              description: You can set `pairingDisabled` to true to prevent users from pairing new devices with the relevant method. You can use this option if you want to phase out an existing authentication method but want to allow users to continue using the method for authentication for existing devices.
             fido2PolicyId:
               type: string
               description: Specifies the UUID that represents the FIDO2 policy in PingOne. This property can be null. When null, the environment's default FIDO2 Policy is used.
@@ -277,7 +280,7 @@ components:
                       - enabled      
                   pairingDisabled:
                     type: boolean
-                    description: A boolean to specify whether pairing is disabled for the method.
+                    description: You can set `pairingDisabled` to true to prevent users from pairing new devices with the relevant method. You can use this option if you want to phase out an existing authentication method but want to allow users to continue using the method for authentication for existing devices.
                   integrityDetection:
                     $ref: '#/components/schemas/EnumMFADevicePolicyMobileIntegrityDetection'
                 required:
@@ -292,6 +295,9 @@ components:
             enabled:
               type: boolean
               description: Enabled or disabled in the policy.
+            pairingDisabled:
+              type: boolean
+              description: You can set `pairingDisabled` to true to prevent users from pairing new devices with the relevant method. You can use this option if you want to phase out an existing authentication method but want to allow users to continue using the method for authentication for existing devices.
             otp:
               type: object
               properties:
