@@ -2,9 +2,9 @@ openapi: 3.0.0
 info:
   title: PingOne Platform API - Agreement Management
   description: The PingOne Platform API covering the PingOne Agreement Management service
-  version: '2022-09-23'
+  version: '2023-06-29'
 servers:
-  - url: https://agreement-mgmt.pingone.{suffix}
+  - url: '{protocol}://{baseDomain}.{suffix}'
     description: PingOne Platform API Endpoint
     variables:
       suffix:
@@ -13,7 +13,18 @@ servers:
           - 'com'
           - 'asia'
           - 'ca'
-        default: 'eu'
+        default: 'com'
+      baseDomain:
+        default: 'agreement-mgmt.pingone'
+      protocol:
+        default: 'https'
+  - url: '{protocol}://{baseHostname}'
+    description: PingOne Platform API Endpoint
+    variables:
+      baseHostname:
+        default: 'agreement-mgmt.pingone.com'
+      protocol:
+        default: 'https'
 components:
   securitySchemes:
     bearer:

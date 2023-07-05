@@ -2,12 +2,12 @@ openapi: 3.0.0
 info:
   title: PingOne Platform API - PingOne Verify
   description: The PingOne Platform API covering the PingOne Verify service
-  version: '2023-05-26'
+  version: '2023-06-29'
 externalDocs:
   url: https://apidocs.pingidentity.com/pingone/platform/v1/api/#pingone-verify
   description: PingOne Platform API Reference - PingOne Verify APIs
 servers:
-  - url: https://api.pingone.{suffix}
+  - url: '{protocol}://{baseDomain}.{suffix}/v1'
     description: PingOne Platform API Endpoint
     variables:
       suffix:
@@ -17,6 +17,17 @@ servers:
           - 'asia'
           - 'ca'
         default: 'com'
+      baseDomain:
+        default: 'api.pingone'
+      protocol:
+        default: 'https'
+  - url: '{protocol}://{baseHostname}/v1'
+    description: PingOne Platform API Endpoint
+    variables:
+      baseHostname:
+        default: 'api.pingone.com'
+      protocol:
+        default: 'https'
 components:
   securitySchemes:
     bearer:
@@ -332,7 +343,7 @@ security:
 tags:
 - name: Verify Policies
 paths:
-  /v1/environments/{environmentID}/verifyPolicies:
+  /environments/{environmentID}/verifyPolicies:
     post:
       tags:
       - Verify Policies
@@ -453,7 +464,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'  
-  /v1/environments/{environmentID}/verifyPolicies/{verifyPolicyID}:
+  /environments/{environmentID}/verifyPolicies/{verifyPolicyID}:
     get:
       tags:
       - Verify Policies

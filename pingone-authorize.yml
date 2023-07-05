@@ -2,12 +2,12 @@ openapi: 3.0.0
 info:
   title: PingOne Platform API - Authorize
   description: The PingOne Platform API covering the PingOne Authorize service
-  version: '2022-09-23'
+  version: '2023-06-29'
 externalDocs:
   url: https://apidocs.pingidentity.com/pingone/platform/v1/api/#pingone-authorize
   description: PingOne Platform API Reference - Authorize APIs
 servers:
-  - url: https://api.pingone.{suffix}
+  - url: '{protocol}://{baseDomain}.{suffix}/v1'
     description: PingOne Platform API Endpoint
     variables:
       suffix:
@@ -16,7 +16,18 @@ servers:
           - 'com'
           - 'asia'
           - 'ca'
-        default: 'eu'
+        default: 'com'
+      baseDomain:
+        default: 'api.pingone'
+      protocol:
+        default: 'https'
+  - url: '{protocol}://{baseHostname}/v1'
+    description: PingOne Platform API Endpoint
+    variables:
+      baseHostname:
+        default: 'api.pingone.com'
+      protocol:
+        default: 'https'
 components:
   securitySchemes:
     bearer:
@@ -276,7 +287,7 @@ tags:
   - name: Policy Decision Authorization
   - name: API Servers
 paths:
-  /v1/environments/{environmentID}/decisionEndpoints:
+  /environments/{environmentID}/decisionEndpoints:
     get:
       tags:
         - Policy Decision Management
@@ -344,7 +355,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DecisionEndpoint'
-  /v1/environments/{environmentID}/decisionEndpoints/{decisionEndpointID}:
+  /environments/{environmentID}/decisionEndpoints/{decisionEndpointID}:
     get:
       tags:
         - Policy Decision Management
@@ -451,7 +462,7 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/apiServers:
+  /environments/{environmentID}/apiServers:
     get:
       tags:
         - API Servers
@@ -519,7 +530,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/APIServer'
-  /v1/environments/{environmentID}/apiServers/{apiServerID}:
+  /environments/{environmentID}/apiServers/{apiServerID}:
     get:
       tags:
         - API Servers

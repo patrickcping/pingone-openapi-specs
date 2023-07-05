@@ -2,12 +2,12 @@ openapi: 3.0.0
 info:
   title: PingOne Platform API - PingOne Risk
   description: The PingOne Platform API covering the PingOne Risk service
-  version: '2021-10-17'
+  version: '2023-06-29'
 externalDocs:
   url: https://apidocs.pingidentity.com/pingone/platform/v1/api/#pingone-risk
   description: PingOne Platform API Reference - PingOne Risk APIs
 servers:
-  - url: https://api.pingone.{suffix}
+  - url: '{protocol}://{baseDomain}.{suffix}/v1'
     description: PingOne Platform API Endpoint
     variables:
       suffix:
@@ -16,7 +16,18 @@ servers:
           - 'com'
           - 'asia'
           - 'ca'
-        default: 'eu'
+        default: 'com'
+      baseDomain:
+        default: 'api.pingone'
+      protocol:
+        default: 'https'
+  - url: '{protocol}://{baseHostname}/v1'
+    description: PingOne Platform API Endpoint
+    variables:
+      baseHostname:
+        default: 'api.pingone.com'
+      protocol:
+        default: 'https'
 components:
   securitySchemes:
     bearer:
@@ -1186,7 +1197,7 @@ tags:
   - name: Risk Evaluations
   - name: Risk Advanced Predictors
 paths:
-  /v1/environments/{environmentID}/riskPolicySets:
+  /environments/{environmentID}/riskPolicySets:
     post:
       tags:
         - Risk Policies
@@ -1306,7 +1317,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/riskPolicySets/{riskPolicySetID}:
+  /environments/{environmentID}/riskPolicySets/{riskPolicySetID}:
     get:
       tags:
         - Risk Policies
@@ -1465,7 +1476,7 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/riskEvaluations:
+  /environments/{environmentID}/riskEvaluations:
     post:
       tags:
         - Risk Evaluations
@@ -1580,7 +1591,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RiskEvaluation'
-  /v1/environments/{environmentID}/riskEvaluations/{riskEvaluationID}:
+  /environments/{environmentID}/riskEvaluations/{riskEvaluationID}:
     get:
       tags:
         - Risk Evaluations
@@ -1616,7 +1627,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RiskEvaluation'
-  /v1/environments/{environmentID}/riskEvaluations/{riskEvaluationID}/event:
+  /environments/{environmentID}/riskEvaluations/{riskEvaluationID}/event:
     put:
       tags:
         - Risk Evaluations
@@ -1659,7 +1670,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RiskEvaluation'
-  /v1/environments/{environmentID}/riskPredictors:
+  /environments/{environmentID}/riskPredictors:
     post:
       tags:
         - Risk Advanced Predictors
@@ -1755,7 +1766,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityArray'
-  /v1/environments/{environmentID}/riskPredictors/{riskPredictorID}:
+  /environments/{environmentID}/riskPredictors/{riskPredictorID}:
     get:
       tags:
         - Risk Advanced Predictors

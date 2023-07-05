@@ -2,12 +2,12 @@ openapi: 3.0.0
 info:
   title: PingOne Platform API - PingOne MFA
   description: The PingOne Platform API covering the PingOne MFA service
-  version: '2021-10-17'
+  version: '2023-06-29'
 externalDocs:
   url: https://apidocs.pingidentity.com/pingone/platform/v1/api/#pingone-mfa
   description: PingOne Platform API Reference - PingOne MFA APIs
 servers:
-  - url: https://api.pingone.{suffix}
+  - url: '{protocol}://{baseDomain}.{suffix}/v1'
     description: PingOne Platform API Endpoint
     variables:
       suffix:
@@ -16,7 +16,18 @@ servers:
           - 'com'
           - 'asia'
           - 'ca'
-        default: 'eu'
+        default: 'com'
+      baseDomain:
+        default: 'api.pingone'
+      protocol:
+        default: 'https'
+  - url: '{protocol}://{baseHostname}/v1'
+    description: PingOne Platform API Endpoint
+    variables:
+      baseHostname:
+        default: 'api.pingone.com'
+      protocol:
+        default: 'https'
 components:
   securitySchemes:
     bearer:
@@ -352,6 +363,34 @@ components:
         - totp
         - default
         - forSignOnPolicy
+    DeviceAuthenticationPolicyPost:
+      oneOf:
+        - $ref: '#/components/schemas/DeviceAuthenticationPolicy'
+        - $ref: '#/components/schemas/DeviceAuthenticationPolicyMigrate'
+    DeviceAuthenticationPolicyPostResponse:
+      oneOf:
+        - $ref: '#/components/schemas/DeviceAuthenticationPolicy'
+        - $ref: '#/components/schemas/EntityArray'
+    DeviceAuthenticationPolicyMigrate:
+      type: object
+      properties:
+        migrationData:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceAuthenticationPolicyMigrateData'
+      required:
+        - migrationData
+    DeviceAuthenticationPolicyMigrateData:
+      type: object
+      properties:
+        deviceAuthenticationPolicyId:
+          type: string
+          description: The ID of the device authentication policy.
+        fido2PolicyId:
+          type: string
+          description: The ID of the FIDO2 policy.
+      required:
+        - deviceAuthenticationPolicyId
     EntityArray:
       type: object
       properties:
@@ -383,6 +422,9 @@ components:
           type: number
         size:
           type: number
+    EnumDeviceAuthenticationPolicyPostContentType:
+      type: string
+      enum: [application/json, application/vnd.pingidentity.deviceAuthenticationPolicy.fido2.migrate+json]
     EnumFIDOAttestationRequirements:
       type: string
       enum: [NONE, AUDIT_ONLY, GLOBAL, CERTIFIED, SPECIFIC]
@@ -549,6 +591,8 @@ components:
           type: string
           description: FIDO policy's UUID.
           readOnly: true
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
         createdAt:
           type: string
           format: date-time
@@ -615,7 +659,6 @@ components:
             option:
               $ref: '#/components/schemas/EnumFIDO2PolicyMDSAuthenticatorOption'
           required:
-            - allowedAuthenticators
             - enforceDuringAuthentication
             - option
         name:
@@ -942,7 +985,7 @@ tags:
   - name: Enable Users MFA
   - name: User MFA Pairing Keys
 paths:
-  /v1/environments/{environmentID}/applications/{applicationID}/pushCredentials:
+  /environments/{environmentID}/applications/{applicationID}/pushCredentials:
     get:
       tags:
         - Applications > Application MFA Push Credentials
@@ -1023,7 +1066,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MFAPushCredentialResponse'
-  /v1/environments/{environmentID}/applications/{applicationID}/pushCredentials/{pushCredentialID}:
+  /environments/{environmentID}/applications/{applicationID}/pushCredentials/{pushCredentialID}:
     get:
       tags:
         - Applications > Application MFA Push Credentials
@@ -1158,7 +1201,7 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/deviceAuthenticationPolicies:
+  /environments/{environmentID}/deviceAuthenticationPolicies:
     get:
       tags:
         - Device Authentication Policy
@@ -1198,8 +1241,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeviceAuthenticationPolicy'
+              $ref: '#/components/schemas/DeviceAuthenticationPolicyPost'
+          application/vnd.pingidentity.deviceAuthenticationPolicy.fido2.migrate+json:
+            schema:
+              $ref: '#/components/schemas/DeviceAuthenticationPolicyPost'
       parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            $ref: '#/components/schemas/EnumDeviceAuthenticationPolicyPostContentType'
         - name: environmentID
           in: path
           schema:
@@ -1220,13 +1270,19 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
+        '200':
+          description: Successful response (migration)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceAuthenticationPolicyPostResponse'
         '201':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DeviceAuthenticationPolicy'
-  /v1/environments/{environmentID}/deviceAuthenticationPolicies/{deviceAuthenticationPolicyID}:
+                $ref: '#/components/schemas/DeviceAuthenticationPolicyPostResponse'
+  /environments/{environmentID}/deviceAuthenticationPolicies/{deviceAuthenticationPolicyID}:
     get:
       tags:
         - Device Authentication Policy
@@ -1333,7 +1389,7 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/fidoDevicesMetadata:
+  /environments/{environmentID}/fidoDevicesMetadata:
     get:
       tags:
         - FIDO Device
@@ -1401,7 +1457,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FIDODevice'
-  /v1/environments/{environmentID}/fidoDevicesMetadata/{fidoDeviceID}:
+  /environments/{environmentID}/fidoDevicesMetadata/{fidoDeviceID}:
     get:
       tags:
         - FIDO Device
@@ -1468,7 +1524,7 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/fidoPolicies:
+  /environments/{environmentID}/fidoPolicies:
     get:
       deprecated: true
       tags:
@@ -1538,7 +1594,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FIDOPolicy'
-  /v1/environments/{environmentID}/fidoPolicies/{fidoPolicyID}:
+  /environments/{environmentID}/fidoPolicies/{fidoPolicyID}:
     get:
       deprecated: true
       tags:
@@ -1648,12 +1704,12 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/fido2Policies:
+  /environments/{environmentID}/fido2Policies:
     get:
       tags:
         - FIDO2 Policy
       summary: READ FIDO2 Policies
-      operationId: readFido2Policies
+      operationId: readFIDO2Policies
       parameters:
         - name: environmentID
           in: path
@@ -1683,7 +1739,7 @@ paths:
       tags:
         - FIDO2 Policy
       summary: CREATE FIDO2 Policy
-      operationId: createFido2Policy
+      operationId: createFIDO2Policy
       requestBody:
         content:
           application/json:
@@ -1716,12 +1772,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FIDO2Policy'
-  /v1/environments/{environmentID}/fido2Policies/{fido2PolicyID}:
+  /environments/{environmentID}/fido2Policies/{fido2PolicyID}:
     get:
       tags:
         - FIDO2 Policy
       summary: READ One FIDO2 Policy
-      operationId: readOneFido2Policy
+      operationId: readOneFIDO2Policy
       parameters:
         - name: environmentID
           in: path
@@ -1801,7 +1857,7 @@ paths:
       tags:
         - FIDO2 Policy
       summary: DELETE FIDO2 Policy
-      operationId: deleteFido2Policy
+      operationId: deleteFIDO2Policy
       parameters:
         - name: environmentID
           in: path
@@ -1828,7 +1884,7 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/mfaSettings:
+  /environments/{environmentID}/mfaSettings:
     get:
       tags:
         - MFA Settings
@@ -1924,7 +1980,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MFASettings'
-  /v1/environments/{environmentID}/users/{userID}/devices:
+  /environments/{environmentID}/users/{userID}/devices:
     post:
       tags:
         - User MFA Devices
@@ -2043,7 +2099,7 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}:
+  /environments/{environmentID}/users/{userID}/devices/{deviceID}:
     post:
       tags:
         - User MFA Devices
@@ -2167,7 +2223,7 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}/nickname:
+  /environments/{environmentID}/users/{userID}/devices/{deviceID}/nickname:
     put:
       tags:
         - User MFA Devices
@@ -2212,7 +2268,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/devices/{deviceID}/logs:
+  /environments/{environmentID}/users/{userID}/devices/{deviceID}/logs:
     put:
       tags:
         - User MFA Devices
@@ -2257,7 +2313,7 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /v1/environments/{environmentID}/users/{userID}/mfaEnabled:
+  /environments/{environmentID}/users/{userID}/mfaEnabled:
     get:
       tags:
         - Enable Users MFA
@@ -2335,7 +2391,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserMFAEnabled'
-  /v1/environments/{environmentID}/users/{userID}/pairingKeys/{pairingKeyID}:
+  /environments/{environmentID}/users/{userID}/pairingKeys/{pairingKeyID}:
     get:
       tags:
         - User MFA Pairing Keys
@@ -2408,7 +2464,7 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-  /v1/environments/{environmentID}/users/{userID}/pairingKeys:
+  /environments/{environmentID}/users/{userID}/pairingKeys:
     post:
       tags:
         - User MFA Pairing Keys
