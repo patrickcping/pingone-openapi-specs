@@ -112,6 +112,8 @@ components:
         name:
           type: string
           description: Device authentication policy's name.
+        newDeviceNotification:
+          $ref: '#/components/schemas/EnumMFADevicePolicyNewDeviceNotification'
         authentication:
           type: object
           description: An object that contains the device selection settings.
@@ -486,6 +488,15 @@ components:
       type: string
       enum: [permissive, restrictive]
       description: Controls how authentication or registration attempts should proceed if a device integrity check does not receive a response. Set the value to `permissive` if you want to allow the process to continue. Set the value to `restrictive` if you want to block the user in such situations.
+    EnumMFADevicePolicyNewDeviceNotification:
+      type: string
+      enum: [NONE, EMAIL_THEN_SMS, SMS_THEN_EMAIL]
+      description: |
+        Use `newDeviceNotification` to control whether a user should be notified if a new authentication method has been added to their account. Can take one of the following values:
+        - `NONE` - don't notify the user when a new authentication method is added.
+        - `EMAIL_THEN_SMS` - notify the user by email. If there is no email address in the user profile, notify the user by SMS. If there is no phone number either, don't notify the user.
+        - `SMS_THEN_EMAIL` - notify the user by SMS. If there is no phone number in the user profile, notify the user by email. If there is no email address either, don't notify the user.
+        If the parameter is not provided, the default value is `EMAIL_THEN_SMS`.
     EnumMFADevicePolicySelection:
       type: string
       enum: [DEFAULT_TO_FIRST, PROMPT_TO_SELECT, ALWAYS_PROMPT_TO_SELECT]
