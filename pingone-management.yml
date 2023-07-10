@@ -3168,12 +3168,15 @@ components:
         rotationPeriod:
           type: integer
           description: The number of days to elapse before this KRP rotates `KrpKeys`. The default value is `90` days. The minimum value is `30` days. The maximum value is 1 day less than the `validityPeriod` value.
+          default: 90
+          minimum: 30
         signatureAlgorithm:
           $ref: '#/components/schemas/EnumKeyRotationPolicySigAlgorithm'
         usageType:
           $ref: '#/components/schemas/EnumKeyRotationPolicyUsageType'
         validityPeriod:
           type: integer
+          default: 365
           description: Controls the `startsAt` and `expiresAt` fields this KRP will apply to generated `KrpKeys`. The default value is `365` days.
       required:
         - algorithm
@@ -3182,7 +3185,6 @@ components:
         - name
         - signatureAlgorithm
         - usageType
-        - validityPeriod
     Language:
       type: object
       properties:
