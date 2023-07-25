@@ -36,6 +36,27 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
+    LinksHATEOAS:
+      type: object
+      readOnly: true
+      additionalProperties: true
+      properties:
+        self:
+          type: object
+          description: An object that describes the current resource.
+          properties:
+            href:
+              $ref: '#/components/schemas/LinksHATEOASHref'
+        next:
+          type: object
+          description: An object that describes the next page of results. This property is present only if there is a next page of results and the `limit` parameter is used.
+          properties:
+            href:
+              $ref: '#/components/schemas/LinksHATEOASHref'
+    LinksHATEOASHref:
+      type: string
+      format: uri
+      description: The URI of the resource.
     EnumAgreementRevisionContentType:
       type: string
       description: An immutable string that specifies the content type of text. Options are text/html and text/plain, as defined by [rfc-6838](https://datatracker.ietf.org/doc/html/rfc6838#section-4.2.1) and [Media Types/text](https://www.iana.org/assignments/media-types/media-types.xhtml#text). This attribute is supported in POST requests only.
@@ -503,6 +524,8 @@ components:
     Agreement:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         consentsAggregatedAt:
           type: string
           format: date-time
@@ -541,6 +564,8 @@ components:
     AgreementLanguage:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         agreement:
           type: object
           properties:
@@ -590,6 +615,8 @@ components:
     AgreementLanguageRevision:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         agreement:
           type: object
           properties:
@@ -633,6 +660,8 @@ components:
     AlertChannel:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: Unique ID of the alert channel.
@@ -668,8 +697,8 @@ components:
     Application:
       type: object
       properties:
-        _links:
-          type: object
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         accessControl:
           type: object
           properties:
@@ -1039,6 +1068,8 @@ components:
     ApplicationAttributeMapping:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -1094,6 +1125,8 @@ components:
     ApplicationResourceGrant:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         application:
           type: object
           readOnly: true
@@ -1214,6 +1247,8 @@ components:
     BillOfMaterials:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         solutionType:
           $ref: '#/components/schemas/EnumSolutionType'
         createdAt:
@@ -1277,6 +1312,8 @@ components:
     BrandingSettings:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -1301,6 +1338,8 @@ components:
     BrandingTheme:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         configuration:
           type: object
           properties:
@@ -1386,6 +1425,8 @@ components:
     BrandingThemeDefault:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         default:
           type: boolean
           description: A boolean to specify whether the theme is the default in the environment
@@ -1394,6 +1435,8 @@ components:
     Certificate:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         algorithm:
           $ref: '#/components/schemas/EnumCertificateKeyAlgorithm'
         createdAt:
@@ -1477,6 +1520,8 @@ components:
     CustomDomain:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         certificate:
           type: object
           readOnly: true
@@ -1526,6 +1571,8 @@ components:
     EmailDomain:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -1638,6 +1685,8 @@ components:
     EntityArray:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         '_embedded':
           type: object
           properties:
@@ -1832,6 +1881,8 @@ components:
     Environment:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         billOfMaterials:
           $ref: '#/components/schemas/BillOfMaterials'
         createdAt:
@@ -1891,6 +1942,8 @@ components:
     FlowPolicy:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: The flow policy resource's unique identifier.
@@ -1926,6 +1979,8 @@ components:
     FlowPolicyAssignment:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: A string that specifies the flow policy assignment resource's unique identifier.
@@ -1953,6 +2008,8 @@ components:
     Form:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -2450,8 +2507,8 @@ components:
     Gateway:
       type: object
       properties:
-        _links:
-          type: object
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -2740,6 +2797,8 @@ components:
     Group:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -2791,6 +2850,8 @@ components:
     GroupMembership:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: ID of the group to assign
@@ -2799,6 +2860,8 @@ components:
     GroupNesting:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: ID of the group to nest
@@ -2819,6 +2882,8 @@ components:
     IdentityProviderAttribute:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         mappingType:
           $ref: '#/components/schemas/EnumIdentityProviderAttributeMappingType'
         name:
@@ -2856,8 +2921,8 @@ components:
     IdentityProviderCommon:
       type: object
       properties:
-        _links:
-          type: object
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         description:
           type: string
           description: The description of the IdP.
@@ -3094,6 +3159,8 @@ components:
     Image:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -3135,6 +3202,8 @@ components:
     KeyRotationPolicy:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         algorithm:
           $ref: '#/components/schemas/EnumKeyRotationPolicyAlgorithm'
         currentKeyId:
@@ -3188,6 +3257,8 @@ components:
     Language:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         default:
           type: boolean
           description: Specifies whether this language is the default for the environment. This property value must be set to false when creating a language resource. It can be set to true only after the language is enabled and after the localization of an agreement resource is complete when agreements are used for the environment.
@@ -3227,6 +3298,8 @@ components:
     LanguageLocalizationStatus:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         createdAt:
           type: string
           format: date-time
@@ -3262,6 +3335,8 @@ components:
     License:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         advancedServices:
           type: object
           readOnly: true
@@ -3504,6 +3579,8 @@ components:
     NotificationsPolicy:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         createdAt:
           type: string
           format: date-time
@@ -3578,6 +3655,8 @@ components:
     NotificationsSettings:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         updatedAt:
           type: string
           format: date-time
@@ -3646,6 +3725,8 @@ components:
     NotificationsSettingsEmailDeliverySettings:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         host:
           type: string
           description: A string that specifies the organization's SMTP server.
@@ -3692,6 +3773,8 @@ components:
     NotificationsSettingsPhoneDeliverySettingsCommon:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -3891,6 +3974,8 @@ components:
     Organization:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: A string that specifies the resource’s unique identifier.
@@ -3975,6 +4060,8 @@ components:
     PasswordPolicy:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         bypassPolicy:
           type: boolean
           default: false
@@ -4120,6 +4207,8 @@ components:
     Population:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         createdAt:
           type: string
           description: The time the resource was created.
@@ -4185,6 +4274,8 @@ components:
     Resource:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         accessTokenValiditySeconds:
           type: integer
           description: An integer that specifies the number of seconds that the access token is valid. If a value is not specified, the default is 3600. The minimum value is 300 seconds (5 minutes); the maximum value is 2592000 seconds (30 days).
@@ -4228,6 +4319,8 @@ components:
     ResourceAttribute:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -4285,6 +4378,8 @@ components:
     ResourceScope:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -4322,6 +4417,8 @@ components:
     Role:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         applicableTo:
           type: array
           readOnly: true
@@ -4356,6 +4453,8 @@ components:
     RoleAssignment:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
         gateway:
@@ -4398,6 +4497,8 @@ components:
     Schema:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         allowsContainsOperator:
           type: boolean
           readOnly: true
@@ -4424,6 +4525,8 @@ components:
     SchemaAttribute:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         description:
           type: string
           description: A string that specifies an optional property that specifies the description of the attribute. If provided, it must not be an empty string. Valid characters consists of any Unicode letter, mark (for example, accent or umlaut), numeric character, punctuation character, or space.
@@ -4518,6 +4621,8 @@ components:
     SignOnPolicy:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         createdAt:
           type: string
           description: The date and time the resource was created (format ISO-8061).
@@ -4679,9 +4784,8 @@ components:
     SignOnPolicyActionCommon:
       type: object
       properties:
-        _links:
-          type: object
-          readOnly: true
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         condition:
           oneOf:
             - $ref: '#/components/schemas/SignOnPolicyActionCommonConditionAnd'
@@ -5105,6 +5209,8 @@ components:
     SignOnPolicyAssignment:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         application:
           $ref: '#/components/schemas/ObjectApplication'
         environment:
@@ -5132,6 +5238,8 @@ components:
     Subscription:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         createdAt:
           type: string
           format: date-time
@@ -5226,6 +5334,8 @@ components:
     Template:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: The template id
@@ -5269,6 +5379,8 @@ components:
     TemplateContentCommon:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: The template id.
@@ -5453,6 +5565,8 @@ components:
     User:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         account:
           type: object
           properties:
@@ -5461,15 +5575,23 @@ components:
               description: A boolean that specifies the whether the user can authenticate. If the value is set to false, the account is locked or the user is disabled, and unless specified otherwise in administrative configuration, the user will be unable to authenticate.
             lockedAt:
               type: string
+              format: date-time
+              readOnly: true
               description: The time the specified user account was locked. This property might be absent if the account is unlocked or if the account was locked out automatically by failed password attempts.
             secondsUntilUnlock:
               type: integer
+              readOnly: true
               description: An integer that specifies the number of seconds until the user's account is unlocked. This property is absent if the account is unlocked, or if it will not automatically unlock (and must be unlocked by an administrator).
             status:
               $ref: '#/components/schemas/EnumUserStatus'
             unlockAt:
               type: string
+              format: date-time
+              readOnly: true
               description: The time the specified user account will be unlocked. This property is absent if the account is unlocked, or if it will not automatically unlock (and must be unlocked by an administrator).
+          required:
+            - canAuthenticate
+            - status
         address:
           type: object
           properties:
@@ -5503,10 +5625,16 @@ components:
               description: A string that specifies the full street address component, which may include house number, street name, P.O. box, and multi-line extended street address information. This attribute may contain newlines (regex `^[\p{L}\p{M}\p{N}\p{Zs}\p{P}\n\r]*$`). It can have a length of no more than 256 characters (min/max=1/256).
         createdAt:
           type: string
+          format: date-time
+          readOnly: true
           description: The time the resource was created.
         email:
           type: string
           description: A string that specifies the user’s email address, which must be provided and valid. For more information about email address formatting, see section 3.4 of RFC 2822, Internet Message Format.
+        emailVerified:
+          type: boolean
+          readOnly: true
+          description: Whether the user’s email is verified. An email address can be verified during account verification. If the email address used to request the verification code is the same as the user’s email at verification time (and the verification code is valid), then the email is verified. The value of this property can be set on user import.
         enabled:
           type: boolean
           readOnly: true
@@ -5533,9 +5661,11 @@ components:
               readOnly: true
         lastSignOn:
           type: object
+          readOnly: true
           properties:
             at:
               type: string
+              format: date-time
               description: The time of the last successful login of the user through the PingOne flow API.
             remoteIp:
               type: string
@@ -5545,6 +5675,9 @@ components:
           properties:
             status:
               $ref: '#/components/schemas/EnumUserLifecycleStatus'
+            suppressVerificationCode:
+              type: boolean
+              description: Used when importing a user and the lifecycle.status is set to VERIFICATION_REQUIRED. If this property is set to true, no verification email is sent to the user. If this property is omitted or set to false, a verification email is sent automatically to the user.
         locale:
           type: string
           pattern: '^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$'
@@ -5631,8 +5764,7 @@ components:
                       type: string
                       description: The UUID of the linked gateway that references the remote directory.
                     type:
-                      type: string
-                      description: An enum indicating one of the supported gateway types. For the supported types, see type in the Gateway base data model.
+                      $ref: '#/components/schemas/EnumGatewayType'
                     userType:
                       type: object
                       description: A reference to a userType in the list of userTypes values for an LDAP gateway.
@@ -5649,6 +5781,8 @@ components:
             href:
               type: string
               description: A string that specifies the URI that is a uniform resource locator (as defined in Section 1.1.3 of RFC 3986) that points to a resource location representing the user’s image. This can be removed from a user by setting the photo attribute to null. If provided, the resource must be a file (for example, a GIF, JPEG, or PNG image file) rather than a web page containing an image. It must be a valid URL that starts with the HTTP or HTTPS scheme.
+          required:
+            - href
         population:
           type: object
           properties:
@@ -5684,6 +5818,8 @@ components:
         updatedAt:
           type: string
           description: The time the resource was last updated.
+          format: date-time
+          readOnly: true
         username:
           type: string
           pattern: '^[\p{L}\p{M}\p{Zs}\p{S}\p{N}\p{P}]*$'
@@ -5698,6 +5834,8 @@ components:
     UserEnabled:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         enabled:
           type: boolean
           default: true
@@ -5705,6 +5843,8 @@ components:
     UserPopulation:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: A string that specifies the population ID associated with the user resource ID identified in the request URL.
@@ -5858,6 +5998,11 @@ paths:
           schema:
             type: integer
           description: Adding a paging value to limit the number of resources displayed per page
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Adding a cursor value to retrieve the next page of results, used with the `limit` parameter. The cursor value is returned in the `_links.next.href` link in the response payload.
         - name: filter
           in: query
           schema:
@@ -10889,6 +11034,11 @@ paths:
           schema:
             type: integer
           example: '10'
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Adding a cursor value to retrieve the next page of results, used with the `limit` parameter. The cursor value is returned in the `_links.next.href` link in the response payload.
         - name: environmentID
           in: path
           schema:
@@ -14648,6 +14798,11 @@ paths:
             type: string
           description: Adding a SCIM filter for a population ID or population name to display only those resources associated with the specified population. Only the id and name parameters are supported
           example: id eq "60971d3b-cc5a-4601-9c44-2be541f91bf1"
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Adding a cursor value to retrieve the next page of results, used with the `limit` parameter. The cursor value is returned in the `_links.next.href` link in the response payload.
       responses:
         '400':
           $ref: '#/components/responses/400'
@@ -16807,6 +16962,11 @@ paths:
           schema:
             type: integer
           example: '100'
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Adding a cursor value to retrieve the next page of results, used with the `limit` parameter. The cursor value is returned in the `_links.next.href` link in the response payload.
         - name: environmentID
           in: path
           schema:
@@ -17316,6 +17476,11 @@ paths:
           schema:
             type: integer
           example: '100'
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Adding a cursor value to retrieve the next page of results, used with the `limit` parameter. The cursor value is returned in the `_links.next.href` link in the response payload.
         - name: filter
           in: query
           schema:

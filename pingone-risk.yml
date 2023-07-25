@@ -36,9 +36,32 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
+    LinksHATEOAS:
+      type: object
+      readOnly: true
+      additionalProperties: true
+      properties:
+        self:
+          type: object
+          description: An object that describes the current resource.
+          properties:
+            href:
+              $ref: '#/components/schemas/LinksHATEOASHref'
+        next:
+          type: object
+          description: An object that describes the next page of results. This property is present only if there is a next page of results and the `limit` parameter is used.
+          properties:
+            href:
+              $ref: '#/components/schemas/LinksHATEOASHref'
+    LinksHATEOASHref:
+      type: string
+      format: uri
+      description: The URI of the resource.
     EntityArray:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         '_embedded':
           type: object
           properties:
@@ -88,11 +111,12 @@ components:
       enum: [VALUE_COMPARISON, STRING_LIST, AND, NOT, OR]
     EnumPredictorNewDeviceDetectType:
       type: string
-      enum: [NEW_DEVICE]
+      description: Used only for New Device predictors and Suspicious Device predictors. Both of these predictor types use the value `DEVICE` for `type`. The `detect` field is used to specify the kind of devices you are trying to detect.
+      enum: [NEW_DEVICE, SUSPICIOUS_DEVICE]
     EnumPredictorType:
       type: string
-      enum: [ANONYMOUS_NETWORK, COMPOSITE, GEO_VELOCITY, IP_REPUTATION, MAP, DEVICE, USER_LOCATION_ANOMALY, USER_RISK_BEHAVIOR, VELOCITY]
-      description: An enum type. This can be either `ANONYMOUS_NETWORK`, `COMPOSITE`, `GEO_VELOCITY`, `IP_REPUTATION`, `MAP`, `DEVICE`, `USER_LOCATION_ANOMALY`, `USER_RISK_BEHAVIOR` or `VELOCITY`.
+      enum: [ANONYMOUS_NETWORK, BOT, COMPOSITE, GEO_VELOCITY, IP_REPUTATION, MAP, DEVICE, USER_LOCATION_ANOMALY, USER_RISK_BEHAVIOR, VELOCITY]
+      description: An enum type that specifies the type of the predictor. Note that both the New Device and Suspicious Device predictors use the type DEVICE. To differentiate between them, you use the `detect` field.
     EnumPredictorUnit:
       type: string
       enum: [DAY, HOUR]
@@ -189,6 +213,8 @@ components:
     RiskEvaluation:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         createdAt:
           type: string
           readOnly: true
@@ -539,6 +565,8 @@ components:
     RiskPolicy:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         condition:
           type: object
           description: Contains the condition logic that determines when a policy is evaluated to true and when it is evaluated to false.
@@ -637,6 +665,8 @@ components:
     RiskPolicySet:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         createdAt:
           type: string
           format: date-time
@@ -740,6 +770,8 @@ components:
     RiskPredictorCommon:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true

@@ -36,6 +36,27 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
+    LinksHATEOAS:
+      type: object
+      readOnly: true
+      additionalProperties: true
+      properties:
+        self:
+          type: object
+          description: An object that describes the current resource.
+          properties:
+            href:
+              $ref: '#/components/schemas/LinksHATEOASHref'
+        next:
+          type: object
+          description: An object that describes the next page of results. This property is present only if there is a next page of results and the `limit` parameter is used.
+          properties:
+            href:
+              $ref: '#/components/schemas/LinksHATEOASHref'
+    LinksHATEOASHref:
+      type: string
+      format: uri
+      description: The URI of the resource.
     DeviceAuthenticationPolicyFIDODevice:
       type: object
       deprecated: true
@@ -103,6 +124,8 @@ components:
     DeviceAuthenticationPolicy:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
         id:
@@ -396,6 +419,8 @@ components:
     EntityArray:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         '_embedded':
           type: object
           properties:
@@ -545,6 +570,8 @@ components:
       type: object
       deprecated: true
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: FIDO policy's UUID.
@@ -598,6 +625,8 @@ components:
     FIDO2Policy:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: FIDO policy's UUID.
@@ -807,6 +836,8 @@ components:
     MFAPushCredentialResponse:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -826,6 +857,8 @@ components:
     MFASettings:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
         authentication:
@@ -936,6 +969,8 @@ components:
     UserMFAEnabled:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         mfaEnabled:
           type: boolean
           description: Whether multi-factor authentication is enabled. This attribute is set to `false` by default when the user is created.

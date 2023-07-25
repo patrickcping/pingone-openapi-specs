@@ -36,9 +36,32 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
+    LinksHATEOAS:
+      type: object
+      readOnly: true
+      additionalProperties: true
+      properties:
+        self:
+          type: object
+          description: An object that describes the current resource.
+          properties:
+            href:
+              $ref: '#/components/schemas/LinksHATEOASHref'
+        next:
+          type: object
+          description: An object that describes the next page of results. This property is present only if there is a next page of results and the `limit` parameter is used.
+          properties:
+            href:
+              $ref: '#/components/schemas/LinksHATEOASHref'
+    LinksHATEOASHref:
+      type: string
+      format: uri
+      description: The URI of the resource.
     APIServer:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         authorizationServer:
           type: object
           description: A container object for properties related to the authorization server that will issue access tokens used to access the APIs.
@@ -80,6 +103,8 @@ components:
     DecisionEndpoint:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         alternateId:
           type: string
           description: A string that specifies alternative unique identifier for the endpoint, which provides a method for locating the resource by a known, fixed identifier.
@@ -142,6 +167,8 @@ components:
     EntityArray:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         '_embedded':
           type: object
           properties:

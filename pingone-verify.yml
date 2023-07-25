@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: PingOne Platform API - PingOne Verify
   description: The PingOne Platform API covering the PingOne Verify service
-  version: '2023-06-29'
+  version: '2023-07-20'
 externalDocs:
   url: https://apidocs.pingidentity.com/pingone/platform/v1/api/#pingone-verify
   description: PingOne Platform API Reference - PingOne Verify APIs
@@ -36,6 +36,101 @@ components:
       bearerFormat: JWT
       description: OAuth bearer token (see documentation)
   schemas:
+    LinksHATEOAS:
+      type: object
+      readOnly: true
+      additionalProperties: true
+      properties:
+        self:
+          type: object
+          description: An object that describes the current resource.
+          properties:
+            href:
+              $ref: '#/components/schemas/LinksHATEOASHref'
+        next:
+          type: object
+          description: An object that describes the next page of results. This property is present only if there is a next page of results and the `limit` parameter is used.
+          properties:
+            href:
+              $ref: '#/components/schemas/LinksHATEOASHref'
+    LinksHATEOASHref:
+      type: string
+      format: uri
+      description: The URI of the resource.
+    EntityArray:
+      type: object
+      properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
+        '_embedded':
+          type: object
+          properties:
+            verifyPolicies:
+              type: array
+              items:
+                $ref: '#/components/schemas/VerifyPolicy'
+            voicePhrases:
+              type: array
+              items:
+                $ref: '#/components/schemas/VoicePhrase'
+            contents:
+              type: array
+              items:
+                $ref: '#/components/schemas/VoicePhraseContents'
+        size:
+          type: number
+    EnumTimeUnit:
+      type: string
+      enum: [SECONDS, MINUTES]
+      description: A string that defines the time unit of a specified duration in `SECONDS` or `MINUTES`.
+    EnumThreshold:
+      type: string
+      enum: [LOW, MEDIUM, HIGH]
+      description: A string that defines the verification comparison threshold. Options are `LOW`, `MEDIUM` and `HIGH`.      
+    EnumVerify:
+      type: string
+      enum: [REQUIRED, OPTIONAL, DISABLED]
+      description: A string that defines the verification check requirements. Options are `REQUIRED`, `OPTIONAL` and `DISABLED`.
+    FacialComparisonConfiguration:
+      type: object
+      properties:
+        verify:
+          $ref: '#/components/schemas/EnumVerify'
+          description: Controls if facial comparison is REQUIRED, OPTIONAL, or DISABLED.
+        threshold:
+          $ref: '#/components/schemas/EnumThreshold'
+          description: Threshold for successful facial comparison; can be LOW, MEDIUM, or HIGH (for which PingOne Verify uses industry and vendor recommended definitions).
+      required:
+        - threshold
+        - verify      
+    GovernmentIdConfiguration:
+      type: object
+      properties:
+        verify:
+          $ref: '#/components/schemas/EnumVerify'
+          description: Controls if Government ID verification is REQUIRED, OPTIONAL, or DISABLED.
+      required:
+        - verify
+    LivenessConfiguration:
+      type: object
+      properties:
+        verify:
+          $ref: '#/components/schemas/EnumVerify'
+          description: Controls if liveness check is REQUIRED, OPTIONAL, or DISABLED.
+        threshold:
+          $ref: '#/components/schemas/EnumThreshold'
+          description: Threshold for successful facial comparison; can be LOW, MEDIUM, or HIGH (for which PingOne Verify uses industry and vendor recommended definitions).
+      required:
+        - threshold
+        - verify       
+    ObjectEnvironment:
+      type: object
+      readOnly: true
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the environment associated with the object.
     OTPDeviceConfiguration:
       type: object
       properties:
@@ -110,70 +205,6 @@ components:
             - notification
       required:
         - verify
-    EntityArray:
-      type: object
-      properties:
-        '_embedded':
-          type: object
-          properties:
-            verifyPolicies:
-              type: array
-              items:
-                $ref: '#/components/schemas/VerifyPolicy'
-        size:
-          type: number
-    EnumTimeUnit:
-      type: string
-      enum: [SECONDS, MINUTES]
-      description: A string that defines the time unit of a specified duration in `SECONDS` or `MINUTES`.
-    EnumThreshold:
-      type: string
-      enum: [LOW, MEDIUM, HIGH]
-      description: A string that defines the verification comparison threshold. Options are `LOW`, `MEDIUM` and `HIGH`.      
-    EnumVerify:
-      type: string
-      enum: [REQUIRED, OPTIONAL, DISABLED]
-      description: A string that defines the verification check requirements. Options are `REQUIRED`, `OPTIONAL` and `DISABLED`.
-    FacialComparisonConfiguration:    
-      type: object
-      properties:
-        verify:
-          $ref: '#/components/schemas/EnumVerify'        
-          description: Controls if facial comparison is REQUIRED, OPTIONAL, or DISABLED.
-        threshold:
-          $ref: '#/components/schemas/EnumThreshold'                
-          description: Threshold for successful facial comparison; can be LOW, MEDIUM, or HIGH (for which PingOne Verify uses industry and vendor recommended definitions).
-      required:
-        - threshold
-        - verify      
-    GovernmentIdConfiguration:    
-      type: object
-      properties:
-        verify:
-          $ref: '#/components/schemas/EnumVerify'     
-          description: Controls if Government ID verification is REQUIRED, OPTIONAL, or DISABLED.
-      required:
-        - verify
-    LivenessConfiguration:    
-      type: object
-      properties:
-        verify:
-          $ref: '#/components/schemas/EnumVerify'             
-          description: Controls if liveness check is REQUIRED, OPTIONAL, or DISABLED.
-        threshold:
-          $ref: '#/components/schemas/EnumThreshold'                
-          description: Threshold for successful facial comparison; can be LOW, MEDIUM, or HIGH (for which PingOne Verify uses industry and vendor recommended definitions).
-      required:
-        - threshold
-        - verify       
-    ObjectEnvironment:
-      type: object
-      readOnly: true
-      properties:
-        id:
-          type: string
-          readOnly: true
-          description: A string that specifies the environment associated with the object.
     P1Error:
       type: object
       properties: 
@@ -222,7 +253,7 @@ components:
                   maximumValue:
                     description: The maximum value allowed for the request.
                     type: integer
-    TransactionConfiguration:    
+    TransactionConfiguration:
       type: object
       properties:
         timeout:
@@ -256,9 +287,142 @@ components:
             - timeout
         dataCollectionOnly:
           type: boolean
+    VoiceConfiguration:
+      example:
+        verify: null
+        enrollment: true
+        textDependent:
+          samples: null
+          phrase:
+            id: id
+        comparison:
+          threshold: null
+        liveness:
+          threshold: null          
+        referenceData:
+          retainOriginalRecordings: true
+          updateOnReenrollment: true
+          updateOnVerification: true
+      properties:
+        verify:
+          $ref: '#/components/schemas/EnumVerify'  
+        enrollment:
+          type: boolean
+        textDependent:
+          $ref: '#/components/schemas/VoiceConfiguration_textDependent'
+        comparison:
+          properties:
+          $ref: '#/components/schemas/VoiceConfiguration_threshold'
+        liveness:
+          $ref: '#/components/schemas/VoiceConfiguration_threshold'
+        referenceData:
+          $ref: '#/components/schemas/VoiceConfiguration_referenceData'
+      required:
+      - verify
+      - enrollment
+      - comparison
+      - liveness
+      type: object      
+    VoiceConfiguration_referenceData:
+      example:
+        retainOriginalRecordings: true
+        updateOnReenrollment: true
+        updateOnVerification: true
+      properties:
+        retainOriginalRecordings:
+          type: boolean
+        updateOnReenrollment:
+          type: boolean
+        updateOnVerification:
+          type: boolean          
+      type: object  
+    VoiceConfiguration_threshold:
+      example:
+        threshold: null
+      properties:
+        threshold:
+          $ref: '#/components/schemas/EnumThreshold'
+      required:
+      - threshold
+      type: object
+    VoiceConfiguration_textDependent_phrase:
+      example:
+        id: id
+      properties:
+        id:
+          type: string
+      required:
+      - id
+      type: object
+    VoiceConfiguration_textDependent:
+      example:
+        samples: null
+        phrase:
+          id: id
+      properties:
+        samples:
+          type: integer
+        phrase:
+          $ref: '#/components/schemas/VoiceConfiguration_textDependent_phrase'
+      required:
+      - samples
+      - phrase
+      type: object 
+    VoicePhrase:
+      properties:
+        id:
+          type: string
+          readOnly: true
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        displayName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true          
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - displayName        
+      type: object 
+    VoicePhraseContents:
+      properties:
+        id:
+          type: string
+          readOnly: true
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        voicePhrase:
+          properties:
+            id:
+              type: string
+          required:
+          - id
+        locale:
+          type: string
+        content:
+          type: string          
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true          
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - locale
+      - content
+      - voicePhrase        
+      type: object 
     VerifyPolicy:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           readOnly: true
@@ -285,6 +449,8 @@ components:
           $ref: '#/components/schemas/OTPDeviceConfiguration'
         transaction:
           $ref: '#/components/schemas/TransactionConfiguration'
+        voice:
+          $ref: '#/components/schemas/VoiceConfiguration'                    
         createdAt:
           type: string
           format: date-time
@@ -341,7 +507,7 @@ components:
 security:
   - bearer: []
 tags:
-- name: Verify Policies
+  - name: Verify Policies
 paths:
   /environments/{environmentID}/verifyPolicies:
     post:
@@ -583,5 +749,388 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-
-
+  /environments/{environmentID}/voicePhrases:
+    post:
+      tags:
+      - Voice Phrases
+      summary: CREATE Voice Phrase
+      operationId: createVoicePhrase
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoicePhrase'
+            example:
+              displayName: 'Example Voice Phrase'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoicePhrase'
+    get:
+      tags:
+      - Voice Phrases
+      summary: READ All Voice Phrases
+      operationId: readAllVoicePhrases
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'  
+  /environments/{environmentID}/voicePhrases/{voicePhraseID}:
+    get:
+      tags:
+      - Voice Phrases
+      summary: READ One Voice Phrase
+      operationId: readOneVoicePhrase
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: voicePhraseID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoicePhrase'
+    put:
+      tags:
+      - Voice Phrases
+      summary: UPDATE Voice Phrase
+      operationId: updateVoicePhrase
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoicePhrase'
+            example:
+              displayName: Voice Phrase Name
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: voicePhraseID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoicePhrase'
+    delete:
+      tags:
+      - Voice Phrases
+      summary: Delete Voice Phrase
+      operationId: deleteVoicePhrase
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: voicePhraseID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
+  /environments/{environmentID}/voicePhrases/{voicePhraseID}/contents:
+    post:
+      tags:
+      - Voice Phrase Contents
+      summary: CREATE Voice Phrase Content
+      operationId: createVoicePhraseContent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoicePhraseContents'
+            example:
+              locale: en
+              content: 'Design brilliant journeys to any digital desintation.'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: voicePhraseID
+          in: path
+          schema:
+            type: string
+          required: true          
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoicePhraseContents'
+    get:
+      tags:
+      - Voice Phrase Contents
+      summary: READ All Voice Phrase Contents
+      operationId: readAllVoicePhraseContents
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: voicePhraseID
+          in: path
+          schema:
+            type: string
+          required: true             
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'  
+  /environments/{environmentID}/voicePhrases/{voicePhraseID}/contents/{voiceContentsID}:
+    get:
+      tags:
+      - Voice Phrase Contents
+      summary: READ One Voice Phrase Content
+      operationId: readOneVoicePhraseContent
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: voicePhraseID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: voiceContentsID
+          in: path
+          schema:
+            type: string
+          required: true          
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoicePhraseContents'
+    put:
+      tags:
+      - Voice Phrase Contents
+      summary: UPDATE Voice Phrase Content
+      operationId: updateVoicePhraseContent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoicePhraseContents'
+            example:
+              locale: en
+              content: 'Brilliant journeys to any digital destination.'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: voicePhraseID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: voiceContentsID
+          in: path
+          schema:
+            type: string
+          required: true               
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoicePhraseContents'
+    delete:
+      tags:
+      - Voice Phrase Contents
+      summary: Delete Voice Phrase Content
+      operationId: deleteVoicePhraseContent
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: voicePhraseID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: voiceContentsID
+          in: path
+          schema:
+            type: string
+          required: true          
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
