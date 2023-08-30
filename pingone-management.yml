@@ -414,17 +414,21 @@ components:
     EnumRoleName:
       type: string
       description: The name of the role
-      enum: ["Organization Admin",
+      enum: [
+        "Client Application Developer",
+        "Configuration Read Only",
+        "DaVinci Admin Read Only",
+        "DaVinci Admin",
         "Environment Admin",
         "Identity Data Admin",
-        "Client Application Developer",
         "Identity Data Read Only",
-        "Configuration Read Only",
+        "Organization Admin",
         "PingFederate Administrator",
-        "PingFederate Expression Administrator",
+        "PingFederate Auditor",
         "PingFederate Crypto Administrator",
-        "PingFederate User Administrator",
-        "PingFederate Auditor"]
+        "PingFederate Expression Administrator",
+        "PingFederate User Administrator"
+      ]
     EnumRoleAssignmentScopeType:
       type: string
       enum: [ORGANIZATION, ENVIRONMENT, POPULATION]
@@ -808,6 +812,9 @@ components:
             assertionSigned:
               type: boolean
               description: A boolean that specifies whether the SAML assertion itself should be signed. The default value is true.
+            enableRequestedAuthnContext:
+              type: boolean
+              description: Indicates whether `requestedAuthnContext` is taken into account in policy decision-making during authentication.
             idpSigning:
               type: object
               properties:
@@ -5309,8 +5316,9 @@ components:
               description: A string that specifies a valid HTTPS URL to which event messages are sent. This is a required property.
             headers:
               type: object
-              description: An object map that specifies the headers applied to the outbound request (for example, `Authorization` `Basic usernamepassword`. The purpose of these headers is for the HTTPS endpoint to authenticate the PingOne service, ensuring that the information from PingOne is from a trusted source.
-              additionalProperties: true
+              description: An object map of strings that specifies the headers applied to the outbound request (for example, `Authorization` `Basic usernamepassword`. The purpose of these headers is for the HTTPS endpoint to authenticate the PingOne service, ensuring that the information from PingOne is from a trusted source.
+              additionalProperties:
+                type: string
           required:
             - url
         name:
