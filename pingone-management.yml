@@ -84,6 +84,11 @@ components:
     EnumApplicationOIDCGrantType:
       type: string
       enum: [AUTHORIZATION_CODE, IMPLICIT, REFRESH_TOKEN, CLIENT_CREDENTIALS]
+    EnumApplicationOIDCPARRequirement:
+      type: string
+      description: Whether pushed authorization requests (PAR) are required. Options are `REQUIRED` and `OPTIONAL`. The default value is `OPTIONAL`.
+      default: OPTIONAL
+      enum: [REQUIRED, OPTIONAL]
     EnumApplicationOIDCPKCEOption:
       type: string
       enum: [OPTIONAL, REQUIRED, S256_REQUIRED]
@@ -103,6 +108,7 @@ components:
       type: string
       enum: [HTTP_REDIRECT, HTTP_POST]
       description: A string that specifies the binding protocol to be used for the logout response. Options are HTTP_REDIRECT or HTTP_POST. The default is HTTP_POST; existing configurations with no data default to HTTP_POST.
+      default: HTTP_POST
     EnumApplicationTags:
       type: string
       enum: [PING_FED_CONNECTION_INTEGRATION]
@@ -112,7 +118,8 @@ components:
       description: A string that specifies the type associated with the application. This is a required property.
     EnumApplicationWSFEDIDPSigningAlgorithm:
       type: string
-      description: The signature algorithm to be used for signing. Algorithms upported RSA_SHA 256, 384, 512, and ECDSA_SHA 1, 224, 256, 384, 512.
+      description: The signature algorithm to be used for signing. Algorithms supported `SHA256withRSA`, `SHA384withRSA`, `SHA512withRSA`, `SHA256withECDSA`, `SHA384withECDSA`, and `SHA512withECDSA`.
+      enum: [SHA256withRSA, SHA384withRSA, SHA512withRSA, SHA256withECDSA, SHA384withECDSA, SHA512withECDSA]
     EnumApplicationWSFEDKerberosGatewayType:
       type: string
       enum: [LDAP]
@@ -121,6 +128,9 @@ components:
       type: string
       enum: [CORE, SCOPE, CUSTOM]
       description: A string that specifies the mapping type of the attribute. Options are CORE, SCOPE, and CUSTOM. The CORE and SCOPE mapping types are for reserved attributes managed by the API and cannot be removed. Attribute values for these mapping types can be updated. The CUSTOM mapping type is for user-defined attributes. Attributes of this type can be updated and deleted.
+    EnumBillOfMaterialsProductTags:
+      type: string
+      enum: [DAVINCI_MINIMAL]
     EnumBrandingLogoType:
       type: string
       enum: [IMAGE, NONE]
@@ -139,8 +149,8 @@ components:
       description: Specifies the key algorithm. Options are `RSA`, `EC`, and `UNKNOWN`.
     EnumCertificateKeySignagureAlgorithm:
       type: string
-      description: Specifies the signature algorithm of the key. For RSA keys, options are `SHA224withRSA`, `SHA256withRSA`, `SHA384withRSA` and `SHA512withRSA`. For elliptical curve (EC) keys, options are `SHA224withECDSA`, `SHA256withECDSA`, `SHA384withECDSA`, and `SHA512withECDSA`
-      enum: [SHA224withRSA, SHA256withRSA, SHA384withRSA, SHA512withRSA, SHA224withECDSA, SHA256withECDSA, SHA384withECDSA, SHA512withECDSA]
+      description: Specifies the signature algorithm of the key. For RSA keys, options are `SHA256withRSA`, `SHA384withRSA` and `SHA512withRSA`. For elliptical curve (EC) keys, options are `SHA256withECDSA`, `SHA384withECDSA`, and `SHA512withECDSA`
+      enum: [SHA256withRSA, SHA384withRSA, SHA512withRSA, SHA256withECDSA, SHA384withECDSA, SHA512withECDSA]
     EnumCertificateKeyStatus:
       type: string
       description: Specifies the status of the key. Options are `VALID`, `EXPIRING`, `EXPIRED`, `NOT_YET_VALID`, and `REVOKED`.
@@ -148,8 +158,8 @@ components:
       readOnly: true
     EnumCertificateKeyUsageType:
       type: string
-      description: Specifies how the certificate is used. Options are `ENCRYPTION`, `SIGNING`, `SSL/TLS`, `ISSUANCE`.
-      enum: [ENCRYPTION, SIGNING, SSL/TLS, ISSUANCE]
+      description: Specifies how the certificate is used. Options are `ENCRYPTION`, `SIGNING`, `SSL/TLS`, `ISSUANCE`, `OUTBOUND_MTLS`.  `ISSUANCE` keys are used as part of another key's trust chain, and are used to sign other keys. Certificate Revocation Lists (CRL) are published against these keys. `SSL/TLS` keys are used to protect internet protocol domains (such as, a [Custom Domain](https://apidocs.pingidentity.com/pingone/platform/v1/api/#custom-domains) you've configured in PingOne). `OUTBOUND_MTLS` keys are used to enable mutual TLS (mTLS) authentication with a subscription service.
+      enum: [ENCRYPTION, SIGNING, SSL/TLS, ISSUANCE, OUTBOUND_MTLS]
     EnumCreateCertificateAcceptHeader:
       type: string
       enum: [application/x-pkcs7-certificates]
@@ -226,6 +236,7 @@ components:
       type: string
       enum: [None, TLS, StartTLS]
       description: A string that specifies the connection security type. Options are None, TLS, and StartTLS. The default value is None.
+      default: None
     EnumGatewayType:
       type: string
       enum: [LDAP, PING_FEDERATE, PING_INTELLIGENCE, API_GATEWAY_INTEGRATION, RADIUS]
@@ -241,6 +252,11 @@ components:
     EnumGetKeyAcceptHeader:
       type: string
       enum: [application/json, application/x-pkcs7-certificates, application/x-x509-ca-cert]
+    EnumGroupSourceType:
+      type: string
+      enum: [GATEWAY, IDP]
+      readOnly: true
+      description: External groups only. Set during user creation/update. Supported values are `GATEWAY`, `IDP`
     EnumHealthStatus:
       type: string
       enum: [HEALTHY, DEGRADED, UNHEALTHY]
@@ -249,6 +265,7 @@ components:
       type: string
       enum: [FACEBOOK, GOOGLE, LINKEDIN, APPLE, TWITTER, AMAZON, YAHOO, MICROSOFT, PAYPAL, GITHUB, OPENID_CONNECT, SAML, PING_ONE]
       description: A string that identifies the type of identity provider used to authenticate the user. The default value of `PING_ONE` is set when a value for identityProvider.id is not provided. The `PING_ONE` value is the default for all pre-existing users. There is currently no search filter support for this attribute.
+      default: PING_ONE
     EnumIdentityProviderAttributeMappingType:
       type: string
       description: The mapping type. Options are CORE (This attribute is required by the schema and cannot be removed. The name and update properties cannot be changed.) or CUSTOM (All user-created attributes are of this type.)
@@ -266,6 +283,10 @@ components:
       description: A string that specifies the OIDC identity provider's token endpoint authentication method. Options are CLIENT_SECRET_BASIC (default), CLIENT_SECRET_POST, and NONE. This is a required property.
       default: CLIENT_SECRET_BASIC
       enum: [CLIENT_SECRET_BASIC, CLIENT_SECRET_POST, NONE]
+    EnumIdentityProviderSAMLSigningAlgorithm:
+      type: string
+      description: The signing key algorithm used by PingOne. Value will depend on which key algorithm and signature algorithm you chose when creating your signing key. Possible values are `SHA256withRSA`, `SHA384withRSA`, `SHA512withRSA`, `SHA256withECDSA`, `SHA384withECDSA`, `SHA512eithEDCSA`.
+      enum: [SHA256withRSA, SHA384withRSA, SHA512withRSA, SHA256withECDSA, SHA384withECDSA, SHA512eithEDCSA]
     EnumIdentityProviderSAMLSSOBinding:
       type: string
       description: A string that specifies the binding for the authentication request. Options are HTTP_POST and HTTP_REDIRECT.
@@ -388,6 +409,75 @@ components:
       type: string
       enum: [PING_ONE_MFA, PING_ONE_DAVINCI, PING_ONE_ORCHESTRATE, PING_ONE_RISK, PING_ONE_FRAUD, PING_ONE_PROVISIONING, PING_DATA_SYNC, PING_DATA_GOVERNANCE, PING_ONE_FOR_ENTERPRISE, PING_ID_SDK, PING_ONE_FOR_SAAS, PING_ONE_VERIFY, PING_ONE_CREDENTIALS, PING_ONE_AUTHORIZE, PING_ONE_BASE, PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_AUTHORIZE, PING_ID, PING_INTELLIGENCE, PING_CENTRAL]
       description: A string that specifies the Ping Identity product type. Options for PingOne platform products are PING_ONE_DAVINCI, PING_ONE_MFA, PING_ONE_RISK, PING_ONE_VERIFY, PING_ONE_CREDENTIALS, PING_ONE_AUTHORIZE and PING_ONE_BASE. The PING_ONE_BASE product represents the default set of services that an environment can use on the PingOne platform. Options for other Ping Identity products are PING_FEDERATE, PING_ACCESS, PING_DIRECTORY, PING_AUTHORIZE, PING_ID, PING_INTELLIGENCE, and PING_CENTRAL
+    EnumPropagationStoreConnectionStatusContentType:
+      type: string
+      enum: [application/vnd.pingidentity.connection.check+json]
+    EnumPropagationStoreStatus:
+      type: string
+      enum: [INACTIVE]
+      description: The status of the identity store. The default value is INACTIVE.
+    EnumPropagationStoreSyncState:
+      type: string
+      readOnly: true
+      enum: [SYNCING, FAILED]
+      description: The current state of synchronization with a propagation store or stores. Options are either SYNCING or FAILED.
+    EnumPropagationStoreType:
+      type: string
+      enum: [Aquera, AzureActiveDirectorySAML2, directory, LdapGateway, PingOne, Salesforce, SalesforceContacts, scim, Slack, Workday, Zoom]
+      description: The type of the identity store and determines the required and acceptable configuration properties. It also determines the acceptable target attribute mappings. Options are Aquera, AzureActiveDirectorySAML2, directory, LdapGateway, PingOne, Salesforce, SalesforceContacts, scim, Slack, Workday, or Zoom.
+    EnumPropagationStoreTypeRemoveActionDisable:
+      type: string
+      enum: [Disable]
+      description: The action to take when deprovisioning (removing) a user. Must be set to Disable.
+    EnumPropagationStoreTypeRemoveActionDisableDelete:
+      type: string
+      enum: [Disable, Delete]
+      description: The action to take when deprovisioning (removing) a user. Options are either `Disable` or `Delete`.
+    EnumPropagationStoreTypeAqueraAuthenticationMethod:
+      type: string
+      enum: [OAuth Bearer Token, Basic Auth]
+      description: The account authentication method. For example, `OAuth Bearer Token` or `Basic Auth`.
+    EnumPropagationStoreTypeAqueraGroupSourceName:
+      type: string
+      enum: [Common Name, Distinguished Name]
+      description: The source to use for the group name. Options are either `Common Name` or `Distinguished Name`.
+    EnumPropagationStoreTypeLDAPGatewayLDAPType:
+      type: string
+      enum: [PingDirectory, Microsoft Active Directory]
+      description: Type of LDAP gateway; can be `PingDirectory` or `Microsoft Active Directory`.
+    EnumPropagationStoreTypePingOneDefaultAuthMethod:
+      type: string
+      enum: [Email 1, SMS 1, Voice 1]
+      description: The default authentication method. Options are `Email 1`, `SMS 1`, or `Voice 1`.
+    EnumPropagationStoreTypePingOneRegion:
+      type: string
+      enum: [NA, CA, EU, AP]
+      description: A supported region. Options are `NA`, `CA`, `EU`, or `AP`.
+    EnumPropagationStoreTypeSalesforceContactsRecordType:
+      type: string
+      enum: [Lead, Contact]
+      description: The type of Salesforce record. Options are either Lead or Contact.
+    EnumPropagationStoreTypeSCIMAuthenticationMethod:
+      type: string
+      enum: [OAuth 2 Client Credentials, OAuth 2 Bearer Token, Basic Authentication]
+      description: The account authentication method. Can be `OAuth 2 Client Credentials`, `OAuth 2 Bearer Token`, or `Basic Authentication`.
+    EnumPropagationStoreTypeSCIMGroupNameSource:
+      type: string
+      enum: [Common Name, Distinguished Name]
+      description: The source to use for the group name. Options are either `Common Name` or `Distinguished Name`.
+    EnumPropagationStoreTypeSCIMUniqueUserIdentifier:
+      type: string
+      enum: [userName, workEmail]
+      description: Specifies the unique user identifier to use. Options are either `userName` or `workEmail`.
+    EnumPropagationStoreTypeSlackUniqueUserIdentifier:
+      type: string
+      enum: [primaryEmail, userName]
+      description: The unique user identifier, must be either `primaryEmail` or `userName`.
+    EnumPropagationStoreTypeZoomAuthenticationMethod:
+      type: string
+      enum: [JWT Bearer Token, OAuth Bearer Token]
+      description: Account authentication method. Case sensitive. Can be JWT Bearer Token or OAuth Bearer Token. Defaults to JWT Bearer Token.
+      default: JWT Bearer Token
     EnumRegionCode:
       type: string
       enum: [AP, CA, EU, NA]
@@ -441,6 +531,7 @@ components:
       type: string
       enum: [ STRING, JSON, BOOLEAN, COMPLEX ]
       description: A string that specifies the the type of the attribute. It may be one of STRING, JSON, BOOLEAN, or COMPLEX. If the type is not provided during creation, then it defaults to STRING. Complex and boolean attributes may not be created, but standard attributes of those types may be updated. JSON attributes are limited by size (total size must not exceed 16KB).
+      default: STRING
     EnumSignOnPolicyExtraVerification:
       type: string
       enum: [disabled, permissive, restrictive]
@@ -488,6 +579,7 @@ components:
         * `APPROVE_AND_OPEN_APP` - when the Approve button is clicked, authentication is completed and the user is taken to the relevant application.
 
         If this parameter is not provided, the default is `BANNER_BUTTONS`. Note that to use the non-default push banners, you must implement them in your application code, using the PingOne SDK. For details, see the [README for iOS](https://github.com/pingidentity/pingone-mobile-sdk-ios/#171-push-notifications-categories) and the [README for Android](https://github.com/pingidentity/pingone-mobile-sdk-android).
+      default: BANNER_BUTTONS
     EnumTrustedEmailStatus:
       type: string
       enum: [ACTIVE, VERIFICATION_REQUIRED]
@@ -811,7 +903,8 @@ components:
               description: An integer that specifies the assertion validity duration in seconds. This is a required property.
             assertionSigned:
               type: boolean
-              description: A boolean that specifies whether the SAML assertion itself should be signed. The default value is true.
+              description: A boolean that specifies whether the SAML assertion itself should be signed. The default value is `true`.
+              default: true
             enableRequestedAuthnContext:
               type: boolean
               description: Indicates whether `requestedAuthnContext` is taken into account in policy decision-making during authentication.
@@ -835,7 +928,8 @@ components:
               description: A string that specifies the format of the Subject NameID attibute in the SAML assertion
             responseSigned:
               type: boolean
-              description: A boolean that specifies whether the SAML assertion response itself should be signed. The default value is False.
+              description: A boolean that specifies whether the SAML assertion response itself should be signed. The default value is `false`.
+              default: false
             sloBinding:
               $ref: '#/components/schemas/EnumApplicationSAMLSloBinding'
             sloEndpoint:
@@ -853,6 +947,10 @@ components:
             spVerification:
               type: object
               properties:
+                authnRequestSigned:
+                  type: boolean
+                  description: Whether the Authn Request signing should be enforced. Default is `false`.
+                  default: false
                 certificates:
                   type: array
                   items:
@@ -874,6 +972,10 @@ components:
         - $ref: '#/components/schemas/Application'
         - type: object
           properties:
+            additionalRefreshTokenReplayProtectionEnabled:
+              type: boolean
+              description: When set to `true` (the default), if you attempt to reuse the refresh token, the authorization server immediately revokes the reused refresh token, as well as all descendant tokens. Setting this to null equates to a `false` setting.
+              default: true
             allowWildcardInRedirectUris:
               type: boolean
               description: A boolean to specify whether wildcards are allowed in redirect URIs. For more information, see [Wildcards in Redirect URIs](https://docs.pingidentity.com/csh?context=p1_c_wildcard_redirect_uri).
@@ -1015,6 +1117,9 @@ components:
               description: A string that specifies the code or token type returned by an authorization request. Options are TOKEN, ID_TOKEN, and CODE. Note that CODE cannot be used in an authorization request with TOKEN or ID_TOKEN because PingOne does not currently support OIDC hybrid flows.
               items:
                 $ref: '#/components/schemas/EnumApplicationOIDCResponseType'
+            requireSignedRequestObject:
+              type: boolean
+              description: Indicates that the Java Web Token (JWT) for the [request query](https://openid.net/specs/openid-connect-core-1_0.html#RequestObject) parameter is required to be signed. If `false` or null (default), a signed request object is not required. Both `supportUnsignedRequestObject` and this property cannot be set to `true`.
             supportUnsignedRequestObject:
               type: boolean
               description: A boolean that specifies whether the [request query](https://openid.net/specs/openid-connect-core-1_0.html#RequestObject) parameter JWT is allowed to be unsigned. If false or null (default), an unsigned request object is not allowed.
@@ -1028,6 +1133,14 @@ components:
               description: The URI for the application. If specified, PingOne will redirect application users to this URI after a user is authenticated. In the PingOne admin console, this becomes the value of the `target_link_uri` parameter used for the Initiate Single Sign-On URL field.
             tokenEndpointAuthMethod:
               $ref: '#/components/schemas/EnumApplicationOIDCTokenAuthMethod'
+            parRequirement:
+              $ref: '#/components/schemas/EnumApplicationOIDCPARRequirement'
+            parTimeout:
+              type: integer
+              description: PAR timeout in seconds. Must be between `1` and `600`. The default value is `60`.
+              minimum: 1
+              maximum: 600
+              default: 60
           required:
             - grantTypes
             - tokenEndpointAuthMethod
@@ -1290,6 +1403,10 @@ components:
                     description: Primary console link for certain products
                 required:
                   - href
+              tags:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnumBillOfMaterialsProductTags'
               deployment:
                 type: object
                 properties:
@@ -1470,7 +1587,7 @@ components:
           description: Specifies the distinguished name of the certificate issuer.
         keyLength:
           type: integer
-          description: Specifies the key length. For RSA keys, options are 2048, 3072, and 7680. For elliptical curve (EC) keys, options are 224, 256, and 384.
+          description: The key length. For RSA keys, options are `2048`, `3072`, `4096`, and `7680`. For elliptical curve (EC) keys, options are `224`, `256`, `384`, and `521`.
         name:
           type: string
           description: Specifies the resource name.
@@ -2812,6 +2929,10 @@ components:
           description: The unique identifier for the group. Search all groups for a specific group ID with a SCIM filter on GET /environments/{environmentID}/groups. Retrieve all the group IDs associated with a user with GET /environments/{environmentID}/users/{userID}?include=memberOfGroupIDs.
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
+        displayName:
+          type: string
+          readOnly: true
+          description: For external groups, set during user creation/update. For groups created on PingOne, this parameter is identical to `name`.
         population:
           type: object
           description: The population to assign the group to
@@ -2836,6 +2957,12 @@ components:
         customData:
           type: object
           description: Optional User-defined custom data.
+        sourceId:
+          type: string
+          readOnly: true
+          description: External groups only. Set during user creation/update.
+        sourceType:
+          $ref: '#/components/schemas/EnumGroupSourceType'
         directMemberCounts:
           type: object
           readOnly: true
@@ -3131,6 +3258,8 @@ components:
             spSigning:
               type: object
               properties:
+                algorithm:
+                  $ref: '#/components/schemas/EnumIdentityProviderSAMLSigningAlgorithm'
                 key:
                   type: object
                   properties:
@@ -3978,6 +4107,14 @@ components:
           type: string
           readOnly: true
           description: A string that specifies the population associated with the object.
+    ObjectResource:
+      type: object
+      readOnly: true
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource associated with the object.
     Organization:
       type: object
       properties:
@@ -4064,6 +4201,10 @@ components:
                   maximumValue:
                     description: The maximum value allowed for the request.
                     type: integer
+                  referencedValues:
+                    type: array
+                    items:
+                      type: string
     PasswordPolicy:
       type: object
       properties:
@@ -4211,6 +4352,20 @@ components:
       required:
         - file
         - usageType
+    PKIKeyFileUpload:
+      type: object
+      properties:
+        usageType:
+          type: string
+          example: ENCRYPTION
+        file:
+          type: string
+          format: binary
+        password:
+          type: string
+      required:
+        - file
+        - usageType
     Population:
       type: object
       properties:
@@ -4254,6 +4409,596 @@ components:
           readOnly: true
       required:
         - name
+    PropagationStore:
+      type: object
+      properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
+        configuration:
+          type: object
+          description: Configuration properties specific to each identity propagation store.
+          additionalProperties: true
+        description:
+          type: string
+          description: A description for the identity propagation store.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        image:
+          type: object
+          properties:
+            href:
+              type: string
+              description: The URL for the identity store resource image file.
+            id:
+              type: string
+              description: The image ID for the identity store resource.
+        managed:
+          type: boolean
+          description: Indicates whether or not to enable deprovisioning of users for a store when it is deleted. The deprovisioning occurs when a new revision is created (`POST {{apiPath}}/environments/{{envID}}/propagation/revisions`).
+        name:
+          type: string
+          description: The name of the identity store.
+        status:
+          $ref: '#/components/schemas/EnumPropagationStoreStatus'
+        syncStatus:
+          type: object
+          readOnly: true
+          properties:
+            details:
+              type: string
+              readOnly: true
+              description: Details of any synchronization errors.
+            failedCount:
+              type: integer
+              readOnly: true
+              description: A count of failed synchronization events since the last revision.
+            failedDeprovisionCount:
+              type: integer
+              readOnly: true
+              description: A count of failed deprovisioning synchronization events since the last revision.
+            lastSyncAt:
+              type: string
+              format: date-time
+              readOnly: true
+              description: The last synchronization in yyyy-MM-dd'T'HH:mm:ss.SSS'Z' format.
+            successCount:
+              type: integer
+              readOnly: true
+              description: A count of successful synchronization events since the last revision.
+            syncState:
+              $ref: '#/components/schemas/EnumPropagationStoreSyncState'
+            userTotal:
+              type: integer
+              readOnly: true
+              description: A count of users that will synchronize to the target store based on the Rule’s filter.
+        type:
+          $ref: '#/components/schemas/EnumPropagationStoreType'
+      required:
+        - configuration
+        - name
+        - type
+    PropagationStoreConfigurationAquera:
+      type: object
+      properties:
+        ACCESS_TOKEN:
+          type: string
+          description: A string specifying the access token for account authentication.
+        AUTHENTICATION_METHOD:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeAqueraAuthenticationMethod'
+        BASIC_AUTH_PASSWORD:
+          type: string
+          description: The password for account authentication.
+        BASIC_AUTH_USER:
+          type: string
+          description: The user name for account authentication.
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DISABLE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be disabled.
+        GROUP_NAME_SOURCE:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeAqueraGroupSourceName'
+        REMOVE_ACTION:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeRemoveActionDisableDelete'
+        SCIM_URL:
+          type: string
+          description: The SCIM URL.
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+      required:
+        - AUTHENTICATION_METHOD
+        - BASIC_AUTH_PASSWORD
+        - BASIC_AUTH_USER
+        - SCIM_URL
+    PropagationStoreConfigurationAzureADSAMLV2:
+      type: object
+      properties:
+        ClientId:
+          type: string
+          description: The Azure Active Directory client ID.
+        ClientSecret:
+          type: string
+          description: The Azure Active Directory client secret.
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DEPROVISION_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be deprovisioned (removed) following action specified in `REMOVE_ACTION`.
+        DISABLE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be disabled.
+        PROVISION_DISABLED_USERS_PROV_OPT:
+          type: boolean
+          description: Whether or not disabled users can be provisioned. Defaults to `true` and, if used, must be set to `true`.
+          default: true
+        REMOVE_ACTION:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeRemoveActionDisableDelete'
+        RemoveLicensesWhenSkuIdEmpty:
+          type: boolean
+          description: Whether or not remove licenses from user when `skuId` is empty.
+        TenantDomain:
+          type: string
+          description: The account's Azure Active Directory domain.
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+      required:
+        - ClientId
+        - ClientSecret
+        - RemoveLicensesWhenSkuIdEmpty
+        - TenantDomain
+    PropagationStoreConfigurationGithubEMU:
+      type: object
+      properties:
+        BASE_URL:
+          type: string
+          description: Base URL of the target propagation store.
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DEPROVISION_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be deprovisioned (removed) following action specified in `REMOVE_ACTION`.
+        OAUTH_ACCESS_TOKEN:
+          type: string
+          description: OAuth 2 access token.
+        REMOVE_ACTION:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeRemoveActionDisableDelete'
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+      required:
+        - BASE_URL
+        - OAUTH_ACCESS_TOKEN
+    PropagationStoreConfigurationGoogleApps:
+      type: object
+      properties:
+        APPLICATION_NAME:
+          type: string
+          description: Name of the application using the store.
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DEPROVISION_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be deprovisioned (removed) following action specified in `REMOVE_ACTION`.
+        DISABLE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be disabled.
+        DOMAIN:
+          type: string
+          description: The account's domain name.
+        OAUTH_ACCESS_TOKEN:
+          type: string
+          description: OAuth 2 access token.
+        OAUTH_CLIENT_ID:
+          type: string
+          description: GoogleApps identifier of the client associated with the propagation store.
+        OAUTH_CLIENT_SECRET:
+          type: string
+          description: GoogleApps secret of the client associated with the propagation store.
+        OAUTH_REFRESH_TOKEN:
+          type: string
+          description: OAuth 2 refresh token.
+        PROVISION_DISABLED_USERS_PROV_OPT:
+          type: boolean
+          description: Whether or not disabled users can be provisioned. Defaults to `true` and, if used, must be set to `true`.
+          default: true
+        REMOVE_ACTION:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeRemoveActionDisableDelete'
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+      required:
+        - APPLICATION_NAME
+        - DOMAIN
+        - OAUTH_ACCESS_TOKEN
+        - OAUTH_CLIENT_ID
+        - OAUTH_CLIENT_SECRET
+        - OAUTH_REFRESH_TOKEN
+    PropagationStoreConfigurationLDAPGateway:
+      type: object
+      properties:
+        ATTRIBUTE_METADATA:
+          type: string
+          description: User-defined attribute metadata.
+        CLIENT_ID:
+          type: string
+          description: Identifier of the client for authentication.
+        CLIENT_SECRET:
+          type: string
+          description: Secret of the client for authentication.
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DELETE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be deleted.
+        ENVIRONMENT_ID:
+          type: string
+          description: Identifier, a UUID, of the environment the connector services.
+        GATEWAY_BASE_URL:
+          type: string
+          description: Base URL of the gateway.
+        GATEWAY_ID:
+          type: string
+          description: Identifier of the gateway to which the connector connects.
+        LDAP_TYPE:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeLDAPGatewayLDAPType'
+        OAUTH_URL:
+          type: string
+          description: OAuth token request endpoint.
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+      required:
+        - CLIENT_ID
+        - CLIENT_SECRET
+        - ENVIRONMENT_ID
+        - GATEWAY_BASE_URL
+        - GATEWAY_ID
+        - LDAP_TYPE
+        - OAUTH_URL
+    PropagationStoreConfigurationPingOne:
+      type: object
+      properties:
+        CLIENT_ID:
+          type: string
+          description: Unique identifier (UUID) of the PingOne client associated with the propagation store.
+        CLIENT_SECRET:
+          type: string
+          description: The PingOne client secret.
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DEFAULT_AUTH_METHOD:
+          $ref: '#/components/schemas/EnumPropagationStoreTypePingOneDefaultAuthMethod'
+        DISABLE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be disabled.
+        ENVIRONMENT_ID:
+          type: string
+          description: Unique identifier (UUID) of the PingOne environment associated with the propagation store.
+        MFA_USER_DEVICE_MANAGEMENT:
+          type: string
+          description: How to manage MFA user devices when synchronizing. Options are either Merge with devices in PingOne or Overwrite devices in PingOne.
+        PROVISION_DISABLED_USERS_PROV_OPT:
+          type: boolean
+          description: Whether or not disabled users can be provisioned.
+        REGION:
+          $ref: '#/components/schemas/EnumPropagationStoreTypePingOneRegion'
+        REMOVE_ACTION:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeRemoveActionDisableDelete'
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+      required:
+        - ENVIRONMENT_ID
+        - REGION
+    PropagationStoreConfigurationSalesforce:
+      type: object
+      properties:
+        ACCOUNT_ID:
+          type: string
+          description: The Salesforce account ID.
+        CLIENT_ID:
+          type: string
+          description: The Salesforce client ID.
+        CLIENT_SECRET:
+          type: string
+          description: The Salesforce client secret.
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DISABLE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be disabled.
+        ENABLE_COMMUNITIES:
+          type: boolean
+          description: Whether or not to enable Salesforce communities.
+        FREEZE_USER_FLAG:
+          type: boolean
+          description: Whether the user account is frozen.
+        OAUTH_ACCESS_TOKEN:
+          type: string
+          description: OAuth access token for account authentication.
+        OAUTH_REFRESH_TOKEN:
+          type: string
+          description: OAuth refresh token for account authentication.
+        PERMISSION_SET_MANAGEMENT:
+          type: string
+          description: The permission sets to be merged with Salesforce.
+        PROFILE_ID:
+          type: string
+          description: The Salesforce profile ID.
+        PROVISION_DISABLED_USERS:
+          type: boolean
+          description: Whether or not disabled users can be provisioned.
+        SALESFORCE_DOMAIN:
+          type: string
+          description: The account's salesforce.com domain.
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+      required:
+        - CLIENT_ID
+        - CLIENT_SECRET
+        - ENABLE_COMMUNITIES
+        - FREEZE_USER_FLAG
+        - OAUTH_ACCESS_TOKEN
+        - OAUTH_REFRESH_TOKEN
+        - PERMISSION_SET_MANAGEMENT
+        - SALESFORCE_DOMAIN
+    PropagationStoreConfigurationSalesforceContacts:
+      type: object
+      properties:
+        ACCOUNT_ID:
+          type: string
+          description: The Salesforce account ID.
+        CLIENT_ID:
+          type: string
+          description: Unique identifier (UUID) of the Salesforce client associated with the propagation store.
+        CLIENT_SECRET:
+          type: string
+          description: The Salesforce client secret.
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DISABLE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be disabled.
+        ENABLE_COMMUNITIES:
+          type: boolean
+          description: Whether or not to enable Salesforce communities.
+        FREEZE_USER_FLAG:
+          type: boolean
+          description: Whether the user account is frozen.
+        OAUTH_ACCESS_TOKEN:
+          type: string
+          description: OAuth access token for account authentication.
+        OAUTH_REFRESH_TOKEN:
+          type: string
+          description: OAuth refresh token for account authentication.
+        PERMISSION_SET_MANAGEMENT:
+          type: string
+          description: The permission sets to be merged with Salesforce.
+        PROFILE_ID:
+          type: string
+          description: The Salesforce profile ID.
+        PROVISION_DISABLED_USERS:
+          type: boolean
+          description: Whether or not disabled users can be provisioned.
+        RECORD_TYPE:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeSalesforceContactsRecordType'
+        SALESFORCE_DOMAIN:
+          type: string
+          description: The account's salesforce.com domain.
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+      required:
+        - CLIENT_ID
+        - CLIENT_SECRET
+        - OAUTH_ACCESS_TOKEN
+        - OAUTH_REFRESH_TOKEN
+        - RECORD_TYPE
+        - SALESFORCE_DOMAIN
+    PropagationStoreConfigurationSCIM:
+      type: object
+      properties:
+        AUTHENTICATION_METHOD:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeSCIMAuthenticationMethod'
+        AUTHORIZATION_TYPE:
+          type: string
+          description: The authorization header type.
+        BASIC_AUTH_PASSWORD:
+          type: string
+          description: The password for account authentication. Required when `AUTHENTICATION_METHOD` is `Basic Authentication`, otherwise optional.
+        BASIC_AUTH_USER:
+          type: string
+          description: The user name for account authentication. Required when `AUTHENTICATION_METHOD` is `Basic Authentication`, otherwise optional.
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DISABLE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be disabled.
+        GROUP_NAME_SOURCE:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeSCIMGroupNameSource'
+        GROUPS_RESOURCE:
+          type: string
+          description: API endpoint path to the group entity.
+        OAUTH_ACCESS_TOKEN:
+          type: string
+          description: OAuth access token for account authentication. Required when `AUTHENTICATION_METHOD` is `OAuth 2 Bearer Token`, otherwise optional.
+        OAUTH_CLIENT_ID:
+          type: string
+          description: OAuth client ID. Required when `AUTHENTICATION_METHOD` is `OAuth 2 Client Credentials`, otherwise optional.
+        OAUTH_CLIENT_SECRET:
+          type: string
+          description: OAuth client secret. Required when `AUTHENTICATION_METHOD` is `OAuth 2 Client Credentials`, otherwise optional.
+        OAUTH_TOKEN_REQUEST:
+          type: string
+          description: OAuth token request endpoint. Required when `AUTHENTICATION_METHOD` is `OAuth 2 Bearer Token`, otherwise optional.
+        REMOVE_ACTION:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeRemoveActionDisableDelete'
+        SCIM_URL:
+          type: string
+          description: The SCIM URL.
+        SCIM_VERSION:
+          type: string
+          description: The SCIM version.
+        UNIQUE_USER_IDENTIFIER:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeSCIMUniqueUserIdentifier'
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+        USER_FILTER:
+          type: string
+          description: A string that specifies a SCIM filter expression.
+        USERS_RESOURCE:
+          type: string
+          description: API endpoint path to the user entity.
+      required:
+        - AUTHENTICATION_METHOD
+        - AUTHORIZATION_TYPE
+        - SCIM_URL
+        - SCIM_VERSION
+        - UNIQUE_USER_IDENTIFIER
+        - USER_FILTER
+        - USERS_RESOURCE
+    PropagationStoreConfigurationServiceNow:
+      type: object
+      properties:
+        Administrator_Password:
+          type: string
+          description: Password for the administrator.
+        Administrator_Username:
+          type: string
+          description: Username for the administrator.
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DEPROVISION_USERS:
+          type: string
+          description: Whether or not users are allowed to be deprovisioned (removed) following action specified in `REMOVE_ACTION`.
+        DISABLE_USERS:
+          type: boolean
+          description: Whether or not new users are allowed to be disabled.
+        REMOVE_ACTION:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeRemoveActionDisable'
+        ServiceNow_Url:
+          type: string
+          description: The URL for the ServiceNow account.
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+      required:
+        - Administrator_Password
+        - Administrator_Username
+        - ServiceNow_Url
+    PropagationStoreConfigurationSlack:
+      type: object
+      properties:
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DEPROVISION_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be deprovisioned (removed) following action specified in `REMOVE_ACTION`.
+        DISABLE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be disabled. Must be set to `true`.
+        OAUTH_ACCESS_TOKEN:
+          type: string
+          description: OAuth 2 access token.
+        REMOVE_ACTION:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeRemoveActionDisable'
+        UNIQUE_USER_IDENTIFIER:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeSlackUniqueUserIdentifier'
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+      required:
+        - OAUTH_ACCESS_TOKEN
+        - UNIQUE_USER_IDENTIFIER
+    PropagationStoreConfigurationWorkday:
+      type: object
+      properties:
+        excludeContingentWorkers:
+          type: boolean
+          description: Whether or not contingent workers are excluded.
+        excludeEmployees:
+          type: boolean
+          description: Whether or not employees are excluded.
+        excludeInactiveWorkers:
+          type: boolean
+          description: Whether or not inactive workers are excluded.
+        host:
+          type: string
+          description: The Workday API host.
+        password:
+          type: string
+          description: The password for account authentication.
+        tenantId:
+          type: string
+          description: The Workday tenant ID.
+        username:
+          type: string
+          description: The user name for account authentication.
+      required:
+        - password
+        - tenantId
+        - username
+    PropagationStoreConfigurationZoom:
+      type: object
+      properties:
+        API_KEY:
+          type: string
+          description: The client API key. Required when `AUTHENTICATION_METHOD` is `JWT Bearer Token`, otherwise optional.
+        API_SECRET:
+          type: string
+          description: The client API secret. Required when `AUTHENTICATION_METHOD` is `JWT Bearer Token`, otherwise optional.
+        AUTHENTICATION_METHOD:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeZoomAuthenticationMethod'
+        CREATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be created.
+        DEPROVISION_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be removed (deprovisioned) following the action configured in `REMOVE_ACTION`.
+        DISABLE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be disabled.
+        OAUTH_ACCOUNT_ID:
+          type: string
+          description: OAuth account identifier. Required when `AUTHENTICATION_METHOD` is `OAuth Bearer Token`, otherwise optional.
+        OAUTH_CLIENT_ID:
+          type: string
+          description: OAuth client identifier. Required when `AUTHENTICATION_METHOD` is `OAuth Bearer Token`, otherwise optional.
+        OAUTH_CLIENT_SECRET:
+          type: string
+          description: OAuth client secret. Required when `AUTHENTICATION_METHOD` is `OAuth Bearer Token`, otherwise optional.
+        OAUTH_TOKEN_URL:
+          type: string
+          description: OAuth token request endpoint. Required when `AUTHENTICATION_METHOD` is `OAuth Bearer Token`, otherwise optional.
+        REMOVE_ACTION:
+          $ref: '#/components/schemas/EnumPropagationStoreTypeRemoveActionDisableDelete'
+        SCIM_URL:
+          type: string
+          description: The SCIM URL.
+        UPDATE_USERS:
+          type: boolean
+          description: Whether or not users are allowed to be updated.
+      required:
+        - SCIM_URL
     RecaptchaConfiguration:
       type: object
       properties:
@@ -4391,6 +5136,8 @@ components:
           type: string
           readOnly: true
           description: A string that specifies the resource’s unique identifier.
+        resource:
+          $ref: '#/components/schemas/ObjectResource'
         name:
           type: string
           description: A string that specifies the resource scope name.
@@ -4429,9 +5176,9 @@ components:
         applicableTo:
           type: array
           readOnly: true
-          description: A string that specifies the scope to which the role applies.
+          description: A set of strings that specifies the scopes to which the role applies.
           items:
-            type: string  
+            $ref: '#/components/schemas/EnumRoleAssignmentScopeType'
         description:
           type: string
           readOnly: true
@@ -4445,7 +5192,7 @@ components:
         permissions:
           type: array
           readOnly: true
-          description: A string that specifies the set of permissions assigned to the role.
+          description: A set of permissions assigned to the role.
           items:
             type: object
             properties:
@@ -4457,6 +5204,10 @@ components:
                 type: string
                 readOnly: true
                 description: A string that specifies the description of what the permission enables for the role.
+              id:
+                type: string
+                readOnly: true
+                description: The ID of a permission associated with this role.
     RoleAssignment:
       type: object
       properties:
@@ -4471,6 +5222,13 @@ components:
             id:
               type: string
               description: A string that specifies the gateway ID.
+        group:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: A string that specifies the group ID.
         id:
           type: string
           readOnly: true
@@ -5324,6 +6082,13 @@ components:
         name:
           type: string
           description: A string that specifies the subscription name. This is a required property.
+        tlsClientAuthKeyPair:
+          type: object
+          description: An onject that describes the TLS client authentication key pair to use for mTLS.
+          properties:
+            id:
+              type: string
+              description: The ID of a key to be used for outbound mutual TLS (mTLS) authentication. This key is used as a client credential to authenticate the webhook. The key must have a `usageType` of `OUTBOUND_MTLS`. See [Certificate management](https://apidocs.pingidentity.com/pingone/platform/v1/api/#certificate-management) for information on creating a key. If this property is set, `verifyTlsCertificates` must be set to `true`.
         updatedAt:
           type: string
           format: date-time
@@ -5889,6 +6654,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/P1Error'
+    '409':
+      description: Conflict.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/P1Error'
     '429':
       description: Request was rate limited
       content:
@@ -6026,6 +6797,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6057,6 +6830,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6088,6 +6863,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6123,6 +6900,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6153,6 +6932,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6194,6 +6975,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6242,6 +7025,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6283,6 +7068,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6313,6 +7100,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6349,6 +7138,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6392,6 +7183,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6427,6 +7220,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6470,6 +7265,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6505,6 +7302,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6546,6 +7345,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6594,6 +7395,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6634,6 +7437,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6682,6 +7487,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6722,6 +7529,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6768,6 +7577,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6813,6 +7624,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6840,6 +7653,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6886,6 +7701,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6922,6 +7739,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -6971,6 +7790,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7006,6 +7827,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7033,6 +7856,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7090,6 +7915,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7130,6 +7957,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7194,6 +8023,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7236,6 +8067,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7268,6 +8101,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7305,6 +8140,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7351,6 +8188,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7386,6 +8225,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7427,6 +8268,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7478,6 +8321,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7518,6 +8363,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7552,6 +8399,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7596,6 +8445,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7639,6 +8490,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7686,6 +8539,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7728,6 +8583,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7762,6 +8619,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7806,6 +8665,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7849,6 +8710,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7896,6 +8759,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7938,6 +8803,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -7970,6 +8837,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8018,6 +8887,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8059,6 +8930,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8099,6 +8972,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8131,6 +9006,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8177,6 +9054,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8218,6 +9097,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8267,6 +9148,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8307,6 +9190,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8340,6 +9225,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8378,6 +9265,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8411,6 +9300,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8459,6 +9350,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8488,6 +9381,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8533,6 +9428,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8564,6 +9461,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8599,6 +9498,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8629,6 +9530,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8663,6 +9566,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8699,6 +9604,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8730,6 +9637,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8767,6 +9676,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8803,6 +9714,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8843,6 +9756,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8878,6 +9793,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8905,6 +9822,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8927,7 +9846,7 @@ paths:
               $ref: '#/components/schemas/Certificate'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PKIFileUpload'
+              $ref: '#/components/schemas/PKIKeyFileUpload'
       parameters:
         - name: Content-Type
           in: header
@@ -8950,6 +9869,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -8990,6 +9911,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9040,6 +9963,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9075,6 +10000,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9107,6 +10034,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9148,6 +10077,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9193,6 +10124,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9224,6 +10157,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9261,6 +10196,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9297,6 +10234,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9337,6 +10276,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9372,6 +10313,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9399,6 +10342,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9441,6 +10386,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9477,6 +10424,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9512,6 +10461,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9544,6 +10495,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9587,6 +10540,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9627,6 +10582,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9667,6 +10624,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9709,6 +10668,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9738,6 +10699,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9777,6 +10740,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9813,6 +10778,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9861,6 +10828,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9896,6 +10865,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9923,6 +10894,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9960,6 +10933,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -9996,6 +10971,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10031,6 +11008,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10063,6 +11042,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10099,6 +11080,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10135,6 +11118,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10176,6 +11161,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10223,6 +11210,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10263,6 +11252,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10295,6 +11286,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10337,6 +11330,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10378,6 +11373,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10409,6 +11406,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10453,6 +11452,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10492,6 +11493,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10542,6 +11545,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10580,6 +11585,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10612,6 +11619,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10649,6 +11658,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10690,6 +11701,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10730,6 +11743,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10762,6 +11777,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10803,6 +11820,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10839,6 +11858,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10887,6 +11908,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10928,6 +11951,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -10979,6 +12004,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11019,6 +12046,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11061,6 +12090,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11105,6 +12136,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11146,6 +12179,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11193,6 +12228,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11228,6 +12265,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11260,6 +12299,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11304,6 +12345,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11345,6 +12388,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11385,6 +12430,171 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
+  /environments/{environmentID}/groups/{groupID}/roleAssignments:
+    get:
+      tags:
+        - Group Role Assignments
+      summary: READ Role Assignments
+      operationId: readGroupRoleAssignments
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: groupID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Group Role Assignments
+      summary: CREATE Group Role Assignment
+      operationId: createGroupRoleAssignment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleAssignment'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: groupID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAssignment'
+  /environments/{environmentID}/groups/{groupID}/roleAssignments/{roleAssignmentID}:
+    get:
+      tags:
+        - Group Role Assignments
+      summary: READ One Group Assignment
+      operationId: readOneGroupRoleAssignment
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: groupID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: roleAssignmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleAssignment'
+    delete:
+      tags:
+        - Group Role Assignments
+      summary: DELETE Group's Role Assignment
+      operationId: deleteGroupRoleAssignment
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: groupID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: roleAssignmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11415,6 +12625,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11450,6 +12662,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11490,6 +12704,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11525,6 +12741,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11563,6 +12781,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11603,6 +12823,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11644,6 +12866,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11683,6 +12907,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11692,16 +12918,10 @@ paths:
   /environments/{environmentID}/propagation/stores:
     get:
       tags:
-        - >-
-          Propagation
-          Stores
+        - Propagation Stores
       summary: READ All Stores
+      operationId: readAllStores
       parameters:
-        - name: Accept
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: environmentID
           in: path
           schema:
@@ -11716,6 +12936,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11723,38 +12945,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
     post:
       tags:
-        - >-
-          Propagation
-          Stores
-      summary: CREATE Store (Aquera)
+        - Propagation Stores
+      summary: CREATE Propagation Store
+      operationId: createPropagationStore
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                type: Aquera
-                name: AqueraTest
-                configuration:
-                  AUTHENTICATION_METHOD: None
-                  USER_FILTER: username Eq "%s"
-                  UNIQUE_USER_IDENTIFIER: userName
-                  REMOVE_ACTION: Disable
-                  CREATE_NEW_USERS: true
-                  UPDATE_NEW_USERS: true
-                  DISABLE_NEW_USERS: true
-                  USERS_RESOURCE: /Users
-                  SCIM_VERSION: '2.0'
-                  SCIM_URL: https://example.com
-                  AUTHORIZATION_TYPE: Basic
-                  BASIC_AUTH_USER: basicUserName
-                  BASIC_AUTH_PASSWORD: BasicPassword
-                image:
-                  href: >-
-                    https://d1oekt4jpdthse.cloudfront.net/branding/market/cb933bfe-8282-405a-a780-0a19b97edc02.png
+              $ref: '#/components/schemas/PropagationStore'
       parameters:
         - name: environmentID
           in: path
@@ -11772,6 +12975,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11779,20 +12984,16 @@ paths:
         '201':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropagationStore'
   /environments/{environmentID}/propagation/stores/{storeID}:
     get:
       tags:
-        - >-
-          Propagation
-          Stores
+        - Propagation Stores
       summary: READ One Store
+      operationId: readOnePropagationStore
       parameters:
-        - name: Accept
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: environmentID
           in: path
           schema:
@@ -11812,6 +13013,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11819,33 +13022,19 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropagationStore'
     put:
       tags:
-        - >-
-          Propagation
-          Stores
+        - Propagation Stores
       summary: UPDATE Store
+      operationId: updatePropagationStore
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                type: scim
-                name: scim
-                description: Update a scim connection
-                configuration:
-                  AUTHENTICATION_METHOD: Basic Authentication
-                  SCIM_URL: https://scim.url
-                  USERS_RESOURCE: /users
-                  SCIM_VERSION: '1.1'
-                  AUTHORIZATION_TYPE: Basic
-                  BASIC_AUTH_USER: basicUserName
-                  BASIC_AUTH_PASSWORD: BasicPassword
-                image:
-                  href: >-
-                    https://d1oekt4jpdthse.cloudfront.net/branding/market/cb933bfe-8282-405a-a780-0a19b97edc02.png
+              $ref: '#/components/schemas/PropagationStore'
       parameters:
         - name: environmentID
           in: path
@@ -11866,6 +13055,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11873,19 +13064,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropagationStore'
     delete:
       tags:
-        - >-
-          Propagation
-          Stores
+        - Propagation Stores
       summary: DELETE Store
+      operationId: deletePropagationStore
       parameters:
-        - name: Accept
-          in: header
-          schema:
-            type: string
-          example: application/json
         - name: environmentID
           in: path
           schema:
@@ -11905,6 +13092,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -11914,34 +13103,19 @@ paths:
   /environments/{environmentID}/propagation/stores/connection/status:
     post:
       tags:
-        - >-
-          Propagation
-          Stores
+        - Propagation Stores
       summary: TEST Connection Configuration
+      operationId: testConnectionConfiguration
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                type: scim
-                name: scim
-                configuration:
-                  AUTHENTICATION_METHOD: Basic Authentication
-                  SCIM_URL: https://scim.url
-                  USERS_RESOURCE: /users
-                  SCIM_VERSION: '1.1'
-                  AUTHORIZATION_TYPE: Basic
-                  BASIC_AUTH_USER: basicUserName
-                  BASIC_AUTH_PASSWORD: BasicPassword
-                image:
-                  href: >-
-                    https://d1oekt4jpdthse.cloudfront.net/branding/market/cb933bfe-8282-405a-a780-0a19b97edc02.png
+              $ref: '#/components/schemas/PropagationStore'
       parameters:
         - name: Content-Type
           in: header
           schema:
-            type: string
+            $ref: '#/components/schemas/EnumPropagationStoreConnectionStatusContentType'
           example: application/vnd.pingidentity.connection.check+json
         - name: environmentID
           in: path
@@ -11959,14 +13133,14 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
         '200':
           description: Successful response
-          content:
-            application/json: {}
   /environments/{environmentID}/propagation/storeMetadata/scim:
     post:
       tags:
@@ -12009,6 +13183,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12054,6 +13230,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12099,6 +13277,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12149,6 +13329,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12188,6 +13370,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12236,6 +13420,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12276,6 +13462,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12315,6 +13503,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12358,6 +13548,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12411,6 +13603,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12451,6 +13645,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12495,6 +13691,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12540,6 +13738,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12584,6 +13784,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12624,6 +13826,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12651,6 +13855,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12688,6 +13894,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12724,6 +13932,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12782,6 +13992,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12817,6 +14029,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12851,6 +14065,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12899,6 +14115,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12942,6 +14160,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -12993,6 +14213,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13035,6 +14257,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13080,6 +14304,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13116,6 +14342,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13151,6 +14379,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13177,6 +14407,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13210,6 +14442,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13243,6 +14477,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13281,6 +14517,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13319,6 +14557,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13348,6 +14588,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13385,6 +14627,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13421,6 +14665,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13461,6 +14707,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13496,6 +14744,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13528,6 +14778,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13570,6 +14822,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13611,6 +14865,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13656,6 +14912,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13696,6 +14954,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13733,6 +14993,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13769,6 +15031,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13805,6 +15069,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13847,6 +15113,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13892,6 +15160,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13932,6 +15202,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -13969,6 +15241,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14014,6 +15288,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14054,6 +15330,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14081,6 +15359,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14116,6 +15396,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14146,6 +15428,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14177,6 +15461,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14223,6 +15509,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14253,6 +15541,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14280,6 +15570,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14317,6 +15609,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14353,6 +15647,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14393,6 +15689,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14428,6 +15726,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14455,6 +15755,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14490,6 +15792,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14526,6 +15830,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14566,6 +15872,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14601,6 +15909,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14628,6 +15938,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14666,6 +15978,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14702,6 +16016,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14742,6 +16058,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14777,6 +16095,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14820,6 +16140,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14858,6 +16180,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14894,6 +16218,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14934,6 +16260,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14969,6 +16297,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -14996,6 +16326,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15033,6 +16365,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15063,6 +16397,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15090,6 +16426,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15132,6 +16470,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15168,6 +16508,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15211,6 +16553,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15246,6 +16590,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15278,6 +16624,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15323,6 +16671,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15364,6 +16714,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15412,6 +16764,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15452,6 +16806,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15484,6 +16840,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15521,6 +16879,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15557,6 +16917,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15599,6 +16961,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15640,6 +17004,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15701,6 +17067,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15741,6 +17109,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15768,6 +17138,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15804,6 +17176,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15840,6 +17214,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15894,6 +17270,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15935,6 +17313,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -15986,6 +17366,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16036,6 +17418,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16076,6 +17460,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16103,6 +17489,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16140,6 +17528,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16176,6 +17566,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16216,6 +17608,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16251,6 +17645,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16283,6 +17679,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16325,6 +17723,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16366,6 +17766,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16411,6 +17813,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16451,6 +17855,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16485,6 +17891,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16515,6 +17923,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16551,6 +17961,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16591,6 +18003,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16626,6 +18040,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16653,6 +18069,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16690,6 +18108,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16726,6 +18146,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16766,6 +18188,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16801,6 +18225,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16833,6 +18259,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16873,6 +18301,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16910,6 +18340,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16945,6 +18377,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -16989,6 +18423,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17020,8 +18456,11 @@ paths:
                 password:
                   value: <This can be plain text or an acceptable hashed value.>
                   forceChange: false
+          application/vnd.pingidentity.user.import+json:
+            schema:
+              $ref: '#/components/schemas/User'
       parameters:
-        - name: content-type
+        - name: Content-Type
           in: header
           schema:
             type: string
@@ -17042,6 +18481,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17083,6 +18524,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17124,6 +18567,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17191,6 +18636,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17233,6 +18680,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17268,6 +18717,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17299,6 +18750,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17339,6 +18792,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17372,6 +18827,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17411,6 +18868,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17458,6 +18917,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17513,6 +18974,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17554,6 +19017,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17595,6 +19060,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17631,6 +19098,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17671,6 +19140,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17706,6 +19177,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17744,6 +19217,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17781,6 +19256,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17817,6 +19294,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17854,6 +19333,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17895,6 +19376,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17929,6 +19412,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -17969,6 +19454,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18004,6 +19491,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18051,6 +19540,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18097,6 +19588,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18131,6 +19624,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18179,6 +19674,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18220,6 +19717,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18260,6 +19759,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18291,6 +19792,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18325,6 +19828,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18363,6 +19868,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18408,6 +19915,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18445,6 +19954,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18476,6 +19987,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18514,6 +20027,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18558,6 +20073,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18591,6 +20108,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18629,6 +20148,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18666,6 +20187,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18693,6 +20216,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18724,6 +20249,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18754,6 +20281,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18794,6 +20323,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18830,6 +20361,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18866,6 +20399,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18906,6 +20441,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18957,6 +20494,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -18980,6 +20519,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -19011,6 +20552,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':

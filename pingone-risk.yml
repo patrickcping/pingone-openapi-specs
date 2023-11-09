@@ -91,8 +91,16 @@ components:
       description: A string that specifies the device sharing type. Options are `UNSPECIFIED`, `SHARED`, and `PRIVATE`.
     EnumFlowType:
       type: string
-      enum: [AUTHENTICATION]
-      description: A string that specifies the flow type for the event. The only option (and default) is `AUTHENTICATION`.
+      enum: [AUTHENTICATION, REGISTRATION, ACCESS, AUTHORIZATION, TRANSACTION]
+      default: AUTHENTICATION
+      description: |
+        	The type of flow for which the risk evaluation is being carried out. Can take any of the following values:
+          `REGISTRATION` - initial registration of an account
+          `AUTHENTICATION` - standard authentication for login or actions such as password change
+          `ACCESS` - verification of whether user can access the relevant application, using tools such as PingAccess
+          `AUTHORIZATION` - verification of whether user is authorized to perform a specific action such as a profile change, using tools such as PingOne Authorize
+          `TRANSACTION` - authentication carried out in the context of a purchase or other monetary transaction
+          The default value is `AUTHENTICATION`.
     EnumRiskPolicyConditionType:
       type: string
       description: |
@@ -210,6 +218,10 @@ components:
                   maximumValue:
                     description: The maximum value allowed for the request.
                     type: integer
+                  referencedValues:
+                    type: array
+                    items:
+                      type: string
     RiskEvaluation:
       type: object
       properties:
@@ -759,6 +771,7 @@ components:
     RiskPredictor:
       oneOf:
         - $ref: '#/components/schemas/RiskPredictorCommon'
+        - $ref: '#/components/schemas/RiskPredictorBotDetection'
         - $ref: '#/components/schemas/RiskPredictorAnonymousNetwork'
         - $ref: '#/components/schemas/RiskPredictorComposite'
         - $ref: '#/components/schemas/RiskPredictorCustom'
@@ -862,6 +875,9 @@ components:
               items:
                 type: string
                 format: ^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$
+    RiskPredictorBotDetection:
+      allOf:
+        - $ref: '#/components/schemas/RiskPredictorCommon'
     RiskPredictorComposite:
       allOf:
         - $ref: '#/components/schemas/RiskPredictorCommon'
@@ -869,6 +885,7 @@ components:
           properties:
             composition:
               type: object
+              deprecated: true
               properties:
                 condition:
                   $ref: '#/components/schemas/RiskPredictorCompositeConditionBase'
@@ -877,8 +894,20 @@ components:
               required:
                 - condition
                 - level
+            compositions:
+              type: array
+              description: Contains the objects that specify the conditions to test and the risk level that should be assigned if the conditions are met. The array can contain a maximum of three elements.
+              items:
+                properties:
+                  condition:
+                    $ref: '#/components/schemas/RiskPredictorCompositeConditionBase'
+                  level:
+                    $ref: '#/components/schemas/EnumRiskLevel'
+                required:
+                  - condition
+                  - level
           required:
-            - composition
+            - compositions
     RiskPredictorCompositeAnd:
       type: object
       properties:
@@ -1210,6 +1239,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/P1Error'
+    '409':
+      description: Conflict.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/P1Error'
     '429':
       description: Request was rate limited
       content:
@@ -1310,6 +1345,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1340,6 +1377,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1376,6 +1415,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1468,6 +1509,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1503,6 +1546,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1614,6 +1659,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1650,6 +1697,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1693,6 +1742,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1759,6 +1810,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1789,6 +1842,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1825,6 +1880,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1893,6 +1950,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1928,6 +1987,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':

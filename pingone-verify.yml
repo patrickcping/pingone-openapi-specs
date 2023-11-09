@@ -79,6 +79,10 @@ components:
                 $ref: '#/components/schemas/VoicePhraseContents'
         size:
           type: number
+    EnumInspectionType:
+      type: string
+      enum: [AUTOMATIC, MANUAL, STEP_UP]
+      description: A string that defines the mechanism used to authenticate a `governmentId` document.  Options are `AUTOMATIC`, `MANUAL`, or `STEP_UP`.
     EnumTimeUnit:
       type: string
       enum: [SECONDS, MINUTES]
@@ -106,6 +110,9 @@ components:
     GovernmentIdConfiguration:
       type: object
       properties:
+        inspectionType:
+          $ref: '#/components/schemas/EnumInspectionType'
+          description: Determines whether document authentication is automated, manual, or a combination of both where manual authentication is performed if automated inspection fails. Can be AUTOMATIC, MANUAL, or STEP_UP. 
         verify:
           $ref: '#/components/schemas/EnumVerify'
           description: Controls if Government ID verification is REQUIRED, OPTIONAL, or DISABLED.
@@ -253,6 +260,10 @@ components:
                   maximumValue:
                     description: The maximum value allowed for the request.
                     type: integer
+                  referencedValues:
+                    type: array
+                    items:
+                      type: string
     TransactionConfiguration:
       type: object
       properties:
@@ -492,6 +503,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/P1Error'
+    '409':
+      description: Conflict.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/P1Error'
     '429':
       description: Request was rate limited
       content:
@@ -590,6 +607,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -620,6 +639,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -656,6 +677,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -708,6 +731,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -743,6 +768,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -779,6 +806,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -809,6 +838,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -845,6 +876,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -887,6 +920,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -922,6 +957,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -964,6 +1001,8 @@ paths:
           $ref: '#/components/responses/404'
         '405':
           $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -999,6 +1038,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1040,6 +1081,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1088,6 +1131,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1128,6 +1173,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':

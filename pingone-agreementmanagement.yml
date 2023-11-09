@@ -90,6 +90,10 @@ components:
                   maximumValue:
                     description: The maximum value allowed for the request.
                     type: integer
+                  referencedValues:
+                    type: array
+                    items:
+                      type: string
   responses:
     '400':
       description: Invalid request received.  Malformed JSON, malformed HTTP request.
@@ -111,6 +115,18 @@ components:
             $ref: '#/components/schemas/P1Error'
     '404':
       description: Not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/P1Error'
+    '405':
+      description: Invalid request received.  Malformed JSON, malformed HTTP request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/P1Error'
+    '409':
+      description: Conflict.
       content:
         application/json:
           schema:
@@ -168,6 +184,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '429':
           $ref: '#/components/responses/429'
         '500':
