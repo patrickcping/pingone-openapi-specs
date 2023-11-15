@@ -606,6 +606,9 @@ components:
       type: string
       enum: [ACCOUNT_OK, VERIFICATION_REQUIRED]
       description: A string that specifies information about the account lifecycle. Options for status are `ACCOUNT_OK` and `VERIFICATION_REQUIRED`. This property value is only allowed to be set when importing a user to set the initial account status. If the initial status is set to `VERIFICATION_REQUIRED` and an email address is provided, a verification email is sent.
+    EnumUserAccountContentTypeHeader:
+      type: string
+      enum: [application/vnd.pingidentity.account.unlock+json, application/vnd.pingidentity.account.lock+json]
     EnumUserRequestInclude:
       type: string
       enum: [memberOfGroupIDs, memberOfGroupNames]
@@ -1038,12 +1041,15 @@ components:
                       properties:
                         decryptionKey:
                           type: string
+                          format: password
                           description: Play Integrity verdict decryption key from your Google Play Services account. This parameter must be provided if you have set `mobile.integrityDetection.googlePlay.verificationType` to `INTERNAL`.
                         serviceAccountCredentials:
                           type: string
+                          format: password
                           description: Contents of the JSON file that represents your Service Account Credentials. This parameter must be provided if you have set `mobile.integrityDetection.googlePlay.verificationType` to `GOOGLE`.
                         verificationKey:
                           type: string
+                          format: password
                           description: Play Integrity verdict signature verification key from your Google Play Services account. This parameter must be provided if you have set `mobile.integrityDetection.googlePlay.verificationType` to `INTERNAL`.
                         verificationType:
                           $ref: '#/components/schemas/EnumApplicationNativeGooglePlayVerificationType'
@@ -1297,6 +1303,7 @@ components:
           $ref: '#/components/schemas/ObjectEnvironment'
         secret:
           type: string
+          format: password
           readOnly: true
           description: A string that specifies the application secret ID used to authenticate to the authorization server.
     ApplicationWSFED:
@@ -1688,6 +1695,7 @@ components:
           description: A string that specifies the PEM-encoded certificate chain.
         privateKey:
           type: string
+          format: password
           description: A string that specifies the PEM-encoded, unencrypted private key that matches the certificate's public key. This is a required property.
       required:
         - certificate
@@ -2698,6 +2706,7 @@ components:
               description: A string that specifies the distinguished name information to bind to the LDAP database (for example, uid=pingone,dc=example,dc=com).
             bindPassword:
               type: string
+              format: password
               description: A string that specifies the bind password for the LDAP database. This is a required property.
             connectionSecurity:
               $ref: '#/components/schemas/EnumGatewayTypeLDAPSecurity'
@@ -2707,6 +2716,7 @@ components:
               properties:
                 serviceAccountPassword:
                   type: string
+                  format: password
                   description: The password for the Kerberos service account.
                 serviceAccountUserPrincipalName:
                   type: string
@@ -2819,6 +2829,7 @@ components:
                 - policy
             defaultSharedSecret:
               type: string
+              format: password
               description: Value to use for the shared secret if the shared secret is not provided for one or more of the RADIUS clients specified.
             radiusClients:
               type: array
@@ -2831,6 +2842,7 @@ components:
                     description: The IP of the RADIUS client.
                   sharedSecret:
                     type: string
+                    format: password
                     description: The shared secret for the RADIUS client. If this value is not provided, the shared secret specified with `defaultSharedSecret` is used. If you are not providing a shared secret for the client, leave out `sharedSecret` or set it to null.
                 required:
                   - ip
@@ -2856,6 +2868,7 @@ components:
           description: A date that specifies the date the credential was last used in UTC. This is a required property.
         credential:
           type: string
+          format: password
           readOnly: true
           description: A string that specifies the signed JWT for the gateway credential. This property is present only when the gateway credential is created.
     GatewayInstance:
@@ -3123,6 +3136,7 @@ components:
               description: A string that specifies the application ID from Facebook. This is a required property.
             appSecret:
               type: string
+              format: password
               description: A string that specifies the application secret from Facebook. This is a required property.
           required:
             - appId
@@ -3137,6 +3151,7 @@ components:
               description: A string that specifies the application ID from the provider. This is a required property.
             clientSecret:
               type: string
+              format: password
               description: A string that specifies the application secret from the provider. This is a required property.
           required:
             - clientId
@@ -3154,6 +3169,7 @@ components:
               description: A string that specifies the application ID from the OIDC identity provider. This is a required property.
             clientSecret:
               type: string
+              format: password
               description: A string that specifies the application secret from the OIDC identity provider. This is a required property.
             discoveryEndpoint:
               type: string
@@ -3196,6 +3212,7 @@ components:
               description: A string that specifies the application ID from Apple. This is the identifier obtained after registering a services ID in the Apple developer portal. This is a required property.
             clientSecretSigningKey:
               type: string
+              format: password
               description: A string that specifies the private key that is used to generate a client secret. This is a required property.
             keyId:
               type: string
@@ -3218,6 +3235,7 @@ components:
               description: A string that specifies the application ID from PayPal. This is a required property.
             clientSecret:
               type: string
+              format: password
               description: A string that specifies the application secret from PayPal. This is a required property.
             clientEnvironment:
               type: string
@@ -3879,6 +3897,7 @@ components:
           description: A string that specifies the organization's SMTP server's username.
         password:
           type: string
+          format: password
           description: A string that specifies the organization's SMTP server's password.
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
@@ -3953,9 +3972,11 @@ components:
                   description: The username for the custom provider account. Required when `authentication.method=BASIC`
                 password:
                   type: string
+                  format: password
                   description: The password for the custom provider account. Required when `authentication.method=BASIC`
                 authToken:
                   type: string
+                  format: password
                   description: The authentication token for the custom provider account.  Required when `authentication.method=BEARER`
               required:
                 - method
@@ -4067,6 +4088,7 @@ components:
                 Relevant to Twilio only.
             authToken:
               type: string
+              format: password
               description: The secret key of the Twilio or Syniverse account.
             numbers:
               type: array
@@ -5125,6 +5147,7 @@ components:
           $ref: '#/components/schemas/ObjectEnvironment'
         secret:
           type: string
+          format: password
           readOnly: true
           description: An auto-generated resource client secret. Possible characters are a-z, A-Z, 0-9, -, ., _, ~. The secret has a minimum length of 64 characters per SHA-512 requirements when using the HS512 algorithm to sign ID tokens using the secret as the key.
     ResourceScope:
@@ -6341,30 +6364,7 @@ components:
         '_links':
           $ref: '#/components/schemas/LinksHATEOAS'
         account:
-          type: object
-          properties:
-            canAuthenticate:
-              type: boolean
-              description: A boolean that specifies the whether the user can authenticate. If the value is set to false, the account is locked or the user is disabled, and unless specified otherwise in administrative configuration, the user will be unable to authenticate.
-            lockedAt:
-              type: string
-              format: date-time
-              readOnly: true
-              description: The time the specified user account was locked. This property might be absent if the account is unlocked or if the account was locked out automatically by failed password attempts.
-            secondsUntilUnlock:
-              type: integer
-              readOnly: true
-              description: An integer that specifies the number of seconds until the user's account is unlocked. This property is absent if the account is unlocked, or if it will not automatically unlock (and must be unlocked by an administrator).
-            status:
-              $ref: '#/components/schemas/EnumUserStatus'
-            unlockAt:
-              type: string
-              format: date-time
-              readOnly: true
-              description: The time the specified user account will be unlocked. This property is absent if the account is unlocked, or if it will not automatically unlock (and must be unlocked by an administrator).
-          required:
-            - canAuthenticate
-            - status
+          $ref: '#/components/schemas/UserAccount'
         address:
           type: object
           properties:
@@ -6524,6 +6524,7 @@ components:
               description: A boolean that specifies whether the user is forced to change the password on the next log in. If not provided, the property is set to false.
             value:
               type: string
+              format: password
               description: A string that specifies the user's password value. The string is either in cleartext or pre-encoded format.
             external:
               type: object
@@ -6604,6 +6605,30 @@ components:
       required:
         - email
         - username
+    UserAccount:
+      type: object
+      properties:
+        canAuthenticate:
+          type: boolean
+          description: A boolean that specifies whether the user can authenticate. If the value is set to `false`, the account is locked or the user is disabled, and unless specified otherwise by the administrative configuration, the user will be unable to authenticate.
+        lockedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: A string that specifies the date-time the specified user account was locked. This property might be absent if the account is unlocked or if the account was locked out automatically by failed password attempts.
+        secondsUntilUnlock:
+          type: integer
+          readOnly: true
+          description: An integer that specifies the number of seconds until the user's account is unlocked. This property is absent if the account is unlocked, or if it will not automatically unlock (and must be unlocked by an administrator).
+        status:
+          $ref: '#/components/schemas/EnumUserStatus'
+        unlockAt:
+          type: string
+          format: date-time
+          description: A string that specifies the time the specified user account will be unlocked. This property is absent if the account is unlocked, or if it will not automatically unlock (and must be unlocked by an administrator).
+      required:
+        - canAuthenticate
+        - status
     UserEnabled:
       type: object
       properties:
@@ -18539,13 +18564,18 @@ paths:
     post:
       tags:
         - User Accounts
-      summary: User Account Unlock
+      summary: User Account
+      operationId: userAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAccount'
       parameters:
         - name: content-type
           in: header
           schema:
-            type: string
-          example: application/vnd.pingidentity.account.unlock+json
+            $ref: '#/components/schemas/EnumUserAccountContentTypeHeader'
         - name: environmentID
           in: path
           schema:
@@ -18578,7 +18608,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityArray'
+                $ref: '#/components/schemas/User'
     put:
       tags:
         - Users

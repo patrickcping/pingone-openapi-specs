@@ -779,12 +779,14 @@ components:
           properties:
             key:
               type: string
+              format: password
               description: A string that Apple uses as an identifier to identify an authentication key.  Mandatory.
             teamId:
               type: string
               description: A string that Apple uses as an identifier to identify teams.
             token:
               type: string
+              format: password
               description: A string that Apple uses as the authentication token signing key to securely connect to APNS. This is a p8 file with a private key format.
           required:
             - key
@@ -799,6 +801,7 @@ components:
           properties:
             key:
               type: string
+              format: password
               description: A string that Apple uses as an identifier to identify an authentication key.  Mandatory.
               deprecated: true
           required:
@@ -810,6 +813,7 @@ components:
           properties:
             googleServiceAccountCredentials:
               type: string
+              format: password
               description: Used when `type` is set to `FCM_HTTP_V1`. The value should be the contents of the JSON file that represents your Service Account Credentials.
           required:
             - googleServiceAccountCredentials
@@ -823,6 +827,7 @@ components:
               description: Used only if type is set to HMS. OAuth 2.0 Client ID from the Huawei Developers API console.
             clientSecret:
               type: string
+              format: password
               description: Used only if type is set to HMS. The client secret associated with the OAuth 2.0 Client ID.
           required:
             - clientId
