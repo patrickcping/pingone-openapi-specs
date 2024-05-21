@@ -212,7 +212,6 @@ components:
                     - stepSize
               required:
                 - failure
-                - window
             applications:
               type: array
               items:

@@ -302,6 +302,11 @@ components:
       description: A string that specifies the OIDC identity provider's token endpoint authentication method. Options are CLIENT_SECRET_BASIC (default), CLIENT_SECRET_POST, and NONE. This is a required property.
       default: CLIENT_SECRET_BASIC
       enum: [CLIENT_SECRET_BASIC, CLIENT_SECRET_POST, NONE]
+    EnumIdentityProviderPKCEMethod:
+      type: string
+      description: The method for PKCE. Options are `NONE` or `S256`. The default is `NONE`. This value auto-populates from a discovery endpoint if the OpenID Provider includes `S256` in its `code_challenge_methods_supported` claim. The plain method is not currently supported.
+      default: NONE
+      enum: [S256, NONE]
     EnumIdentityProviderSAMLSigningAlgorithm:
       type: string
       description: The signing key algorithm used by PingOne. Value will depend on which key algorithm and signature algorithm you chose when creating your signing key. Possible values are `SHA256withRSA`, `SHA384withRSA`, `SHA512withRSA`, `SHA256withECDSA`, `SHA384withECDSA`, `SHA512eithEDCSA`.
@@ -954,6 +959,9 @@ components:
               default: true
             corsSettings:
               $ref: '#/components/schemas/ApplicationCorsSettings'
+            defaultTargetUrl:
+              type: string
+              description: This is used as the RelayState parameter by the IdP to deep link into the application after authentication. This value can be overridden by the applicationUrl query parameter for GET Identity Provider Initiated SSO. Although both of these parameters are generally URLs, because they are used as deep links, this is not enforced. If neither defaultTargetUrl nor applicationUrl is specified during a SAML authentication flow, no RelayState value is supplied to the application. The defaultTargetUrl (or the applicationUrl) value is passed to the SAML application's ACS URL as a separate RelayState key value (not within the SAMLResponse key value).
             enableRequestedAuthnContext:
               type: boolean
               description: Indicates whether `requestedAuthnContext` is taken into account in policy decision-making during authentication.
@@ -2882,6 +2890,9 @@ components:
                   allowPasswordChanges:
                     type: boolean
                     description: Defaults to false if this property isn't specified in the request. If false, the user cannot change the password in the remote LDAP directory. In this case, operations for forgotten passwords or resetting of passwords are not available to a user referencing this gateway.
+                  updateUserOnSuccessfulAuthentication:
+                    type: boolean
+                    description: If set to true, when users sign on through an LDAP Gateway client, user attributes are updated based on responses from the LDAP server. Defaults to false if this property isn't specified in the request.
                   id:
                     type: string
                     description: The UUID of the user type. This correlates to the password.external.gateway.userType.id User property.
@@ -2973,6 +2984,19 @@ components:
               type: string
               format: password
               description: Value to use for the shared secret if the shared secret is not provided for one or more of the RADIUS clients specified.
+            networkPolicyServer:
+              type: object
+              description: If specified, the RADIUS gateway authenticates using the MS-CHAP v2 protocol.
+              properties:
+                ip:
+                  type: string
+                  description: The IP address of the Network Policy Server (NPS).
+                port:
+                  type: integer
+                  description: The port number of the NPS.
+              required:
+                - ip
+                - port
             radiusClients:
               type: array
               description: Collection of RADIUS clients.
@@ -3366,6 +3390,8 @@ components:
             userInfoEndpoint:
               type: string
               description: A string that specifies the OIDC identity provider's userInfo endpoint.
+            pkceMethod:
+              $ref: '#/components/schemas/EnumIdentityProviderPKCEMethod'
           required:
             - authorizationEndpoint
             - clientId

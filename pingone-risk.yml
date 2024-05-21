@@ -123,7 +123,7 @@ components:
       enum: [NEW_DEVICE, SUSPICIOUS_DEVICE]
     EnumPredictorType:
       type: string
-      enum: [ADVERSARY_IN_THE_MIDDLE, ANONYMOUS_NETWORK, BOT, COMPOSITE, GEO_VELOCITY, IP_REPUTATION, MAP, DEVICE, USER_LOCATION_ANOMALY, USER_RISK_BEHAVIOR, VELOCITY]
+      enum: [ADVERSARY_IN_THE_MIDDLE, ANONYMOUS_NETWORK, BOT, COMPOSITE, EMAIL_REPUTATION, GEO_VELOCITY, IP_REPUTATION, MAP, DEVICE, USER_LOCATION_ANOMALY, USER_RISK_BEHAVIOR, VELOCITY]
       description: An enum type that specifies the type of the predictor. Note that both the New Device and Suspicious Device predictors use the type DEVICE. To differentiate between them, you use the `detect` field.
     EnumPredictorUnit:
       type: string
@@ -776,6 +776,7 @@ components:
         - $ref: '#/components/schemas/RiskPredictorBotDetection'
         - $ref: '#/components/schemas/RiskPredictorComposite'
         - $ref: '#/components/schemas/RiskPredictorCustom'
+        - $ref: '#/components/schemas/RiskPredictorEmailReputation'
         - $ref: '#/components/schemas/RiskPredictorGeovelocity'
         - $ref: '#/components/schemas/RiskPredictorIPReputation'
         - $ref: '#/components/schemas/RiskPredictorDevice'
@@ -1085,6 +1086,9 @@ components:
       required:
         - contains
         - list
+    RiskPredictorEmailReputation:
+      allOf:
+        - $ref: '#/components/schemas/RiskPredictorCommon'
     RiskPredictorGeovelocity:
       allOf:
         - $ref: '#/components/schemas/RiskPredictorCommon'

@@ -96,10 +96,124 @@ components:
         - name
         - authorizationServer
         - baseURLs
+    ApplicationResource:
+      type: object
+      properties:
+        description:
+          type: string
+          description: The application resource's description.
+        id:
+          type: string
+          readOnly: true
+          description: The resource's unique identifier.
+        name:
+          type: string
+          description: The application resource name. The name value must be unique.
+        parent:
+          type: object
+          readOnly: true
+          description: The application resource's parent.
+          properties:
+            type:
+              $ref: '#/components/schemas/EnumApplicationResourceParentType'
+            id:
+              type: string
+              description: The application resource's parent ID.
+          required:
+            - type
+            - id
+      required:
+        - name
+    ApplicationResourcePermission:
+      type: object
+      properties:
+        action:
+          type: string
+          description: The action associated with this permission.
+        description:
+          type: string
+          description: The resource's description.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        id:
+          type: string
+          description: The resource's unique identifier.
+          readOnly: true
+        resource:
+          type: object
+          description: An object that identifies the associated application resource.
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: The ID for the associated application resource.
+            name:
+              type: string
+              description: The name of the associated application resource.
+      required:
+        - action
+    ApplicationRole:
+      type: object
+      properties:
+        description:
+          type: string
+          description: The description of the application role.
+        id:
+          type: string
+          readOnly: true
+          description: The ID of the application role.
+        name:
+          type: string
+          description: The name of the application role.
+      required:
+        - name
+    ApplicationRolePermission:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the application resource permission to associate with this role.
+        permission:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: The ID of the permission resource associated with a specified role.
+            action:
+              type: string
+              description: The action associated with this permission.
+            resource:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: The ID of the application resource associated with this permission.
+                name:
+                  type: string
+                  description: The name of the applicawtion resource associated with this permission.
+      required:
+        - id
+    ApplicationRoleAssignment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the API server operation. This is randomly generated when the operation is created.
+        role:
+          type: object
+          description: The role associated with the role assignment.
+        subject:
+          type: object
+          description: The user associated with the role assignment.
     EnumAPIServerPatternType:
       type: string
       enum: [EXACT, PARAMETER]
       description: A string that specifies the type of the pattern. Options are `EXACT` ( the verbatim pattern is compared against the path from the request using a case-sensitive comparison) and `PARAMETER` (the pattern is compared against the path from the request using a case-sensitive comparison, using the syntax below to encode wildcards and path segment captures.)
+    EnumApplicationResourceParentType:
+      type: string
+      enum: [PING_ONE_RESOURCE]
+      description: The application resource's parent type. Options are PING_ONE_RESOURCE.
     DecisionEndpoint:
       type: object
       properties:
@@ -172,14 +286,32 @@ components:
         '_embedded':
           type: object
           properties:
-            decisionEndpoints:
-              type: array
-              items:
-                $ref: '#/components/schemas/DecisionEndpoint'
             apiServers:
               type: array
               items:
                 $ref: '#/components/schemas/APIServer'
+            assignments:
+              type: array
+              items:
+                $ref: '#/components/schemas/ApplicationRoleAssignment'
+            decisionEndpoints:
+              type: array
+              items:
+                $ref: '#/components/schemas/DecisionEndpoint'
+            permissions:
+              type: array
+              items:
+                oneOf:
+                  - $ref: '#/components/schemas/ApplicationResourcePermission'
+                  - $ref: '#/components/schemas/ApplicationRolePermission'
+            resources:
+              type: array
+              items:
+                $ref: '#/components/schemas/ApplicationResource'
+            roles:
+              type: array
+              items:
+                $ref: '#/components/schemas/ApplicationRole'
         count:
           type: number
         size:
@@ -694,4 +826,628 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
-  
+  /environments/{environmentID}/applicationResources:
+    get:
+      tags:
+        - Application Resources
+      summary: READ Application Resources
+      operationId: readApplicationResources
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+  /environments/{environmentID}/applicationResources/{applicationResourceID}:
+    get:
+      tags:
+        - Application Resources
+      summary: READ One Application Resource
+      operationId: readOneApplicationResource
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationResourceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResource'
+  /environments/{environmentID}/applicationResources/{applicationResourceID}/permissions:
+    get:
+      tags:
+        - Application Resource Permissions
+      summary: READ Application Permissions
+      operationId: readApplicationPermissions
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationResourceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Application Resource Permissions
+      summary: CREATE Application Permissions
+      operationId: createApplicationPermissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationResourcePermission'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationResourceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResourcePermission'
+  /environments/{environmentID}/applicationResources/{applicationResourceID}/permissions/{applicationResourcePermissionID}:
+    get:
+      tags:
+        - Application Resource Permissions
+      summary: READ One Application Permission
+      operationId: readOneApplicationPermission
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationResourceID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationResourcePermissionID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResourcePermission'
+    put:
+      tags:
+        - Application Resource Permissions
+      summary: UPDATE Application Permission
+      operationId: updateApplicationPermission
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationResourcePermission'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationResourceID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationResourcePermissionID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResourcePermission'
+    delete:
+      tags:
+        - Application Resource Permissions
+      summary: DELETE Application Permission
+      operationId: deleteApplicationPermission
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationResourceID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationResourcePermissionID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
+  /environments/{environmentID}/applicationRoles:
+    get:
+      tags:
+        - Application Roles
+      summary: READ Application Roles
+      operationId: readApplicationRoles
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Application Roles
+      summary: CREATE Application Roles
+      operationId: createApplicationRoles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationRole'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationRole'
+  /environments/{environmentID}/applicationRoles/{applicationRoleID}:
+    get:
+      tags:
+        - Application Roles
+      summary: READ One Application Role
+      operationId: readOneApplicationRole
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationRoleID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationRole'
+    put:
+      tags:
+        - Application Role
+      summary: UPDATE Application Role
+      operationId: updateApplicationRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationRole'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationRoleID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationRole'
+    delete:
+      tags:
+        - Application Role
+      summary: DELETE Application Role
+      operationId: deleteApplicationRole
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationRoleID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
+  /environments/{environmentID}/applicationRoles/{applicationRoleID}/permissions:
+    get:
+      tags:
+        - Application Role Permissions
+      summary: READ Application Role Permissions
+      operationId: readApplicationRolePermissions
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationRoleID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Application Role Permissions
+      summary: CREATE Application Role Permission
+      operationId: createApplicationRolePermission
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationRolePermission'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationRoleID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationRolePermission'
+  /environments/{environmentID}/applicationRoles/{applicationRoleID}/permissions/{applicationRolePermissionID}:
+    delete:
+      tags:
+        - Application Role Permissions
+      summary: DELETE Application Role Permission
+      operationId: deleteApplicationRolePermission
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationRoleID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationRolePermissionID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
+  /environments/{environmentID}/applicationRoles/{applicationRoleID}/assignments:
+    get:
+      tags:
+        - Application Role Assignments
+      summary: READ Application Role Assignments
+      operationId: readApplicationRoleAssignments
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: applicationRoleID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
