@@ -12,10 +12,11 @@ servers:
     variables:
       suffix:
         enum:
-          - 'eu'
-          - 'com'
           - 'asia'
           - 'ca'
+          - 'com'
+          - 'com.au'
+          - 'eu'
         default: 'com'
       baseDomain:
         default: 'api.pingone'
@@ -62,6 +63,16 @@ components:
       properties:
         '_links':
           $ref: '#/components/schemas/LinksHATEOAS'
+        accessControl:
+          type: object
+          properties:
+            custom:
+              type: object
+              description: Defines if the operation will use custom policy rather than the "Group" or "Scope" `accessControl` requirement.
+              properties:
+                enabled:
+                  type: boolean
+                  description: If `TRUE`, custom policy will be used for the endpoint. Defaults to `FALSE`.
         authorizationServer:
           type: object
           description: A container object for properties related to the authorization server that will issue access tokens used to access the APIs.
@@ -75,6 +86,8 @@ components:
                   description: A string that specifies the UUID of the custom PingOne resource. This property must identify a PingOne resource with a type property value of CUSTOM.
               required:
                 - id
+            type:
+              $ref: '#/components/schemas/EnumAPIServerAuthorizationServerType'
           required:
             - resource
         baseURLs:
@@ -82,6 +95,14 @@ components:
           description: An array of string that specifies the possible base URLs that an end-user will use to access the APIs hosted on the customer's API server. Multiple base URLs may be specified to support cases where the same API may be available from multiple URLs (for example, from a user-friendly domain URL and an internal domain URL). Base URLs must be valid absolute URLs with the https or http scheme. If the path component is non-empty, it must not end in a trailing slash. The path must not contain empty backslash, dot, or double-dot segments. It must not have a query or fragment present, and the host portion of the authority must be a DNS hostname or valid IP (IPv4 or IPv6). The length must be less than or equal to 256 characters.
           items:
             type: string
+        directory:
+          type: object
+          description: A container object for fields related to the user directory used to issue access tokens for accessing the APIs. If not provided, the `directory.type` will default to `PINGONE_SSO`.
+          properties:
+            type:
+              $ref: '#/components/schemas/EnumAPIServerAuthorizationServerType'
+          required:
+            - type
         id:
           type: string
           description: A string that specifies the resource's unique identifier.
@@ -89,16 +110,197 @@ components:
         name:
           type: string
           description: A string that specifies the API server resource name. The name value must be unique among all API servers, and it must be a valid resource name.
-        operations:
+        policy:
           type: object
-          description: A map from the operation name to the operation object. Each key must be valid ObjectName, and each value must be a valid operation. Each key must be unique within the operations object, which means the operation key is unique within an API server. No duplicate operation values are allowed; operations with the same paths and methods members are not allowed. The operations object is limited to 25 keys (25 individual operations).
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: The ID of the root policy.
+          required:
+            - id
       required:
         - name
         - authorizationServer
         - baseURLs
+    APIServerDeployment:
+      type: object
+      properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
+        accessControl:
+          type: object
+          properties:
+            custom:
+              type: object
+              description: Defines if the operation will use custom policy rather than the "Group" or "Scope" `accessControl` requirement.
+              properties:
+                enabled:
+                  type: boolean
+                  default: false
+                  description: If `TRUE`, custom policy will be used for the endpoint. Defaults to `FALSE`.
+        authorizationVersion:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: The UUID of the last deployed policy authorization version. This is present only if custom polcies are enabled and the API service has been deployed at least once.
+        decisionEndpoint:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: The UUID of the decision endpoint.
+        deployedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time of most recent successful deployment. Null if the API service has never been successfully deployed.
+        policy:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: The ID of the root policy.
+        status:
+          type: object
+          properties:
+            code:
+              type: string
+              description: |
+                The deployment status code.
+                - `POLICIES_CREATE_IN_PROGRESS`	The policy bundle for the API service's managed policies is being created.
+                - `DECISION_ENDPOINT_CREATE_IN_PROGRESS`	A decision endpoint is being created for the API service.
+                - `DECISION_ENDPOINT_UPDATE_IN_PROGRESS`	The API service's decision endpoint is being updated.
+                - `DEPLOYMENT_SUCCESSFUL`	The API service's policies have been successfully deployed.
+                - `DEPLOYMENT_FAILED`	HAP-MGMT was unable to deploy the API service's policies.
+                - `DEPLOYMENT_UNINITIALIZED`	A deployment has not yet been attempted.
+              enum: [POLICIES_CREATE_IN_PROGRESS, DECISION_ENDPOINT_CREATE_IN_PROGRESS, DECISION_ENDPOINT_UPDATE_IN_PROGRESS, DEPLOYMENT_SUCCESSFUL, DEPLOYMENT_FAILED, DEPLOYMENT_UNINITIALIZED]
+            error:
+              type: object
+              description: Error details returned if the last deployment request failed.
+              properties:
+                id:
+                  type: string
+                  description: A unique identifier for the error.
+                code:
+                  type: string
+                  description: A general fault code that identifies the the type of error. See [Error codes](https://apidocs.pingidentity.com/pingone/platform/v1/api/#error-codes).
+                message:
+                  type: string
+                  description: A short human-readable description of the error.
+    APIServerOperation:
+      type: object
+      properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
+        id:
+          type: string
+          readOnly: true
+          description: The ID of the API service operation. This is randomly generated when the operation is created.
+        name:
+          type: string
+          description: The name of the API service operation.
+        accessControl:
+          type: object
+          description: The access control configuration for the operation.
+          properties:
+            group:
+              type: object
+              description: The group membership requirements for the operation. The `groups` array must be non-empty when the `group` object is included. The `groups` array must not contain more than 25 elements.
+              properties:
+                groups:
+                  type: array
+                  minItems: 1
+                  maxItems: 25
+                  description: The list of groups that define the access requirements for the operation. The end user must be a member of one or more of these groups to gain access to the operation. This is a required property if `accessControl.group` is set. The ID must reference a group that exists at the time the data is persisted. There is no referential integrity between a group and this configuration. If a group is subsequently deleted, the access control configuration will continue to reference that group.
+                  items:
+                    type: object
+                    properties:
+                      element:
+                        type: object
+                        description: The ID of the group, wrapped in an object, for future extensibility. This is a required property if `operations.value.accessControl.group` is set.
+                        properties:
+                          id:
+                            type: string
+                            description: A UUID that specifies the group ID. This is a required property if `accessControl.group` is set.
+                        required:
+                          - id
+                    required:
+                      - element
+              required:
+                - groups
+            permission:
+              type: object
+              description: Defines the application permission requirements for the operation.
+              properties:
+                id:
+                  type: string
+                  description: An application permission ID that defines the access requirements for the operation. The end user must be entitled to the specified application permission to gain access to the operation. This is a required property if `accessControl.permission` is set.
+              required:
+                - id
+            scope:
+              type: object
+              description: Defines the scope membership requirements for the operation.
+              properties:
+                matchType:
+                  $ref: '#/components/schemas/EnumAPIServerOperationMatchType'
+                scopes:
+                  type: array
+                  description: A list of scopes that define the access requirements for the operation. The client must be authorized with `ANY` or `ALL` of the scopes to be granted access, depending on the `matchType` configuration.
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: The ID of the scope.
+                    required:
+                      - id
+              required:
+                - scopes
+        methods:
+          type: array
+          description: The methods that define the operation. No duplicates are allowed. Each element must be a valid HTTP token, according to [RFC 7230](https://datatracker.ietf.org/doc/html/rfc7230), and cannot exceed 64 characters. An empty array is not valid. To indicate that an operation is defined for every method, the `methods` array should be set to null. The `methods` array is limited to 10 entries.
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/EnumAPIServerOperationMethod'
+        paths:
+          type: array
+          description: The paths that define the operation. The same literal pattern is not allowed within the same operation (the pattern of a `paths` element must be unique as compared to all other patterns in the same `paths` array). However, the same literal pattern is allowed in different operations (for example, OperationA, `/path1`, OperationB, `/path1` is valid). The `paths` array is limited to 10 entries.
+          maxItems: 10
+          items:
+            type: object
+            properties:
+              pattern:
+                type: string
+                description: |
+                  The pattern used to identify the path or paths for the operation. The semantics of the pattern are determined by the type. For any type, the pattern can contain characters that are otherwise invalid in a URL path. Invalid characters are handled by performing matching against a percent-decoded HTTP request target path. This allows an administrator to configure patterns without worrying about percent encoding special characters.
+                  When the `type` is `PARAMETER`, the syntax outlined in the table below is enforced. Additionally, the pattern must contain a wildcard, double wildcard or named parameter. When the `type` is `EXACT`, the pattern can be any byte sequence except for ASCII control characters such as line feeds or carriage returns. The length of the pattern cannot exceed 2048 characters. The path pattern must not contain empty path segments such as `/../`, `//`, and `/./`.
+              type:
+                $ref: '#/components/schemas/EnumAPIServerOperationPathPatternType'
+            required:
+              - pattern
+              - type
+        policy:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: The ID of the root policy.
+          required:
+            - id
+      required:
+        - name
+        - paths
     ApplicationResource:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         description:
           type: string
           description: The application resource's description.
@@ -127,6 +329,8 @@ components:
     ApplicationResourcePermission:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         action:
           type: string
           description: The action associated with this permission.
@@ -155,6 +359,8 @@ components:
     ApplicationRole:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         description:
           type: string
           description: The description of the application role.
@@ -170,33 +376,40 @@ components:
     ApplicationRolePermission:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: The ID of the application resource permission to associate with this role.
-        permission:
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        key:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        action:
+          type: string
+          readOnly: true
+          description: The action associated with this permission.
+        resource:
           type: object
           readOnly: true
           properties:
             id:
               type: string
-              description: The ID of the permission resource associated with a specified role.
-            action:
+              description: The ID of the application resource associated with this permission.
+            name:
               type: string
-              description: The action associated with this permission.
-            resource:
-              type: object
-              properties:
-                id:
-                  type: string
-                  description: The ID of the application resource associated with this permission.
-                name:
-                  type: string
-                  description: The name of the applicawtion resource associated with this permission.
+              description: The name of the applicawtion resource associated with this permission.
       required:
         - id
     ApplicationRoleAssignment:
       type: object
       properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
         id:
           type: string
           description: The ID of the API server operation. This is randomly generated when the operation is created.
@@ -210,10 +423,26 @@ components:
       type: string
       enum: [EXACT, PARAMETER]
       description: A string that specifies the type of the pattern. Options are `EXACT` ( the verbatim pattern is compared against the path from the request using a case-sensitive comparison) and `PARAMETER` (the pattern is compared against the path from the request using a case-sensitive comparison, using the syntax below to encode wildcards and path segment captures.)
+    EnumAPIServerAuthorizationServerType:
+      type: string
+      enum: [PINGONE_SSO,EXTERNAL]
+      description: The type of authorization server that will issue access tokens. Valid options are `PINGONE_SSO` or `EXTERNAL`. Defaults to `PINGONE_SSO`. Must be the same value as the directory.type. If `EXTERNAL`, the `authorizationServer.resource` field must not be provided.
     EnumApplicationResourceParentType:
       type: string
       enum: [PING_ONE_RESOURCE]
       description: The application resource's parent type. Options are PING_ONE_RESOURCE.
+    EnumAPIServerOperationMatchType:
+      type: string
+      description: An enumeration defining the match type of the scope rule. `ALL` means the client must be authorized with all scopes configured in the `scopes` array to obtain access. `ANY` means the client must be authorized with one or more of the scopes.
+      enum: [ANY, ALL]
+    EnumAPIServerOperationMethod:
+      type: string
+      description: The name of the HTTP method. This value is case-sensitive.
+      enum: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+    EnumAPIServerOperationPathPatternType:
+      type: string
+      description: The type of the pattern. Options are `EXACT` (the verbatim pattern is compared against the path from the request using a case-sensitive comparison) and `PARAMETER` (the pattern is compared against the path from the request using a case-sensitive comparison, using the syntax below to encode wildcards and named parameters).
+      enum: [EXACT, PARAMETER]
     DecisionEndpoint:
       type: object
       properties:
@@ -298,6 +527,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/DecisionEndpoint'
+            operations:
+              type: array
+              items:
+                $ref: '#/components/schemas/APIServerOperation'
             permissions:
               type: array
               items:
@@ -826,6 +1059,299 @@ paths:
           $ref: '#/components/responses/500'
         '204':
           description: Successful response
+  /environments/{environmentID}/apiServers/{apiServerID}/deployment:
+    get:
+      tags:
+        - API Server Deployment
+      summary: READ API Server Deployment Status
+      operationId: readDeploymentStatus
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: apiServerID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIServerDeployment'
+    post:
+      tags:
+        - API Server Deployment
+      summary: Deploy API Server
+      operationId: deployAPIServer
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: apiServerID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            enum: [application/vnd.pingidentity.apiserver.deploy+json]
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIServerDeployment'
+  /environments/{environmentID}/apiServers/{apiServerID}/operations:
+    get:
+      tags:
+        - API Server Operations
+      summary: READ All API Server Operations
+      operationId: readAllAPIServerOperations
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: apiServerID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - API Server Operations
+      summary: CREATE API Server Operation
+      operationId: createAPIServerOperation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIServerOperation'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: apiServerID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIServerOperation'
+  /environments/{environmentID}/apiServers/{apiServerID}/operations/{apiServerOperationID}:
+    get:
+      tags:
+        - API Server Operations
+      summary: READ One API Server Operation
+      operationId: readOneAPIServerOperation
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: apiServerID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: apiServerOperationID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIServerOperation'
+    put:
+      tags:
+        - API Server Operations
+      summary: UPDATE API Server Operation
+      operationId: updateAPIServerOperation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIServerOperation'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: apiServerID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: apiServerOperationID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIServerOperation'
+    delete:
+      tags:
+        - API Server Operations
+      summary: DELETE API Server Operation
+      operationId: deleteAPIServerOperation
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: apiServerID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: apiServerOperationID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
   /environments/{environmentID}/applicationResources:
     get:
       tags:
@@ -938,8 +1464,8 @@ paths:
     post:
       tags:
         - Application Resource Permissions
-      summary: CREATE Application Permissions
-      operationId: createApplicationPermissions
+      summary: CREATE Application Permission
+      operationId: createApplicationPermission
       requestBody:
         content:
           application/json:
@@ -1219,7 +1745,7 @@ paths:
                 $ref: '#/components/schemas/ApplicationRole'
     put:
       tags:
-        - Application Role
+        - Application Roles
       summary: UPDATE Application Role
       operationId: updateApplicationRole
       requestBody:
@@ -1261,7 +1787,7 @@ paths:
                 $ref: '#/components/schemas/ApplicationRole'
     delete:
       tags:
-        - Application Role
+        - Application Roles
       summary: DELETE Application Role
       operationId: deleteApplicationRole
       parameters:
