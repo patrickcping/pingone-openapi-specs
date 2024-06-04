@@ -2718,20 +2718,14 @@ components:
     FormSocialLoginButton:
       type: object
       properties:
+        key:
+          type: string
+          description: A string that specifies an identifier for the field component.
         label:
           type: string
           description: A string that specifies the social login button label.
         styles:
-          type: object
-          properties:
-            horizontalAlignment:
-              $ref: '#/components/schemas/EnumFormItemAlignment'
-            textColor:
-              type: string
-              description: A string that specifies the social login button text color.
-            enabled:
-              type: boolean
-              description: A boolean that specifies whether the social login button is enabled.
+          $ref: '#/components/schemas/FormStyles'
         idpType:
           $ref: '#/components/schemas/EnumFormSocialLoginIdpType'
         idpName:
@@ -2743,19 +2737,12 @@ components:
         idpEnabled:
           type: boolean
           description: A boolean that specifies whether the external identity provider is enabled.
-        iconSrc:
-          type: string
-          description: A string that specifies the HTTP link (URL format) for the external identity provider's icon.
-        width:
-          type: integer
-          description: An integer that specifies the button width. Set as a percentage.
       required:
         - label
         - idpType
         - idpName
         - idpId
         - idpEnabled
-        - iconSrc
     FormSubmit:
       type: object
       properties:
@@ -5359,6 +5346,26 @@ components:
           format: password
           readOnly: true
           description: An auto-generated resource client secret. Possible characters are a-z, A-Z, 0-9, -, ., _, ~. The secret has a minimum length of 64 characters per SHA-512 requirements when using the HS512 algorithm to sign ID tokens using the secret as the key.
+        previous:
+          type: object
+          description: An object that specifies the resource's previous secret, when it expires, and when it was last used.
+          properties:
+            secret:
+              type: string
+              format: password
+              readOnly: true
+              description: A string that specifies the resource's previous secret. This property is returned in the response if the previous secret is not expired.
+            expiresAt:
+              type: string
+              format: date-time
+              description: A timestamp that specifies how long this secret is saved (and can be used) before it expires. Supported time range is 1 minute to 30 days.
+            lastUsed:
+              type: string
+              format: date-time
+              readOnly: true
+              description: A timestamp that specifies when the previous secret was last used.
+          required:
+            - expiresAt
     ResourceScope:
       type: object
       properties:
@@ -17248,7 +17255,7 @@ paths:
     get:
       tags:
         - Resource Client Secret
-      summary: READ Resource Client Secret
+      summary: READ Resource Secret
       operationId: readResourceSecret
       parameters:
         - name: environmentID
@@ -17285,8 +17292,13 @@ paths:
     post:
       tags:
         - Resource Client Secret
-      summary: CREATE Resource Client Secret
-      operationId: createResourceSecret
+      summary: UPDATE Resource Secret
+      operationId: updateResourceSecret
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceSecret'
       parameters:
         - name: environmentID
           in: path
@@ -17315,12 +17327,45 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-        '201':
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResourceSecret'
+    delete:
+      tags:
+        - Resource Client Secret
+      summary: DELETE Previous Resource Secret
+      operationId: deletePreviousResourceSecret
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: resourceID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
   /environments/{environmentID}/resources/{resourceID}/scopes:
     get:
       tags:
