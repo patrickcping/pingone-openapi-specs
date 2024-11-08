@@ -40,32 +40,37 @@ components:
     LinksHATEOAS:
       type: object
       readOnly: true
-      additionalProperties: true
-      properties:
-        self:
-          type: object
-          description: An object that describes the current resource.
-          properties:
-            href:
-              $ref: '#/components/schemas/LinksHATEOASHref'
-        next:
-          type: object
-          description: An object that describes the next page of results. This property is present only if there is a next page of results and the `limit` parameter is used.
-          properties:
-            href:
-              $ref: '#/components/schemas/LinksHATEOASHref'
-    LinksHATEOASHref:
+      additionalProperties:
+        type: object
+        properties:
+          href:
+            type: string
+            format: uri
+            description: The HREF of the link.
+        required:
+          - href 
+    EnumAdministratorSecurityAllowedMethods:
       type: string
-      format: uri
-      description: The URI of the resource.
+      description: Indicates the methods to enable or disable for admin sign-on. Possible values are `TOTP` (temporary one-time password), `FIDO2`, or `EMAIL`.
+      enum: [TOTP, FIDO2, EMAIL]
+    EnumAdministratorSecurityAuthenticationMethod:
+      type: string
+      description: Indicates whether to use PingOne MFA, an external IdP, or a combination of both for admin sign-on. Possible values are `PINGONE`, `EXTERNAL`, or `HYBRID`. The default is `PINGONE`.
+      enum: [PINGONE, EXTERNAL, HYBRID]
+      default: PINGONE
+    EnumAdministratorSecurityMfaStatus:
+      type: string
+      description: This applies only to the specified environment, and can be either `OPT_IN` (indicating MFA is to be used for administrator sign-ons), or `OPT_OUT` (indicating MFA is not to be used for administrator sign-ons). This currently defaults to `OPT_OUT`.
+      default: OPT_OUT
+      enum: [OPT_IN, OPT_OUT]
     EnumAgreementRevisionContentType:
       type: string
       description: An immutable string that specifies the content type of text. Options are text/html and text/plain, as defined by [rfc-6838](https://datatracker.ietf.org/doc/html/rfc6838#section-4.2.1) and [Media Types/text](https://www.iana.org/assignments/media-types/media-types.xhtml#text). This attribute is supported in POST requests only.
       enum: [text/html,text/plain]
     EnumAlertChannelAlertType:
       type: string
-      enum: [CERTIFICATE_EXPIRED, CERTIFICATE_EXPIRING, KEY_PAIR_EXPIRED, GATEWAY_VERSION_DEPRECATED, KEY_PAIR_EXPIRING, GATEWAY_VERSION_DEPRECATING]
-      description: Alert channel alerting types. Possible values are `CERTIFICATE_EXPIRED`, `CERTIFICATE_EXPIRING`, `KEY_PAIR_EXPIRED`, `GATEWAY_VERSION_DEPRECATED`, `KEY_PAIR_EXPIRING`, `GATEWAY_VERSION_DEPRECATING`.
+      enum: [CERTIFICATE_EXPIRED, CERTIFICATE_EXPIRING, KEY_PAIR_EXPIRED, KEY_PAIR_EXPIRING, GATEWAY_VERSION_DEPRECATED, GATEWAY_VERSION_DEPRECATING, LICENSE_90_PERCENT_USER_SOFT_LIMIT, LICENSE_EXPIRED, LICENSE_EXPIRING, LICENSE_ROTATED, LICENSE_USER_HARD_LIMIT_EXCEEDED, LICENSE_USER_SOFT_LIMIT_EXCEEDED, RISK_CONFIGURATION]
+      description: Alert channel alerting types.
     EnumAlertChannelSeverity:
       type: string
       enum: [INFO, WARNING, ERROR]
@@ -157,6 +162,10 @@ components:
       type: string
       enum: [RSA, EC, UNKNOWN]
       description: Specifies the key algorithm. Options are `RSA`, `EC`, and `UNKNOWN`.
+    EnumCertificateKeyEncryptionAlgorithm:
+      type: string
+      enum: [AES_128, AES_256, TRIPLEDES]
+      description: The algorithm to use when encrypting assertions.
     EnumCertificateKeySignagureAlgorithm:
       type: string
       description: Specifies the signature algorithm of the key. For RSA keys, options are `SHA256withRSA`, `SHA384withRSA` and `SHA512withRSA`. For elliptical curve (EC) keys, options are `SHA256withECDSA`, `SHA384withECDSA`, and `SHA512withECDSA`
@@ -179,6 +188,15 @@ components:
     EnumCSRResponseImportHeader:
       type: string
       enum: [application/x-pem-file]
+    EnumCustomAdminRoleApplicableTo:
+      type: string
+      description: The scope types to which the role can be applied. Options are ORGANIZATION, ENVIRONMENT, and POPULATION.
+      enum: [ORGANIZATION, ENVIRONMENT, POPULATION]
+    EnumCustomAdminRoleType:
+      type: string
+      enum: [PLATFORM,CUSTOM]
+      description: A value that indicates whether the role is a built-in role or a custom role. Options are PLATFORM and CUSTOM.
+      readOnly: true
     EnumCustomDomainPostHeader:
       type: string
       enum: [application/vnd.pingidentity.certificate.import+json, application/vnd.pingidentity.domainName.verify+json]
@@ -263,8 +281,8 @@ components:
       description: This can be either `PING_ONE` or `LDAP`. If set to `PING_ONE`, PingOne authenticates with the external directory initially, then PingOne authenticates all subsequent sign-ons.
     EnumGatewayVendor:
       type: string
-      enum: [PingDirectory, Microsoft Active Directory, Oracle Directory Server Enterprise Edition, Oracle Unified Directory, CA Directory, OpenDJ Directory, IBM (Tivoli) Security Directory Server, LDAP v3 compliant Directory Server]
-      description: A string that specifies the LDAP vendor. Options are `PingDirectory`, `Microsoft Active Directory`, `Oracle Directory Server Enterprise Edition`, `Oracle Unified Directory`, `CA Directory`, `OpenDJ Directory`, `IBM (Tivoli) Security Directory Server`, and `LDAP v3 compliant Directory Server`.
+      enum: [PingDirectory, Microsoft Active Directory, Oracle Directory Server Enterprise Edition, Oracle Unified Directory, CA Directory, OpenDJ Directory Server, IBM (Tivoli) Security Directory Server, LDAPv3-compliant Directory Server]
+      description: A string that specifies the LDAP vendor. Options are `PingDirectory`, `Microsoft Active Directory`, `Oracle Directory Server Enterprise Edition`, `Oracle Unified Directory`, `CA Directory`, `OpenDJ Directory Server`, `IBM (Tivoli) Security Directory Server`, and `LDAPv3-compliant Directory Server`.
     EnumGetKeyAcceptHeader:
       type: string
       enum: [application/json, application/x-pkcs7-certificates, application/x-x509-ca-cert]
@@ -325,6 +343,30 @@ components:
       type: string
       enum: [png, jpg, gif]
       description: A string that specifies the type of format used for the image. Options are jpg, png, and gif.
+    EnumIntegrationPingProductName:
+      type: string
+      enum: [PINGID, PINGONE_ENTERPRISE, PINGONE, PINGACCESS, PINGFEDERATE, PINGDIRECTORY, PINGDATAGOVERNANCE, PINGINTELLIGENCE_FOR_APIS, PINGONE_ADVANCED_SERVICES]
+      description: The Ping product associated with the integration.
+    EnumIntegrationTag:
+      type: string
+      enum: [SSO, AUTHENTICATION, MFA, INTELLIGENCE, GOVERNANCE, IDAAS, ACCESS, DIRECTORY, PROVISIONING]
+      description: Tag to apply to the integration metadata. Can include `SSO`, `AUTHENTICATION`, `MFA`, `INTELLIGENCE`, `GOVERNANCE`, `IDAAS`, `ACCESS`, `DIRECTORY`, or `PROVISIONING`.
+    EnumIntegrationVersionType:
+      type: string
+      enum: [PRODUCT_INTEGRATION_KIT, SAML]
+      description: The type of integration for this version. Currently, the only valid values are PRODUCT_INTEGRATION_KIT and SAML.
+    EnumIntegrationVersionIntegrationKitIntegratedWithName:
+      type: string
+      enum: [PINGID, PINGONE_ENTERPRISE, PINGONE, PINGACCESS, PINGFEDERATE, PINGDIRECTORY, PINGDATAGOVERNANCE]
+      description: Name of the compatible Ping product with which this version integrates. Can include PINGID, PINGONE_ENTERPRISE, PINGONE, PINGACCESS, PINGFEDERATE, PINGDIRECTORY, or PINGDATAGOVERNANCE
+    EnumIntegrationVersionSAMLProtocolVersion:
+      type: string
+      enum: ["2.0", "1.1", "1.0"]
+      description: The SAML protocol version supported 2.0, 1.1, or 1.0.
+    EnumIntegrationVersionSAMLSLOBinding:
+      type: string
+      enum: [HTTP_POST, HTTP_REDIRECT]
+      description: The SLO binding. Must be either HTTP_POST or HTTP_REDIRECT
     EnumKeyRotationPolicyAlgorithm:
       type: string
       enum: [RSA]
@@ -344,6 +386,26 @@ components:
     EnumMobileIntegrityDetectionPlatform:
       type: string
       enum: [IOS, GOOGLE]
+    EnumNotificationsSettingsEmailDeliverySettingsCustomAuthenticationMethod:
+      type: string
+      description: Use the value `BASIC` if your authentication with the email provider uses a username and password. Use `BEARER` if your authentication is based on the use of a bearer token.
+      enum: [BASIC, BEARER]
+    EnumNotificationsSettingsEmailDeliverySettingsCustomProtocol:
+      type: string
+      enum: [HTTP]
+      description: Set to `HTTP` when configuring an external email provider.
+    EnumNotificationsSettingsEmailDeliverySettingsCustomProvider:
+      type: string
+      enum: [CUSTOM_PROVIDER]
+      description: Must be set to `CUSTOM_PROVIDER`.
+    EnumNotificationsSettingsEmailDeliverySettingsCustomRequestsDeliveryMethod:
+      type: string
+      enum: [EMAIL]
+      description: Should be set to EMAIL.
+    EnumNotificationsSettingsEmailDeliverySettingsCustomRequestsMethod:
+      type: string
+      enum: [GET, POST]
+      description: Use method to specify the type of API request the email provider requires. Valid values are `GET` and `POST`.
     EnumNotificationsPolicyCountryLimitDeliveryMethod:
       type: string
       enum: [SMS, Voice]
@@ -505,7 +567,7 @@ components:
       default: JWT Bearer Token
     EnumRegionCode:
       type: string
-      enum: [AP, CA, EU, NA]
+      enum: [AP, AU, CA, EU, NA]
       description: A string that specifies the environment region code. The value is set when the environment is created and cannot be updated.
     EnumRegionCodeLicense:
       type: string
@@ -534,6 +596,7 @@ components:
       type: string
       description: The name of the role
       enum: [
+        "Application Owner",
         "Client Application Developer",
         "Configuration Read Only",
         "DaVinci Admin Read Only",
@@ -550,7 +613,7 @@ components:
       ]
     EnumRoleAssignmentScopeType:
       type: string
-      enum: [ORGANIZATION, ENVIRONMENT, POPULATION]
+      enum: [ORGANIZATION, ENVIRONMENT, POPULATION, APPLICATION]
       description: A string that specifies the type of resource defining the scope of the Role assignment.
     EnumSchemaAttributeSchemaType:
       type: string
@@ -584,8 +647,13 @@ components:
       description: A string identifying the type of gateway. Currently, only `LDAP` is supported.
     EnumSolutionType:
       type: string
-      enum: [WORKFORCE, CUSTOMER]
-      description: The solution set of the environment
+      enum: [WORKFORCE, CUSTOMER, CIAM_TRIAL, WF_TRIAL]
+      description: |
+        The solution type selected when creating the environment. Ignored on PUT operations. The following values are supported:
+        `CIAM_TRIAL`. The Customer trial experience. Indicates the Customer solution type, and the Solution Designer was selected.
+        `WF_TRIAL`. The Workforce trial experience. Indicates the Workforce solution type, and the Solution Designer was selected.
+        `CUSTOMER`. Indicates the Customer solution type was selected. This solution type uses PingOne MFA, rather than PingID.
+        `WORKFORCE`. Indicates the Workforce solution type was selected. This solution type uses PingID, rather than PingOne MFA.
     EnumSubscriptionFilterIncludedTags:
       type: string
       enum: [adminIdentityEvent]
@@ -661,6 +729,51 @@ components:
       type: string
       enum: [NOT_INITIATED, ENABLED, DISABLED]
       description: Indicates whether ID verification can be done for the user. This value can be NOT_INITIATED (the initial value), ENABLED, or DISABLED. If the user verification status is DISABLED, a new verification status cannot be created for that user until the status is changed to ENABLED.
+    AdministratorSecurity:
+      type: object
+      properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
+        allowedMethods:
+          $ref: '#/components/schemas/EnumAdministratorSecurityAllowedMethods'
+        authenticationMethod:
+          $ref: '#/components/schemas/EnumAdministratorSecurityAuthenticationMethod'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was created.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        mfaStatus:
+          $ref: '#/components/schemas/EnumAdministratorSecurityMfaStatus'
+        policy:
+          type: object
+          readOnly: true
+          properties:
+            id:
+              type: string
+              readOnly: true
+              description: The admin sign-on policy ID.
+        provider:
+          type: object
+          properties:
+            id:
+              type: string
+              description: The UUID of the external IdP, if applicable.
+          required:
+            - id
+        recovery:
+          type: boolean
+          description: Indicates whether to allow account recovery within the admin policy.
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was last updated.
+      required:
+        - authenticationMethod
+        - recovery
     Agreement:
       type: object
       properties:
@@ -797,6 +910,15 @@ components:
         - effectiveAt
         - requireReconsent
         - text
+    AgreementRevisionText:
+      type: object
+      properties:
+        resourcePath:
+          type: string
+        data:
+          type: string
+        dataType:
+          type: string
     AlertChannel:
       type: object
       properties:
@@ -808,6 +930,9 @@ components:
           readOnly: true
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
+        alertName:
+          type: string
+          description: The name to assign to the alert channel.
         channelType:
           $ref: '#/components/schemas/EnumAlertChannelType'
         addresses:
@@ -992,6 +1117,9 @@ components:
               type: boolean
               description: A boolean that specifies whether the SAML assertion response itself should be signed. The default value is `false`.
               default: false
+            sessionNotOnOrAfterDuration:
+              type: integer
+              description: Update this value if the SAML application requires a different `SessionNotOnOrAfter` attribute value within the `AuthnStatement` element than the `NotOnOrAfter` value set by the `assertionDuration` property.
             sloBinding:
               $ref: '#/components/schemas/EnumApplicationSAMLSloBinding'
             sloEndpoint:
@@ -1003,6 +1131,24 @@ components:
             sloWindow:
               type: integer
               description: Defines how long PingOne can exchange logout messages with the application, specifically a `LogoutRequest` from the application, since the initial request. PingOne can also send a `LogoutRequest` to the application when a single logout is initiated by the user from other session participants, such as an application or identity provider. This setting is per application. The SLO logout is separate from the user session logout that revokes all tokens.
+            spEncryption:
+              type: object
+              description: Enables PingOne to encrypt SAML assertions to be sent to the application. Assertions are not encrypted by default.
+              properties:
+                algorithm:
+                  $ref: '#/components/schemas/EnumCertificateKeyEncryptionAlgorithm'
+                certificate:
+                  type: object
+                  description: Contains the ID of the encryption public certificate that has been uploaded to PingOne.
+                  properties:
+                    id:
+                      type: string
+                      description: Specify the unique identifier of the encryption public certificate that has been uploaded to PingOne.
+                  required:
+                    - id
+              required:
+                - algorithm
+                - certificate
             spEntityId:
               type: string
               description: A string that specifies the service provider entity ID used to lookup the application. This is a required property and is unique within the environment.
@@ -1025,6 +1171,8 @@ components:
                       - id
               required:
                 - certificates
+            template:
+              $ref: '#/components/schemas/ApplicationTemplate'
           required:
             - spEntityId
             - acsUrls
@@ -1223,6 +1371,8 @@ components:
             targetLinkUri:
               type: string
               description: The URI for the application. If specified, PingOne will redirect application users to this URI after a user is authenticated. In the PingOne admin console, this becomes the value of the `target_link_uri` parameter used for the Initiate Single Sign-On URL field.
+            template:
+              $ref: '#/components/schemas/ApplicationTemplate'
             tokenEndpointAuthMethod:
               $ref: '#/components/schemas/EnumApplicationOIDCTokenAuthMethod'
             parRequirement:
@@ -1428,6 +1578,34 @@ components:
               description: A timestamp that specifies when the previous secret was last used.
           required:
             - expiresAt
+    ApplicationTemplate:
+      type: object
+      properties:
+        configuration:
+          type: object
+          description: Contains a key/value map of the parameters required by the integration in Integration Catalog.
+          additionalProperties:
+            type: string
+        integration:
+          type: object
+          properties:
+            id:
+              type: string
+              description: The UUID of the integration in Integration Catalog.
+          required:
+            - id
+        version:
+          type: object
+          properties:
+            id:
+              type: string
+              description: The UUID of the integration version in Integration Catalog.
+          required:
+            - id
+      required:
+        - configuration
+        - integration
+        - version
     ApplicationWSFED:
       allOf:
         - $ref: '#/components/schemas/Application'
@@ -1772,6 +1950,68 @@ components:
       required:
         - default
         - usageType
+    CustomAdminRole:
+      type: object
+      properties:
+        '_links':
+          $ref: '#/components/schemas/LinksHATEOAS'
+        applicableTo:
+          type: array
+          description: The scope types to which the role can be applied.
+          items:
+            $ref: '#/components/schemas/EnumCustomAdminRoleApplicableTo'
+        canAssign:
+          type: array
+          description: A relationship that specifies if an actor is assigned the current custom role for a jurisdiction, then the actor can assign any of this set of roles to another actor for the same jurisdiction or sub-jurisdiction. This capability is dreived from the canBeAssignedBy property.
+          readOnly: true
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The unique identifier of the actor.
+            required:
+              - id
+        canBeAssignedBy:
+          type: array
+          description: A relationship that determines whether a user assigned to one of this set of roles for a jurisdiction can assign the current custom role to another user for the same jurisdiction or sub-jurisdiction.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The unique identifier of the actor.
+            required:
+              - id
+        description:
+          type: string
+          description: The description of the role.
+        environment:
+          $ref: '#/components/schemas/ObjectEnvironment'
+        id:
+          type: string
+          readOnly: true
+          description: A string that specifies the resource’s unique identifier.
+        name:
+          type: string
+          description: The role name.
+        permissions:
+          type: array
+          description: The set of permissions assigned to the role.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The unique identifier of the permission (e.g. `permissions:read:userRoleAssignments`).
+            required:
+              - id
+        type:
+          $ref: '#/components/schemas/EnumCustomAdminRoleType'
+      required:
+        - canBeAssignedBy
+        - name
+        - permissions
     CustomDomain:
       type: object
       properties:
@@ -1966,6 +2206,7 @@ components:
                   - $ref:  '#/components/schemas/IdentityProviderAttribute'
                   - $ref:  '#/components/schemas/SchemaAttribute'
                   - $ref:  '#/components/schemas/ResourceAttribute'
+                  - $ref:  '#/components/schemas/IntegrationVersionAttribute'
             applications:
               type: array
               items:
@@ -2040,6 +2281,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/IdentityProvider'
+            integrations:
+              type: array
+              items:
+                $ref: '#/components/schemas/Integration'
             keys:
               type: array
               items:
@@ -2134,6 +2379,7 @@ components:
                 oneOf:
                   - $ref: '#/components/schemas/Role'
                   - $ref: '#/components/schemas/UserApplicationRoleAssignment'
+                  - $ref: '#/components/schemas/CustomAdminRole'
             schemas:
               type: array
               items:
@@ -2142,6 +2388,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/User'
+            versions:
+              type: array
+              items:
+                $ref: '#/components/schemas/IntegrationVersion'
         count:
           type: number
         size:
@@ -3552,6 +3802,264 @@ components:
                   type: integer
                   readOnly: true
                   description: The height of the image (in pixels).
+    Integration:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            type: string
+          description: The list of categories used to classify the integration. Valid strings include alphanumeric characters, underscore, hyphen, and space.
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Creation date of the integration.
+        description:
+          type: string
+          description: The description of the integration in HTML to be used for the integration listing. You can use class and style attributes for inline styling. There's a 4000 character limit for the description.
+        id:
+          type: string
+          description: The platform-generated ID of this integration.
+          readOnly: true
+        logo:
+          type: object
+          description: A logo to use for the integration. If specified, the associated properties are required.
+          properties:
+            href:
+              type: string
+              description: The href to the absolute URL of the image.
+            id:
+              type: string
+              description: The image ID generated by the Image service.
+          required:
+            - id
+            - href
+        marketingLandingPageUrl:
+          type: string
+          description: Absolute URL link to the marketing landing page.
+        name:
+          type: string
+          description: Name of the integration.
+        pingProductNames:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnumIntegrationPingProductName'
+          description: The Ping product associated with the integration. Can include `PINGID`, `PINGONE_ENTERPRISE`, `PINGONE`, `PINGACCESS`, `PINGFEDERATE`, `PINGDIRECTORY`, `PINGDATAGOVERNANCE`, `PINGINTELLIGENCE_FOR_APIS` or `PINGONE_ADVANCED_SERVICES`
+        publisher:
+          type: string
+          description: Name of the publisher.
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnumIntegrationTag'
+          description: Tags to apply to the integration metadata. Can include `SSO`, `AUTHENTICATION`, `MFA`, `INTELLIGENCE`, `GOVERNANCE`, `IDAAS`, `ACCESS`, `DIRECTORY`, or `PROVISIONING`.
+        thirdParty:
+          type: object
+          description: Metadata that defines the third party related to this integration.
+          properties:
+            companyName:
+              type: string
+              description: Name of the third party company for the listing.
+            products:
+              type: array
+              items:
+                type: string
+              description: Names of the third party products for the integration.
+          required:
+            - companyName
+      required:
+        - name
+        - pingProductNames
+        - publisher
+    IntegrationVersion:
+      oneOf:
+      - $ref: '#/components/schemas/IntegrationVersionIntegrationKit'
+      - $ref: '#/components/schemas/IntegrationVersionSAML'
+      discriminator:
+        propertyName: type
+        mapping:
+          PRODUCT_INTEGRATION_KIT: '#/components/schemas/IntegrationVersionIntegrationKit'
+          SAML: '#/components/schemas/IntegrationVersionSAML'
+    IntegrationVersionAttribute:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Auto-generated ID of this attribute.
+        integration:
+          type: object
+          readOnly: true
+          description: The parent integration of the integration version.
+          properties:
+            id:
+              type: string
+              readOnly: true
+              description: The platform-generated ID of the parent integration.
+          required:
+            - id
+        name:
+          type: string
+          description: Attribute name the application expects. Unique within the integration version and in the form `urn:oasis:names:tc:SAML:2.0:attrname-format:uri`.
+        required:
+          type: boolean
+          description: Whether or not the attribute is required. If true, the value property must be set with a non-empty value. Default is false.
+        schema:
+          type: string
+          description: A JSON schema describing the current attribute mapping.
+        version:
+          type: object
+          readOnly: true
+          description: The relationship to the parent integration version.
+          properties:
+            id:
+              type: string
+              description: The platform-generated ID of the parent integration version.
+          required:
+            - id
+      required:
+        - schema
+    IntegrationVersionCommon:
+      type: object
+      properties:
+        configuration:
+          type: object
+          description: The configuration of the integration version. If specified, configuration.schema and configuration.properties is required.
+          properties:
+            schema:
+              type: object
+              description: Contains a JSON schema defining the integration version.
+            properties:
+              type: object
+              description: Contains the property names and assigned values for the integration version.
+          required:
+            - schema
+            - properties
+        description:
+          type: string
+          description: Unicode characters. The description of this integration metadata version.
+        id:
+          type: string
+          readOnly: true
+          description: The platform-generated ID of this integration metadata version.
+        integration:
+          type: object
+          description: The parent integration of the integration version.
+          readOnly: true
+          properties:
+            id:
+              type: string
+              description: The platform-generated ID of the parent integration.
+          required:
+            - id
+        name:
+          type: string
+          description: A unique name for the integration metadata version.
+        number:
+          type: string
+          description: A unique number for the integration version.
+        type:
+          $ref: '#/components/schemas/EnumIntegrationVersionType'
+      required:
+        - name
+        - number
+    IntegrationVersionIntegrationKit:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationVersionCommon'
+        - type: object
+          properties:
+            documentationUrl:
+              type: string
+              description: Absolute URL to the documentation.
+            endOfLifeOn:
+              type: string
+              format: date
+              description: EOL support date in the form yyyy-mm-dd.
+            integratedWith:
+              type: object
+              description: Ping product integration details.
+              properties:
+                name:
+                  $ref: '#/components/schemas/EnumIntegrationVersionIntegrationKitIntegratedWithName'
+                minVersion:
+                  type: string
+                  description: Earliest version of the integrated Ping product.
+                maxVersion:
+                  type: string
+                  description: Latest version of the integrated Ping product.
+              required:
+                - name
+            number:
+              type: string
+              description: Unique number for the integration version.
+            releasedOn:
+              type: string
+              format: date
+              description: Release date in the form yyyy-mm-dd.
+          required:
+            - number
+            - releasedOn
+    IntegrationVersionSAML:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationVersionCommon'
+        - type: object
+          properties:
+            assertionConsumerService:
+              type: string
+              description: The URL to which PingOne sends SAML responses. Parameterize the URL using `${_paremter_}`. For example, `https://${subdomain}.slack.com`. The maximum length is 2000 characters.
+              maxLength: 2000
+            assertionEncrypted:
+              type: boolean
+              description: The state of assertion encryption. `true` if encrypted.
+            defaultTarget:
+              type: string
+              description: After an IdP-initiated SSO, this URL is passed in the RelayState value in the SAML response. Informs the IdP where to send its response. Parameterize the URL using `${_paremter_}`. For example, `https://${subdomain}.slack.com`.
+            entityId:
+              type: string
+              description: Unique ID for the application.
+            nameIdFormat:
+              type: string
+              description: |
+                This can be one of the following:
+                urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+                urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+                urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+                urn:oasis:names:tc:SAML:2.0:nameid-format:transient
+            protocolVersion:
+              $ref: '#/components/schemas/EnumIntegrationVersionSAMLProtocolVersion'
+            slo:
+              type: object
+              description: The Single Logout information.
+              properties:
+                requestEndpoint:
+                  type: string
+                  description: The endpoint where SLO requests are sent.
+                responseEndpoint:
+                  type: string
+                  description: The endpoint where SLO responses are sent.
+                binding:
+                  $ref: '#/components/schemas/EnumIntegrationVersionSAMLSLOBinding'
+            thirdParty:
+              type: object
+              description: Third-party IdP information.
+              properties:
+                metadata:
+                  type: object
+                  description: The third-party IdP metadata.
+                  properties:
+                    href:
+                      type: string
+                      description: URL of IdP's SAML metadata XML.
+                instructions:
+                  type: object
+                  properties:
+                    href:
+                      type: string
+                      description: URL of IdP's setup instructions.
+          required:
+            - assertionConsumerService
+            - protocolVersion
     KeyRotationPolicy:
       type: object
       properties:
@@ -4076,50 +4584,148 @@ components:
                 required:
                   - id
     NotificationsSettingsEmailDeliverySettings:
+      oneOf:
+        - $ref: '#/components/schemas/NotificationsSettingsEmailDeliverySettingsCustom'
+        - $ref: '#/components/schemas/NotificationsSettingsEmailDeliverySettingsSMTP'
+    NotificationsSettingsEmailDeliverySettingsCommon:
       type: object
       properties:
         '_links':
           $ref: '#/components/schemas/LinksHATEOAS'
-        host:
-          type: string
-          description: A string that specifies the organization's SMTP server.
-        port:
-          type: integer
-          description: An integer that specifies the port used by the organization's SMTP server to send emails (default `465`). Note that the protocol used depends upon the port specified. If you specify port `25`, `587`, or `2525`, SMTP with `STARTTLS` is used. Otherwise, `SMTPS` is used.
-          default: 465
-        protocol:
-          type: string
-          description: A string that specifies the organization's SMTP server's protocol.
-          readOnly: true
-        username:
-          type: string
-          description: A string that specifies the organization's SMTP server's username.
-        password:
-          type: string
-          format: password
-          description: A string that specifies the organization's SMTP server's password.
         environment:
           $ref: '#/components/schemas/ObjectEnvironment'
-        from:
-          type: object
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The time the resource was last updated.
+    NotificationsSettingsEmailDeliverySettingsCustom:
+      allOf:
+        - $ref: '#/components/schemas/NotificationsSettingsEmailDeliverySettingsCommon'
+        - type: object
           properties:
+            authentication:
+              type: object
+              description: Contains the information for authenticating with the email provider.
+              properties:
+                method:
+                  $ref: '#/components/schemas/EnumNotificationsSettingsEmailDeliverySettingsCustomAuthenticationMethod'
+                authToken:
+                  type: string
+                  description: If you specified `BEARER` as the authentication method, use authToken to provide the bearer token to use.
+                username:
+                  type: string
+                  description: If you specified `BASIC` as the authentication method, use username to provide the username for authenticating with the email provider.
+                password:
+                  type: string
+                  format: password
+                  description: If you specified `BASIC` as the authentication method, use password to provide the password for authenticating with the email provider.
+              required:
+                - method
+            from:
+              type: object
+              description: Contains the "from" information to use for the notifications.
+              properties:
+                name:
+                  type: string
+                  description: The "from" name to use in the notifications that are sent.
+                address:
+                  type: string
+                  description: The "from" address to use in the notifications that are sent.
             name:
               type: string
-              description: A string that specifies the email's "from" name.
-            address:
-              type: string
-              description: A string that specifies the email's "from" address.
+              description: Name to use to identify the provider.
+            protocol:
+              $ref: '#/components/schemas/EnumNotificationsSettingsEmailDeliverySettingsCustomProtocol'
+            provider:
+              $ref: '#/components/schemas/EnumNotificationsSettingsEmailDeliverySettingsCustomProvider'
+            replyTo:
+              type: object
+              description: Contains the "reply-to" information to use for the notifications.
+              properties:
+                name:
+                  type: string
+                  description: The "reply-to" name to use in the notifications that are sent.
+                address:
+                  type: string
+                  description: The "reply-to" address to use in the notifications that are sent.
+            requests:
+              type: array
+              description: Contains the object that is used to configure the API requests sent to the email provider.
+              items:
+                type: object
+                properties:
+                  body:
+                    type: string
+                    description: |
+                      Required if method is set to `POST`. Use body to provide the content of the body for the request sent to the email provider. The body that you define must include the mandatory PingOne variables for notifications: `${from}`, `${to}`, and `${message}`. You can also include any optional notification variables.
+                      If you are including the header `content-type: application/json` in `headers`:
+                      - The content of `body` must be valid JSON
+                      - You must enclose the JSON object in quotation marks and escape all quotation marks within the string, for example, `"{\"From\": \"${from}\",\"To\": \"${to}\",\"message2\": \"${message}\"}"`.
+                  deliveryMethod:
+                    $ref: '#/components/schemas/EnumNotificationsSettingsEmailDeliverySettingsCustomRequestsDeliveryMethod'
+                  headers:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    description: Use this object to specify the headers that your email provider's API expects.
+                  method:
+                    $ref: '#/components/schemas/EnumNotificationsSettingsEmailDeliverySettingsCustomRequestsMethod'
+                  url:
+                    type: string
+                    description: Use url to specify the endpoint for your email provider, for example, `https://api.example.com/email`. If `method` is set to `GET`, append to the URL the various query parameters that the email provider's API requires. The URL must also include the required PingOne variables, as described for the body parameter.
+                required:
+                  - deliveryMethod
+                  - method
+                  - url
           required:
-            - address
-        replyTo:
-          type: object
+            - authentication
+            - name
+            - protocol
+            - requests
+    NotificationsSettingsEmailDeliverySettingsSMTP:
+      allOf:
+        - $ref: '#/components/schemas/NotificationsSettingsEmailDeliverySettingsCommon'
+        - type: object
           properties:
-            name:
+            host:
               type: string
-              description: A string that specifies the email's "reply to" name.
-            address:
+              description: A string that specifies the organization's SMTP server.
+            port:
+              type: integer
+              description: An integer that specifies the port used by the organization's SMTP server to send emails (default `465`). Note that the protocol used depends upon the port specified. If you specify port `25`, `587`, or `2525`, SMTP with `STARTTLS` is used. Otherwise, `SMTPS` is used.
+              default: 465
+            protocol:
               type: string
-              description: A string that specifies the email's "reply to" address.
+              description: A string that specifies the organization's SMTP server's protocol.
+              readOnly: true
+            username:
+              type: string
+              description: A string that specifies the organization's SMTP server's username.
+            password:
+              type: string
+              format: password
+              description: A string that specifies the organization's SMTP server's password.
+            from:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: A string that specifies the email's "from" name.
+                address:
+                  type: string
+                  description: A string that specifies the email's "from" address.
+              required:
+                - address
+            replyTo:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: A string that specifies the email's "reply to" name.
+                address:
+                  type: string
+                  description: A string that specifies the email's "reply to" address.
     NotificationsSettingsPhoneDeliverySettings:
       oneOf:
         - $ref: '#/components/schemas/NotificationsSettingsPhoneDeliverySettingsCustom'
@@ -7453,6 +8059,76 @@ paths:
           description: Successful response
           content:
             application/json: {}
+  /environments/{environmentID}/adminConfig:
+    get:
+      tags:
+        - Administrator Security
+      summary: READ Administrator Security
+      operationId: readAdministratorSecurity
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdministratorSecurity'
+    put:
+      tags:
+        - Administrator Security
+      summary: UPDATE Administrator Security
+      operationId: updateAdministratorSecurity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdministratorSecurity'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdministratorSecurity'
   /environments/{environmentID}/agreements:
     post:
       tags:
@@ -8132,43 +8808,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AlertChannel'
   /environments/{environmentID}/alertChannels/{alertChannelID}:
-    get:
-      tags:
-        - Alerting
-      summary: READ One Alert Channel
-      operationId: readOneAlertChannel
-      parameters:
-        - name: environmentID
-          in: path
-          schema:
-            type: string
-          required: true
-        - name: alertChannelID
-          in: path
-          schema:
-            type: string
-          required: true
-      responses:
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '409':
-          $ref: '#/components/responses/409'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AlertChannel'
     put:
       tags:
         - Alerting
@@ -14852,13 +15491,24 @@ paths:
     get:
       tags:
         - Integration Catalog
-      summary: READ Integration Metadata
+      summary: READ All Integration Metadata
+      operationId: readAllIntegrationMetadata
       parameters:
         - name: environmentID
           in: path
           schema:
             type: string
           required: true
+        - name: filter
+          in: query
+          schema:
+            type: string
+          example: (pingProductNames eq "PINGFEDERATE" and version.releasedOn ge "2020-05-20")
+        - name: expand
+          in: query
+          schema:
+            type: string
+          example: versions
       responses:
         '400':
           $ref: '#/components/responses/400'
@@ -14877,12 +15527,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /environments/{environmentID}/integrations/{integrationID}:
     get:
       tags:
         - Integration Catalog
       summary: READ One Integration Metadata
+      operationId: readOneIntegrationMetadata
       parameters:
         - name: environmentID
           in: path
@@ -14912,12 +15565,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Integration'
   /environments/{environmentID}/integrations/{integrationID}/versions:
     get:
       tags:
         - Integration Catalog
-      summary: READ Integration Version Metadata
+      summary: Read All Integration Versions Metadata
+      operationId: readIntegrationVersionMetadata
       parameters:
         - name: environmentID
           in: path
@@ -14947,12 +15603,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
   /environments/{environmentID}/integrations/{integrationID}/versions/{integrationVersionID}:
     get:
       tags:
         - Integration Catalog
       summary: READ One Integration Version Metadata
+      operationId: readOneIntegrationVersionMetadata
       parameters:
         - name: environmentID
           in: path
@@ -14987,12 +15646,15 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationVersion'
   /environments/{environmentID}/integrations/{integrationID}/versions/{integrationVersionID}/asset:
     get:
       tags:
         - Integration Catalog
-      summary: READ Integration Version Asset Download
+      summary: Download Integration Version Asset
+      operationId: downloadOneIntegrationVersionAsset
       parameters:
         - name: environmentID
           in: path
@@ -15027,7 +15689,105 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/zip:
+              schema:
+                type: string
+                format: byte
+            application/x-zip-compressed:
+              schema:
+                type: string
+                format: byte
+  /environments/{environmentID}/integrations/{integrationID}/versions/{integrationVersionID}/attributes:
+    get:
+      tags:
+        - Integration Catalog
+      summary: Read All Attributes of an Integration Version (SAML only)
+      operationId: readAllIntegrationVersionAttributes
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: integrationID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: integrationVersionID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+  /environments/{environmentID}/integrations/{integrationID}/versions/{integrationVersionID}/attributes/{integrationVersionAttributeID}:
+    get:
+      tags:
+        - Integration Catalog
+      summary: Read One Attributes of an Integration Version (SAML only)
+      operationId: readOneIntegrationVersionAttributes
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: integrationID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: integrationVersionID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: integrationVersionAttributeID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationVersionAttribute'
   /environments/{environmentID}/languages:
     get:
       tags:
@@ -17923,6 +18683,191 @@ paths:
             type: string
           required: true
         - name: scopeID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '204':
+          description: Successful response
+  /environments/{environmentID}/roles:
+    get:
+      tags:
+        - Custom Admin Roles
+      summary: READ All Custom Admin Roles
+      operationId: readAllCustomAdminRoles
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityArray'
+    post:
+      tags:
+        - Custom Admin Roles
+      summary: CREATE Custom Role
+      operationId: createCustomAdminRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomAdminRole'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '405':
+          $ref: '#/components/responses/405'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomAdminRole'
+  /environments/{environmentID}/roles/{customRoleID}:
+    get:
+      tags:
+        - Custom Admin Roles
+      summary: READ One Custom Role
+      operationId: readOneCustomAdminRole
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: customRoleID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomAdminRole'
+    put:
+      tags:
+        - Custom Admin Roles
+      summary: UPDATE Custom Role
+      operationId: updateCustomAdminRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomAdminRole'
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: customRoleID
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomAdminRole'
+    delete:
+      tags:
+        - Custom Admin Roles
+      summary: DELETE Custom Role
+      operationId: deleteCustomAdminRole
+      parameters:
+        - name: environmentID
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: customRoleID
           in: path
           schema:
             type: string

@@ -40,24 +40,15 @@ components:
     LinksHATEOAS:
       type: object
       readOnly: true
-      additionalProperties: true
-      properties:
-        self:
-          type: object
-          description: An object that describes the current resource.
-          properties:
-            href:
-              $ref: '#/components/schemas/LinksHATEOASHref'
-        next:
-          type: object
-          description: An object that describes the next page of results. This property is present only if there is a next page of results and the `limit` parameter is used.
-          properties:
-            href:
-              $ref: '#/components/schemas/LinksHATEOASHref'
-    LinksHATEOASHref:
-      type: string
-      format: uri
-      description: The URI of the resource.
+      additionalProperties:
+        type: object
+        properties:
+          href:
+            type: string
+            format: uri
+            description: The HREF of the link.
+        required:
+          - href
     EntityArray:
       type: object
       properties:
@@ -84,6 +75,14 @@ components:
       type: string
       enum: [AUTOMATIC, MANUAL, STEP_UP]
       description: A string that defines the mechanism used to authenticate a `governmentId` document.  Options are `AUTOMATIC`, `MANUAL`, or `STEP_UP`.
+    EnumProviderAuto:
+      type: string
+      enum: [MITEK, VERIFF]
+      description: A string that defines the automatic verification subprocessor; can be `MITEK` or `VERIFF`.
+    EnumProviderManual:
+      type: string
+      enum: [MITEK]
+      description: A string that defines the automatic verification subprocessor; can be `MITEK`.      
     EnumTimeUnit:
       type: string
       enum: [SECONDS, MINUTES]
@@ -111,9 +110,21 @@ components:
     GovernmentIdConfiguration:
       type: object
       properties:
+        failExpiredId:
+          type: boolean
+          description: Indicates whether verification should fail if the ID is expired.
         inspectionType:
           $ref: '#/components/schemas/EnumInspectionType'
           description: Determines whether document authentication is automated, manual, or a combination of both where manual authentication is performed if automated inspection fails. Can be AUTOMATIC, MANUAL, or STEP_UP. 
+        provider:
+          type: object
+          properties:
+            auto:
+              $ref: '#/components/schemas/EnumProviderAuto'              
+            manual:
+              $ref: '#/components/schemas/EnumProviderManual'          
+        retry:
+          $ref: '#/components/schemas/ObjectRetry'
         verify:
           $ref: '#/components/schemas/EnumVerify'
           description: Controls if Government ID verification is REQUIRED, OPTIONAL, or DISABLED.
@@ -122,12 +133,14 @@ components:
     LivenessConfiguration:
       type: object
       properties:
-        verify:
-          $ref: '#/components/schemas/EnumVerify'
-          description: Controls if liveness check is REQUIRED, OPTIONAL, or DISABLED.
+        retry:
+          $ref: '#/components/schemas/ObjectRetry'      
         threshold:
           $ref: '#/components/schemas/EnumThreshold'
           description: Threshold for successful facial comparison; can be LOW, MEDIUM, or HIGH (for which PingOne Verify uses industry and vendor recommended definitions).
+        verify:
+          $ref: '#/components/schemas/EnumVerify'
+          description: Controls if liveness check is REQUIRED, OPTIONAL, or DISABLED.
       required:
         - threshold
         - verify       
@@ -139,6 +152,12 @@ components:
           type: string
           readOnly: true
           description: A string that specifies the environment associated with the object.
+    ObjectRetry:
+      type: object
+      properties:
+        attempts:
+          type: integer
+          description: The number of retries permitted.          
     OTPDeviceConfiguration:
       type: object
       properties:

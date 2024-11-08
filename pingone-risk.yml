@@ -40,24 +40,15 @@ components:
     LinksHATEOAS:
       type: object
       readOnly: true
-      additionalProperties: true
-      properties:
-        self:
-          type: object
-          description: An object that describes the current resource.
-          properties:
-            href:
-              $ref: '#/components/schemas/LinksHATEOASHref'
-        next:
-          type: object
-          description: An object that describes the next page of results. This property is present only if there is a next page of results and the `limit` parameter is used.
-          properties:
-            href:
-              $ref: '#/components/schemas/LinksHATEOASHref'
-    LinksHATEOASHref:
-      type: string
-      format: uri
-      description: The URI of the resource.
+      additionalProperties:
+        type: object
+        properties:
+          href:
+            type: string
+            format: uri
+            description: The HREF of the link.
+        required:
+          - href
     EntityArray:
       type: object
       properties:
@@ -124,7 +115,7 @@ components:
       enum: [NEW_DEVICE, SUSPICIOUS_DEVICE]
     EnumPredictorType:
       type: string
-      enum: [ADVERSARY_IN_THE_MIDDLE, ANONYMOUS_NETWORK, BOT, COMPOSITE, EMAIL_REPUTATION, GEO_VELOCITY, IP_REPUTATION, MAP, DEVICE, USER_LOCATION_ANOMALY, USER_RISK_BEHAVIOR, VELOCITY]
+      enum: [ADVERSARY_IN_THE_MIDDLE, ANONYMOUS_NETWORK, BOT, COMPOSITE, DEVICE, EMAIL_REPUTATION, GEO_VELOCITY, IP_REPUTATION, MAP, TRAFFIC_ANOMALY, USER_LOCATION_ANOMALY, USER_RISK_BEHAVIOR, VELOCITY]
       description: An enum type that specifies the type of the predictor. Note that both the New Device and Suspicious Device predictors use the type DEVICE. To differentiate between them, you use the `detect` field.
     EnumPredictorUnit:
       type: string
@@ -138,6 +129,14 @@ components:
     EnumPredictorVelocityUseType:
       type: string
       enum: [POISSON_WITH_MAX]
+    EnumRiskPredictorTrafficAnomalyRuleIntervalUnit:
+      type: string
+      enum: [DAY, HOUR]
+      description: The time unit for defining the timeframe for tracking number of users on the device - can be `DAY` or `HOUR`
+    EnumRiskPredictorTrafficAnomalyRuleType:
+      type: string
+      enum: [UNIQUE_USERS_PER_DEVICE]
+      description: The type of rule. Currently the only valid value is `UNIQUE_USERS_PER_DEVICE` - for tracking the number of unique users for a device over a defined timeframe.
     EnumResultType:
       type: string
       enum: [VALUE]
@@ -777,10 +776,11 @@ components:
         - $ref: '#/components/schemas/RiskPredictorBotDetection'
         - $ref: '#/components/schemas/RiskPredictorComposite'
         - $ref: '#/components/schemas/RiskPredictorCustom'
+        - $ref: '#/components/schemas/RiskPredictorDevice'
         - $ref: '#/components/schemas/RiskPredictorEmailReputation'
         - $ref: '#/components/schemas/RiskPredictorGeovelocity'
         - $ref: '#/components/schemas/RiskPredictorIPReputation'
-        - $ref: '#/components/schemas/RiskPredictorDevice'
+        - $ref: '#/components/schemas/RiskPredictorTrafficAnomaly'
         - $ref: '#/components/schemas/RiskPredictorUserLocationAnomaly'
         - $ref: '#/components/schemas/RiskPredictorUserRiskBehavior'
         - $ref: '#/components/schemas/RiskPredictorVelocity'
@@ -872,7 +872,7 @@ components:
         - $ref: '#/components/schemas/RiskPredictorCommon'
         - type: object
           properties:
-            whiteList:
+            domainWhiteList:
               type: array
               description: A list of strings that specify legitimate domains that users will access for restricted resources.
               items:
@@ -891,6 +891,11 @@ components:
     RiskPredictorBotDetection:
       allOf:
         - $ref: '#/components/schemas/RiskPredictorCommon'
+        - type: object
+          properties:
+            includeRepeatedEventsWithoutSdk:
+              type: boolean
+              description: Set the value of `includeRepeatedEventsWithoutSdk` to `true` to expand the range of bot activity that PingOne Protect can detect.
     RiskPredictorComposite:
       allOf:
         - $ref: '#/components/schemas/RiskPredictorCommon'
@@ -1119,12 +1124,62 @@ components:
           properties:
             detect:
               $ref: '#/components/schemas/EnumPredictorNewDeviceDetectType'
+            shouldValidatePayloadSignature:
+              type: boolean
+              description: Relevant only for Suspicious Device predictors. If `shouldValidatePayloadSignature` is set to `true`, then any risk policies that include this predictor will require that the Signals SDK payload be provided as a signed JWT whose signature will be verified before proceeding with risk evaluation. You instruct the Signals SDK to provide the payload as a signed JWT by using the `universalDeviceIdentification` flag during initialization of the SDK, or by selecting the relevant setting for the `skrisk` component in DaVinci flows.
             activationAt:
               type: string
               format: date-time
               description: You can use the `activationAt` parameter to specify a date on which the learning process for the predictor should be restarted. This can be used in conjunction with the fallback setting (`default.result.level`) to force strong authentication when moving the predictor to production. The date should be in an RFC3339 format. Note that activation date uses UTC time.
           required:
             - detect
+    RiskPredictorTrafficAnomaly:
+      allOf:
+        - $ref: '#/components/schemas/RiskPredictorCommon'
+        - type: object
+          properties:
+            rules:
+              type: array
+              items:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                    description: Set to true to use the defined rule in the predictor.
+                  interval:
+                    type: object
+                    description: Object that contains the fields used to define the timeframe to consider. The timeframe can be between 1 hour and 14 days.
+                    properties:
+                      unit:
+                        $ref: '#/components/schemas/EnumRiskPredictorTrafficAnomalyRuleIntervalUnit'
+                      quantity:
+                        type: integer
+                        description: The number of days or hours for the timeframe for tracking number of users on the device.
+                    required:
+                      - unit
+                      - quantity
+                  threshold:
+                    type: object
+                    description: Object that contains the fields used to define the risk thresholds.
+                    properties:
+                      medium:
+                        type: integer
+                        description: Number of users during the defined timeframe that will be considered Medium risk.
+                      high:
+                        type: integer
+                        description: Number of users during the defined timeframe that will be considered High risk.
+                    required:
+                      - medium
+                      - high
+                  type:
+                    $ref: '#/components/schemas/EnumRiskPredictorTrafficAnomalyRuleType'
+                required:
+                  - enabled
+                  - interval
+                  - threshold
+                  - type
+          required:
+            - rules
     RiskPredictorUserLocationAnomaly:
       allOf:
         - $ref: '#/components/schemas/RiskPredictorCommon'

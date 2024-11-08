@@ -40,24 +40,15 @@ components:
     LinksHATEOAS:
       type: object
       readOnly: true
-      additionalProperties: true
-      properties:
-        self:
-          type: object
-          description: An object that describes the current resource.
-          properties:
-            href:
-              $ref: '#/components/schemas/LinksHATEOASHref'
-        next:
-          type: object
-          description: An object that describes the next page of results. This property is present only if there is a next page of results and the `limit` parameter is used.
-          properties:
-            href:
-              $ref: '#/components/schemas/LinksHATEOASHref'
-    LinksHATEOASHref:
-      type: string
-      format: uri
-      description: The URI of the resource.
+      additionalProperties:
+        type: object
+        properties:
+          href:
+            type: string
+            format: uri
+            description: The HREF of the link.
+        required:
+          - href
     APIServer:
       type: object
       properties:
@@ -89,8 +80,8 @@ components:
             type:
               $ref: '#/components/schemas/EnumAPIServerAuthorizationServerType'
           required:
-            - resource
-        baseURLs:
+            - type
+        baseUrls:
           type: array
           description: An array of string that specifies the possible base URLs that an end-user will use to access the APIs hosted on the customer's API server. Multiple base URLs may be specified to support cases where the same API may be available from multiple URLs (for example, from a user-friendly domain URL and an internal domain URL). Base URLs must be valid absolute URLs with the https or http scheme. If the path component is non-empty, it must not end in a trailing slash. The path must not contain empty backslash, dot, or double-dot segments. It must not have a query or fragment present, and the host portion of the authority must be a DNS hostname or valid IP (IPv4 or IPv6). The length must be less than or equal to 256 characters.
           items:
@@ -122,7 +113,7 @@ components:
       required:
         - name
         - authorizationServer
-        - baseURLs
+        - baseUrls
     APIServerDeployment:
       type: object
       properties:
@@ -220,17 +211,11 @@ components:
                   items:
                     type: object
                     properties:
-                      element:
-                        type: object
-                        description: The ID of the group, wrapped in an object, for future extensibility. This is a required property if `operations.value.accessControl.group` is set.
-                        properties:
-                          id:
-                            type: string
-                            description: A UUID that specifies the group ID. This is a required property if `accessControl.group` is set.
-                        required:
-                          - id
+                      id:
+                        type: string
+                        description: A UUID that specifies the group ID. This is a required property if `accessControl.group` is set.
                     required:
-                      - element
+                      - id
               required:
                 - groups
             permission:
