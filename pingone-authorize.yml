@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
   title: PingOne Platform API - Authorize
   description: The PingOne Platform API covering the PingOne Authorize service
@@ -38,6 +38,7 @@ components:
       description: OAuth bearer token (see documentation)
   schemas:
     LinksHATEOAS:
+      x-pingidentity-paginatedresponse-links: true
       type: object
       readOnly: true
       additionalProperties:
@@ -492,48 +493,6 @@ components:
        - name
        - description
        - recordRecentRequests
-    EntityArray:
-      type: object
-      properties:
-        '_links':
-          $ref: '#/components/schemas/LinksHATEOAS'
-        '_embedded':
-          type: object
-          properties:
-            apiServers:
-              type: array
-              items:
-                $ref: '#/components/schemas/APIServer'
-            assignments:
-              type: array
-              items:
-                $ref: '#/components/schemas/ApplicationRoleAssignment'
-            decisionEndpoints:
-              type: array
-              items:
-                $ref: '#/components/schemas/DecisionEndpoint'
-            operations:
-              type: array
-              items:
-                $ref: '#/components/schemas/APIServerOperation'
-            permissions:
-              type: array
-              items:
-                oneOf:
-                  - $ref: '#/components/schemas/ApplicationResourcePermission'
-                  - $ref: '#/components/schemas/ApplicationRolePermission'
-            resources:
-              type: array
-              items:
-                $ref: '#/components/schemas/ApplicationResource'
-            roles:
-              type: array
-              items:
-                $ref: '#/components/schemas/ApplicationRole'
-        count:
-          type: number
-        size:
-          type: number
     ObjectApplication:
       type: object
       readOnly: true
@@ -679,6 +638,7 @@ paths:
       tags:
         - Policy Decision Management
       summary: READ All Decision Endpoints
+      x-pingidentity-paginatedresponse: true
       operationId: readAllDecisionEndpoints
       parameters:
         - name: environmentID
@@ -706,7 +666,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityArray'
+                x-pingidentity-paginatedresponse: true
+                type: object
+                properties:
+                  '_links':
+                    $ref: '#/components/schemas/LinksHATEOAS'
+                  '_embedded':
+                    type: object
+                    properties:
+                      decisionEndpoints:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DecisionEndpoint'
+                  count:
+                    type: number
+                  size:
+                    type: number
     post:
       tags:
         - Policy Decision Management
@@ -864,6 +839,7 @@ paths:
       tags:
         - API Servers
       summary: READ All API Servers
+      x-pingidentity-paginatedresponse: true
       operationId: readAllAPIServers
       parameters:
         - name: environmentID
@@ -891,7 +867,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityArray'
+                x-pingidentity-paginatedresponse: true
+                type: object
+                properties:
+                  '_links':
+                    $ref: '#/components/schemas/LinksHATEOAS'
+                  '_embedded':
+                    type: object
+                    properties:
+                      apiServers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/APIServer'
+                  count:
+                    type: number
+                  size:
+                    type: number
     post:
       tags:
         - API Servers
@@ -1133,6 +1124,7 @@ paths:
         - API Server Operations
       summary: READ All API Server Operations
       operationId: readAllAPIServerOperations
+      x-pingidentity-paginatedresponse: true
       parameters:
         - name: environmentID
           in: path
@@ -1164,7 +1156,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityArray'
+                x-pingidentity-paginatedresponse: true
+                type: object
+                properties:
+                  '_links':
+                    $ref: '#/components/schemas/LinksHATEOAS'
+                  '_embedded':
+                    type: object
+                    properties:
+                      operations:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/APIServerOperation'
+                  count:
+                    type: number
+                  size:
+                    type: number
     post:
       tags:
         - API Server Operations
@@ -1343,6 +1350,7 @@ paths:
         - Application Resources
       summary: READ Application Resources
       operationId: readApplicationResources
+      x-pingidentity-paginatedresponse: true
       parameters:
         - name: environmentID
           in: path
@@ -1369,7 +1377,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityArray'
+                x-pingidentity-paginatedresponse: true
+                type: object
+                properties:
+                  '_links':
+                    $ref: '#/components/schemas/LinksHATEOAS'
+                  '_embedded':
+                    type: object
+                    properties:
+                      resources:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ApplicationResource'
+                  count:
+                    type: number
+                  size:
+                    type: number
   /environments/{environmentID}/applicationResources/{applicationResourceID}:
     get:
       tags:
@@ -1414,6 +1437,7 @@ paths:
         - Application Resource Permissions
       summary: READ Application Permissions
       operationId: readApplicationPermissions
+      x-pingidentity-paginatedresponse: true
       parameters:
         - name: environmentID
           in: path
@@ -1445,7 +1469,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityArray'
+                x-pingidentity-paginatedresponse: true
+                type: object
+                properties:
+                  '_links':
+                    $ref: '#/components/schemas/LinksHATEOAS'
+                  '_embedded':
+                    type: object
+                    properties:
+                      permissions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ApplicationResourcePermission'
+                  count:
+                    type: number
+                  size:
+                    type: number
     post:
       tags:
         - Application Resource Permissions
@@ -1624,6 +1663,7 @@ paths:
         - Application Roles
       summary: READ Application Roles
       operationId: readApplicationRoles
+      x-pingidentity-paginatedresponse: true
       parameters:
         - name: environmentID
           in: path
@@ -1650,7 +1690,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityArray'
+                x-pingidentity-paginatedresponse: true
+                type: object
+                properties:
+                  '_links':
+                    $ref: '#/components/schemas/LinksHATEOAS'
+                  '_embedded':
+                    type: object
+                    properties:
+                      roles:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ApplicationRole'
+                  count:
+                    type: number
+                  size:
+                    type: number
     post:
       tags:
         - Application Roles
@@ -1809,6 +1864,7 @@ paths:
         - Application Role Permissions
       summary: READ Application Role Permissions
       operationId: readApplicationRolePermissions
+      x-pingidentity-paginatedresponse: true
       parameters:
         - name: environmentID
           in: path
@@ -1840,7 +1896,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityArray'
+                x-pingidentity-paginatedresponse: true
+                type: object
+                properties:
+                  '_links':
+                    $ref: '#/components/schemas/LinksHATEOAS'
+                  '_embedded':
+                    type: object
+                    properties:
+                      permissions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ApplicationRolePermission'
+                  count:
+                    type: number
+                  size:
+                    type: number
     post:
       tags:
         - Application Role Permissions
@@ -1930,6 +2001,7 @@ paths:
         - Application Role Assignments
       summary: READ Application Role Assignments
       operationId: readApplicationRoleAssignments
+      x-pingidentity-paginatedresponse: true
       parameters:
         - name: environmentID
           in: path
@@ -1961,4 +2033,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityArray'
+                x-pingidentity-paginatedresponse: true
+                type: object
+                properties:
+                  '_links':
+                    $ref: '#/components/schemas/LinksHATEOAS'
+                  '_embedded':
+                    type: object
+                    properties:
+                      assignments:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ApplicationRoleAssignment'
+                  count:
+                    type: number
+                  size:
+                    type: number
